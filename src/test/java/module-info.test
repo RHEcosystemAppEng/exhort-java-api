@@ -1,0 +1,10 @@
+--add-modules
+  jdk.unsupported,org.assertj.core,org.mockito,net.bytebuddy
+
+--add-reads
+  com.redhat.crda=org.assertj.core
+
+--add-opens
+  com.redhat.crda/com.redhat.crda=org.junit.platform.commons
+--add-opens
+  com.redhat.crda/com.redhat.crda=org.mockito

@@ -1,0 +1,43 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Java project Files
+.classpath
+.factorypath
+.project
+.settings
+
+# Maven
+target
+.flattened-pom.xml
+
+# Cache Files
+*.cache
+
+# Reports (superlinter)
+*.report
+*.tap
+
+# Vscode configuration
+*.code-workspace
+
+# Node
+node_modules
+
+# project stuff
+CHANGELOG.md
+release-context.json
+rest_dispatch_release.http
+delete_release.js

@@ -1,5 +1,5 @@
 --add-modules
-  jdk.unsupported,org.assertj.core,org.mockito,net.bytebuddy
+  jdk.attach,jdk.unsupported,org.assertj.core,org.mockito,net.bytebuddy
 
 --add-reads
   com.redhat.crda=org.assertj.core

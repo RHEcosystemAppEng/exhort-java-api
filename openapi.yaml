@@ -1,0 +1,385 @@
+openapi: 3.0.3
+info:
+  title: CodeReady Dependency Analytics API
+  description: Vulnerability analysis with Red Hat CodeReady Dependency Analytics
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 3.0.0
+servers:
+- url: http://crda-backend-crda.apps.sssc-cl01.appeng.rhecoeng.com/api/v3/
+  description: Production server
+- url: http://localhost:8080/api/v3/
+  description: Local development
+paths:
+  /component-analysis/{pkgManager}:
+    post:
+      operationId: componentAnalysis
+      summary: Performs a vulnerability for the provided components
+      parameters:
+      - name: pkgManager
+        in: path
+        description: Package manager related to the provided packages
+        required: true
+        schema:
+          enum:
+          - maven
+          type: string
+        example: maven
+      - name: providers
+        in: query
+        description: List of vulnerability providers to get the report from
+        required: false
+        schema:
+          enum:
+          - snyk
+          - tidelift
+          type: string
+        example: snyk
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful component analysis report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisReport'
+        '422':
+          description: Invalid request
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Error message
+  /dependency-analysis/{pkgManager}:
+    post:
+      operationId: dependencyAnalysis
+      summary:  Takes a client-resolved dependency graph to perform a full stack analysis from all the available Vulnerability sources
+      parameters:
+      - name: pkgManager
+        in: path
+        description: Package manager related to the provided packages
+        required: true
+        schema:
+          enum:
+          - maven
+          type: string
+        example: maven
+      - name: providers
+        in: query
+        description: List of vulnerability providers to get the report from
+        required: false
+        schema:
+          enum:
+          - snyk
+          - tidelift
+          type: string
+        example: snyk
+      requestBody:
+        required: true
+        description: Dependency graph in DOT format
+        content:
+          text/vnd.graphviz:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Full dependency analysis from all the available providers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisReport'
+            text/html:
+              schema:
+                type: object
+            multipart/mixed:
+              schema:
+                type: object
+                properties:
+                  json_report:
+                    $ref: '#/components/schemas/AnalysisReport'
+                  html_report:
+                    type: object
+              encoding:
+                summary:
+                  contentType: application/json
+                report:
+                  contentType: text/html
+components:
+  schemas:
+    AnalysisReport:
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/Summary'
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DependencyReport'
+    ComponentRequest:
+      type: array
+      items:
+        $ref: '#/components/schemas/PackageRef'
+      example:
+        - name: io.quarkus:quarkus-jdbc-postgresql
+          version: 2.13.5.Final
+        - name: io.quarkus:quarkus-hibernate-orm
+          version: 2.13.5.Final
+    PackageRef:
+      type: object
+      properties:
+        name:
+          type: string
+          description: <groupId>:<artifactId> for Java packages
+          example: org.jgroups:jgroups
+        version:
+          type: string
+          description: Package version
+          example: 5.2.0.Final
+      example:
+        name: io.quarkus:quarkus-jdbc-postgresql
+        version: 2.13.5.Final
+    DependencyReport:
+      type: object
+      properties:
+        ref:
+          $ref: '#/components/schemas/PackageRef'
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/Issue'
+        transitive:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransitiveDependencyReport'
+        recommendation:
+          description: Trusted Content recommendation that is not related to any security vulnerability
+          $ref: '#/components/schemas/PackageRef'
+        remediations:
+          description: Trusted Content remediation related to identified security vulnerabilities
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Remediation'
+        highestVulnerability:
+          description: Highest vulnerability found for this dependency
+          type: object
+          $ref: '#/components/schemas/Issue'
+      example:
+        ref:
+          name: io.quarkus:quarkus-jdbc-postgresql
+          version: 2.13.5.Final
+        issues:
+          - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
+            title: Denial of Service (DoS)
+            source: snyk
+            cvss:
+              attackVector: Network
+              attackComplexity: High
+              privilegesRequired: None
+              userInteraction: None
+              scope: Unchanged
+              confidentialityImpact: None
+              integrityImpact: None
+              availabilityImpact: High
+              exploitCodeMaturity: Proof of concept code
+              remediationLevel:
+              reportConfidence:
+              cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
+            cvssScore: 5.9
+            severity: MEDIUM
+            cves:
+            - CVE-2022-42003
+        transitive:
+          - ref:
+              name: org.postgresql:postgresql
+              version: 42.5.0
+            issues:
+              - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
+                title: Denial of Service (DoS)
+                source: snyk
+                cvss:
+                  attackVector: Network
+                  attackComplexity: High
+                  privilegesRequired: None
+                  userInteraction: None
+                  scope: Unchanged
+                  confidentialityImpact: None
+                  integrityImpact: None
+                  availabilityImpact: High
+                  exploitCodeMaturity: Proof of concept code
+                  remediationLevel:
+                  reportConfidence:
+                  cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
+                cvssScore: 5.9
+                severity: MEDIUM
+                cves:
+                - CVE-2022-42003
+        remediations:
+          CVE-2022-41946:
+            issueRef: CVE-2022-41946
+            mavenPackage:
+              name: com.fasterxml.jackson.core:jackson-databind
+              version: 2.13.1.Final-redhat-00002
+            productStatus: known_not_affected
+    Issue:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        source:
+          type: string
+        cvss:
+          $ref: '#/components/schemas/CvssVector'
+        score:
+          type: number
+        severity:
+          type: string
+          enum:
+            - CRITICAL
+            - HIGH
+            - MEDIUM
+            - LOW
+        cves:
+          type: array
+          items:
+            type: string
+        unique:
+          type: boolean
+      example:
+        id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
+        title: Denial of Service (DoS)
+        source: snyk
+        cvss:
+          attackVector: Network
+          attackComplexity: High
+          privilegesRequired: None
+          userInteraction: None
+          scope: Unchanged
+          confidentialityImpact: None
+          integrityImpact: None
+          availabilityImpact: High
+          exploitCodeMaturity: Proof of concept code
+          remediationLevel:
+          reportConfidence:
+          cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
+        cvssScore: 5.9
+        severity: MEDIUM
+        cves:
+        - CVE-2022-42003
+
+    TransitiveDependencyReport:
+      type: object
+      properties:
+        ref:
+          $ref: '#/components/schemas/PackageRef'
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/Issue'
+        remediations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Remediation'
+      example:
+        ref:
+          name: org.postgresql:postgresql
+          version: 42.5.0
+        issues:
+          - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
+            title: Denial of Service (DoS)
+            source: snyk
+            cvss:
+              attackVector: Network
+              attackComplexity: High
+              privilegesRequired: None
+              userInteraction: None
+              scope: Unchanged
+              confidentialityImpact: None
+              integrityImpact: None
+              availabilityImpact: High
+              exploitCodeMaturity: Proof of concept code
+              remediationLevel:
+              reportConfidence:
+              cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
+            cvssScore: 5.9
+            severity: MEDIUM
+            cves:
+            - CVE-2022-42003
+    Remediation:
+      type: object
+      properties:
+        issueRef:
+          type: string
+        mavenPackage:
+          $ref: '#/components/schemas/PackageRef'
+        productStatus:
+          type: string
+      example:
+        issueRef: CVE-2022-41946
+        mavenPackage:
+          name: io.quarkus:quarkus-jdbc-postgresql
+          version: 2.13.7.Final-redhat-00003
+        productStatus: fixed
+    Summary:
+      type: object
+      properties:
+        dependencies:
+          $ref: '#/components/schemas/DependenciesSummary'
+        vulnerabilities:
+          $ref: '#/components/schemas/VulnerabilitiesSummary'
+    DependenciesSummary:
+      type: object
+      properties:
+        scanned:
+          type: number
+        transitive:
+          type: number
+    VulnerabilitiesSummary:
+      type: object
+      properties:
+        direct:
+          type: number
+        total:
+          type: number
+        critical:
+          type: number
+        high:
+          type: number
+        medium:
+          type: number
+        low:
+          type: number
+    CvssVector:
+      type: object
+      properties:
+        attackVector:
+          type: string
+        attackComplexity:
+          type: string
+        privilegesRequired:
+          type: string
+        userInteraction:
+          type: string
+        scope:
+          type: string
+        confidentialityImpact:
+          type: string
+        integrityImpact:
+          type: string
+        availabilityImpact:
+          type: string
+        exploitCodeMaturity:
+          type: string
+        remediationLevel:
+          type: string
+        reportConficende:
+          type: string
+        cvss:
+          type: string

@@ -13,27 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda;
+package com.redhat.crda.providers;
 
-/** Application runner for encapsulating the application. */
-public final class AppRunner {
-  private final AppInterface runningApp;
+import com.redhat.crda.Provider;
 
-  /**
-   * Constructor that takes the enacpsulated application.
-   *
-   * @param appToRun {@link AppInterface} impelementation.
-   */
-  public AppRunner(final AppInterface appToRun) {
-    runningApp = appToRun;
-  }
+import java.nio.file.Path;
 
-  /**
-   * Test whether or not the enacpsualted application is running.
-   *
-   * @return true if the enacpsulated application is running.
-   */
-  public boolean isAppRunning() {
-    return runningApp.running();
+public final class JavaMavenProvider implements Provider {
+  @Override
+  public Content ProvideFor(final Path manifestPath) {
+    return null;
   }
 }

@@ -18,9 +18,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>
     <!-- Dependencies -->
+    <jackson.version>2.15.0</jackson.version>
+    <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
+    <!-- Testing Dependencies -->
     <assertj.version>3.24.2</assertj.version>
     <junit-jupiter.version>5.9.1</junit-jupiter.version>
-    <mockito.version>4.11.0</mockito.version>
+    <mockito.version>5.3.1</mockito.version>
     <!-- Plugins -->
     <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -38,11 +41,13 @@
     <maven-site-plugin.version>4.0.0-M6</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+    <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
     <extra-enforcer-rules.version>1.6.2</extra-enforcer-rules.version>
     <flatten-maven-plugin.version>1.4.1</flatten-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <junit-platform-maven-plugin.version>1.1.7</junit-platform-maven-plugin.version>
     <license-maven-plugin.version>4.1</license-maven-plugin.version>
+    <openapi-generator-maven-plugin.version>6.6.0</openapi-generator-maven-plugin.version>
     <pitest-maven.version>1.13.2</pitest-maven.version>
     <pitest-junit5-plugin.version>1.1.2</pitest-junit5-plugin.version>
     <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
@@ -82,6 +87,27 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Dependencies -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>${jakarta.annotation-api.version}</version>
+      </dependency>
       <!-- Testing Dependencies -->
       <dependency>
         <groupId>org.assertj</groupId>
@@ -112,6 +138,23 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+    </dependency>
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>org.assertj</groupId>
@@ -268,6 +311,11 @@ limitations under the License.]]>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>${build-helper-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
           <version>${versions-maven-plugin.version}</version>
         </plugin>
@@ -287,6 +335,11 @@ limitations under the License.]]>
               </rule>
             </rules>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.openapitools</groupId>
+          <artifactId>openapi-generator-maven-plugin</artifactId>
+          <version>${openapi-generator-maven-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.pitest</groupId>
@@ -420,6 +473,65 @@ limitations under the License.]]>
           </execution>
         </executions>
       </plugin>
+
+      <!-- build-helper-maven-plugin:add-source is bound to the generate-sources phase and will include generated files as sources -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- openapi-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from openapi spec -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/openapi.yaml</inputSpec>
+              <generatorName>java</generatorName>
+              <modelPackage>com.redhat.crda.backend</modelPackage>
+              <output>${project.build.directory}</output>
+              <configHelp>false</configHelp>
+              <configOptions>
+                <asyncNative>true</asyncNative>
+                <documentationProvider>none</documentationProvider>
+                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                <serializableModel>true</serializableModel>
+                <serializationLibrary>jackson</serializationLibrary>
+                <sourceFolder>generated-sources</sourceFolder>
+                <useJakartaEe>true</useJakartaEe>
+              </configOptions>
+              <library>native</library>
+              <skipValidateSpec>true</skipValidateSpec>
+              <!--<generateModels>false</generateModels>-->
+              <generateApis>false</generateApis>
+              <generateSupportingFiles>false</generateSupportingFiles>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <generateApiTests>false</generateApiTests>
+              <addCompileSourceRoot>false</addCompileSourceRoot>
+              <addTestCompileSourceRoot>false</addTestCompileSourceRoot>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
@@ -583,5 +695,6 @@ limitations under the License.]]>
         </plugins>
       </build>
     </profile>
+
   </profiles>
 </project>

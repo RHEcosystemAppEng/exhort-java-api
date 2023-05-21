@@ -22,6 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.BDDMockito.given;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.crda.backend.AnalysisReport;
 import com.redhat.crda.tools.Ecosystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +64,7 @@ class Api_Test {
     given(mockProvider.ProvideFor(tmpFile))
       .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
 
-    // create an argument matcher to make sure we mock the response to the right request
+    // create an argument matcher to make sure we mock the response to for right request
     ArgumentMatcher<HttpRequest> matchesRequest = r ->
       r.headers().firstValue("Content-Type").get().equals("fake-content-type") &&
       r.headers().firstValue("Accept").get().equals("text/html") &&
@@ -84,6 +87,56 @@ class Api_Test {
       var htmlTxt = apiSut.getStackAnalysisHtml(tmpFile.toString());
       // verify we got the correct html response
       then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>");
+    }
+    // cleanup
+    Files.delete(tmpFile);
+  }
+
+  @Test
+  void the_getStackAnalysisJson_method_should_return_json_object_from_the_backend()
+    throws IOException, ExecutionException, InterruptedException {
+    // create a temporary pom.xml file
+    var tmpFile = Files.createTempFile(null, null);
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom.xml")) {
+      Files.write(tmpFile, is.readAllBytes());
+    }
+
+    // create a fake manifest object serving the mocked provider
+    var fakeManifest = new Ecosystem.Manifest(tmpFile, Ecosystem.PackageManager.MAVEN, mockProvider);
+    // stub the mocked provider with a fake content object
+    given(mockProvider.ProvideFor(tmpFile))
+      .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
+
+    // create an argument matcher to make sure we mock the response for the right request
+    ArgumentMatcher<HttpRequest> matchesRequest = r ->
+      r.headers().firstValue("Content-Type").get().equals("fake-content-type") &&
+        r.headers().firstValue("Accept").get().equals("application/json") &&
+        r.method().equals("POST");
+
+    // load dummy json and set as the expected analysis
+    var mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    AnalysisReport expectedAnalysis;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/stack_analysis.json")) {
+      expectedAnalysis = mapper.readValue(is, AnalysisReport.class);
+    }
+
+    // mock and http response object and stub it to return the expected analysis
+    var mockHttpResponse = mock(HttpResponse.class);
+    given(mockHttpResponse.body()).willReturn(mapper.writeValueAsString(expectedAnalysis));
+
+    // mock static getManifest utility function
+    try(var ecosystemTool = mockStatic(Ecosystem.class)) {
+      // stub static getManifest utility function to return our fake manifest
+      ecosystemTool.when(() -> Ecosystem.getManifest(tmpFile)).thenReturn(fakeManifest);
+
+      // stub the http client to return our mocked response when request matches our arg matcher
+      given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
+        .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
+
+      // when invoking the api for a json stack analysis report
+      var responseAnalysis = apiSut.getStackAnalysisJson(tmpFile.toString());
+      // verify we got the correct analysis report
+      then(responseAnalysis.get()).isEqualTo(expectedAnalysis);
     }
     // cleanup
     Files.delete(tmpFile);

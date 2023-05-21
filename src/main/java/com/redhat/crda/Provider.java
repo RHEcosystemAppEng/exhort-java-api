@@ -15,11 +15,14 @@
  */
 package com.redhat.crda;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Stream;
 
 @FunctionalInterface
 public interface Provider {
   record Content(byte[] buffer, String type){}
-  Content ProvideFor(Path manifestPath);
+  Content ProvideFor(Path manifestPath) throws IOException, InterruptedException;
 }

@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.crda.backend.AnalysisReport;
 import com.redhat.crda.tools.Ecosystem;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -41,16 +43,16 @@ public final class Api {
 
   Api(final HttpClient client) {
     this.client = client;
-    this.mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
-  public CompletableFuture<String> getStackAnalysisHtml(final String manifestFile) {
+  public CompletableFuture<String> getStackAnalysisHtml(final String manifestFile) throws IOException, InterruptedException {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body);
   }
 
-  public CompletableFuture<AnalysisReport> getStackAnalysisJson(final String manifestFile) {
+  public CompletableFuture<AnalysisReport> getStackAnalysisJson(final String manifestFile) throws IOException, InterruptedException {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "application/json"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body)
@@ -65,7 +67,7 @@ public final class Api {
       );
   }
 
-  private HttpRequest buildRequest(final String manifestFile, final String acceptType) {
+  private HttpRequest buildRequest(final String manifestFile, final String acceptType) throws IOException, InterruptedException {
     var manifestPath = Paths.get(manifestFile);
     var manifest = Ecosystem.getManifest(manifestPath);
 

@@ -114,7 +114,7 @@ class Api_Test {
         r.method().equals("POST");
 
     // load dummy json and set as the expected analysis
-    var mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedAnalysis;
     try (var is = getClass().getModule().getResourceAsStream("dummy_responses/stack_analysis.json")) {
       expectedAnalysis = mapper.readValue(is, AnalysisReport.class);

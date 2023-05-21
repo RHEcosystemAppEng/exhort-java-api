@@ -508,7 +508,7 @@ limitations under the License.]]>
         </executions>
       </plugin>
 
-      <!-- openapi-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from openapi spec -->
+      <!-- crda_backend-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from crda_backend spec -->
       <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -518,7 +518,7 @@ limitations under the License.]]>
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/openapi.yaml</inputSpec>
+              <inputSpec>${project.basedir}/src/main/resources/crda_backend/openapi.yaml</inputSpec>
               <generatorName>java</generatorName>
               <modelPackage>com.redhat.crda.backend</modelPackage>
               <output>${project.build.directory}</output>

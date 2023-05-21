@@ -44,13 +44,13 @@ public final class Api {
     this.mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
-  public CompletableFuture<String> getStackReportHtml(final String manifestFile) {
+  public CompletableFuture<String> getStackAnalysisHtml(final String manifestFile) {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body);
   }
 
-  public CompletableFuture<AnalysisReport> getStackReportJson(final String manifestFile) {
+  public CompletableFuture<AnalysisReport> getStackAnalysisJson(final String manifestFile) {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "application/json"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body)
@@ -70,7 +70,7 @@ public final class Api {
     var manifest = Ecosystem.getManifest(manifestPath);
 
     var uri = URI.create(
-      String.format("%s/api/v3/dependency-analysis/%s", Api.ENDPOINT, manifest.ecosystem()));
+      String.format("%s/api/v3/dependency-analysis/%s", Api.ENDPOINT, manifest.packageManager().toString()));
 
     var content = manifest.provider().ProvideFor(manifestPath);
 

@@ -16,7 +16,6 @@
 package com.redhat.crda.providers;
 
 import com.redhat.crda.Provider;
-
 import java.nio.file.Path;
 
 public final class JavaMavenProvider implements Provider {

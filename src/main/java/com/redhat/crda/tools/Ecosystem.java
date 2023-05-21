@@ -17,19 +17,26 @@ package com.redhat.crda.tools;
 
 import com.redhat.crda.Provider;
 import com.redhat.crda.providers.JavaMavenProvider;
-
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public final class Ecosystem {
-  public record Manifest(String filename, String ecosystem, Provider provider){}
+  public enum PackageManager {
+    MAVEN;
+
+    @Override
+    public String toString() {
+      return this.name().toLowerCase();
+    }
+  }
+
+  public record Manifest(Path manifestPath, PackageManager packageManager, Provider provider){}
   private Ecosystem() {}
 
   public static Manifest getManifest(final Path manifestPath) {
     var filename = manifestPath.getFileName().toString();
     switch (filename) {
       case "pom.xml" -> {
-        return new Manifest(filename, "maven", new JavaMavenProvider());
+        return new Manifest(manifestPath, PackageManager.MAVEN, new JavaMavenProvider());
       }
       default -> throw new IllegalStateException(String.format("Unknown manifest file %s", filename));
     }

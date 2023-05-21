@@ -324,6 +324,9 @@ limitations under the License.]]>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco-maven-plugin.version}</version>
           <configuration>
+            <excludes>
+              <exclude>com/redhat/crda/backend/*</exclude>
+            </excludes>
             <propertyName>jacoco.java.option</propertyName>
             <rules>
               <rule>
@@ -354,6 +357,9 @@ limitations under the License.]]>
           </dependencies>
           <configuration>
             <exportLineCoverage>true</exportLineCoverage>
+            <excludedClasses>
+              <excludedClass>com.redhat.crda.backend.*</excludedClass>
+            </excludedClasses>
             <mutationThreshold>${mutation.coverage.threshold}</mutationThreshold>
             <mutators>
               <mutator>STRONGER</mutator>

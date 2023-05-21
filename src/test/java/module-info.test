@@ -1,11 +1,13 @@
 --add-modules
-  jdk.attach,jdk.unsupported,org.assertj.core,org.mockito,net.bytebuddy,net.bytebuddy.agent
+  jdk.attach,jdk.unsupported,org.assertj.core,org.junit.jupiter.params,org.mockito,net.bytebuddy,net.bytebuddy.agent
 
 --add-reads
   com.redhat.crda=org.assertj.core
 
 --add-opens
   com.redhat.crda/com.redhat.crda=org.junit.platform.commons
+--add-opens
+  com.redhat.crda/com.redhat.crda.providers=org.junit.platform.commons
 --add-opens
   com.redhat.crda/com.redhat.crda.tools=org.junit.platform.commons
 --add-opens

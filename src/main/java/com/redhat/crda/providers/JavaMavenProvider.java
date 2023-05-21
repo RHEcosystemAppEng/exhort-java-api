@@ -38,6 +38,8 @@ public final class JavaMavenProvider implements Provider {
       add("dependency:tree");
       add("-DoutputType=dot");
       add(String.format("-DoutputFile=%s", tmpFile.toString()));
+      add("-f");
+      add(manifestPath.toString());
     }};
 
     var ignored = this.getIgnored(manifestPath);

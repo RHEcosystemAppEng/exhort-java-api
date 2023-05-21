@@ -54,7 +54,7 @@ class Api_Test {
       throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile(null, null);
-    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom.xml")) {
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -89,7 +89,7 @@ class Api_Test {
       then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>");
     }
     // cleanup
-    Files.delete(tmpFile);
+    Files.deleteIfExists(tmpFile);
   }
 
   @Test
@@ -97,7 +97,7 @@ class Api_Test {
     throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile(null, null);
-    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom.xml")) {
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -139,6 +139,6 @@ class Api_Test {
       then(responseAnalysis.get()).isEqualTo(expectedAnalysis);
     }
     // cleanup
-    Files.delete(tmpFile);
+    Files.deleteIfExists(tmpFile);
   }
 }

@@ -1,8 +1,0 @@
---add-modules
-  com.redhat.crda.simple.integrationtest,org.assertj.core
-
---add-reads
-  com.redhat.crda.simple.integrationtest=org.assertj.core
-
---add-opens
-  com.redhat.crda.simple.integrationtest/com.redhat.crda.simple.it=org.junit.platform.commons

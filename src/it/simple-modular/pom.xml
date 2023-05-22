@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.redhat.crda.integrationtests</groupId>
-  <artifactId>crda-java-api-simple-integrationtest</artifactId>
+  <groupId>com.redhat.crda.integration.tests</groupId>
+  <artifactId>crda-java-api-simple-modular-it</artifactId>
   <version>0.0.1</version>
-  <name>crda-java-api-simple-integrationtest</name>
+  <name>crda-java-api-simple-modular-it</name>
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
@@ -19,18 +19,31 @@
     <dependency>
       <groupId>com.redhat.crda</groupId>
       <artifactId>crda-java-api</artifactId>
-      <version>@project.version@</version>
+      <!--      <version>@project.version@</version>-->
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.24.2</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.15.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>5.9.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.3.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

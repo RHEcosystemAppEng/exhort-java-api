@@ -33,7 +33,7 @@ import java.util.concurrent.CompletionException;
 
 /** Crda API Service **/
 public final class CrdaApi implements Api {
-  private static final String ENDPOINT = "http://crda-backend-crda.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String ENDPOINT = "http://crda-backend-dev-crda.apps.sssc-cl01.appeng.rhecoeng.com";
 
   private final HttpClient client;
   private final ObjectMapper mapper;

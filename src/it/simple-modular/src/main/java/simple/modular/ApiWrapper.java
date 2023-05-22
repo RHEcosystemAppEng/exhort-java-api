@@ -13,26 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.simple.it;
+package simple.modular;
 
-import com.redhat.crda.AppInterface;
+import com.redhat.crda.Api;
+import com.redhat.crda.backend.AnalysisReport;
 
-/** Concrete implementation of the AppInterface. */
-final class AppImplementation implements AppInterface {
-  private boolean isRunning;
+public final class ApiWrapper {
+  private final Api crdaApi;
 
-  @Override
-  public boolean running() {
-    return this.isRunning;
+  public ApiWrapper(final Api crdaApi) {
+    this.crdaApi = crdaApi;
   }
 
-  /** Use to start the application. */
-  public void start() {
-    isRunning = true;
+  public String getHtmlAnalysis(final String manifestPath) throws Exception {
+    return crdaApi.getStackAnalysisHtml(manifestPath).get();
   }
 
-  /** Use to stop the application. */
-  public void stop() {
-    isRunning = false;
+  public AnalysisReport getJsonAnalysis(final String manifestPath) throws Exception {
+    return crdaApi.getStackAnalysisJson(manifestPath).get();
   }
 }

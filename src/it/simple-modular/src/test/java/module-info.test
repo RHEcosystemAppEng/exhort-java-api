@@ -1,0 +1,14 @@
+--add-modules
+  jdk.attach,org.mockito,net.bytebuddy,net.bytebuddy.agent
+
+--add-reads
+  com.redhat.crda.simple.modular.it=com.fasterxml.jackson.databind
+--add-reads
+  com.redhat.crda.simple.modular.it=org.mockito
+--add-reads
+  com.redhat.crda.simple.modular.it=java.net.http
+
+--add-opens
+  com.redhat.crda.simple.modular.it/simple.modular=org.junit.platform.commons
+--add-opens
+  com.redhat.crda/com.redhat.crda.impl=com.redhat.crda.simple.modular.it

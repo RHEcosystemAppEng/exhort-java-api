@@ -289,6 +289,8 @@
                   <exclude>**/module-info.test</exclude>
                   <exclude>src/test/resources/**</exclude>
                   <exclude>src/main/resources/**</exclude>
+                  <exclude>src/it/**/test/resources/**</exclude>
+                  <exclude>src/it/**/main/resources/**</exclude>
                 </excludes>
                 <includes>
                   <include>src/main/**</include>

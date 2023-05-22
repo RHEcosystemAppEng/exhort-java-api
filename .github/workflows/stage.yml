@@ -33,7 +33,9 @@ jobs:
           echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
 
       - name: Deploy snapshot to GitHub
-        if: contains(steps.project.outputs.version, 'SNAPSHOT')
+        if: |
+          contains(needs.deploy.outputs.project_version, 'SNAPSHOT') &&
+          github.repository == 'RHEcosystemAppEng/crda-java-api'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn deploy -Pprepare-deployment,deploy-github -B -ff

@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.crda.backend.AnalysisReport;
+import com.redhat.crda.impl.CrdaApi;
 import com.redhat.crda.tools.Ecosystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +48,7 @@ class Api_Test {
   @Mock
   HttpClient mockHttpClient;
   @InjectMocks
-  Api apiSut;
+  CrdaApi crdaApiSut;
 
   @Test
   void the_getStackAnalysisHtml_method_should_return_html_report_from_the_backend()
@@ -84,7 +85,7 @@ class Api_Test {
         .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a html stack analysis report
-      var htmlTxt = apiSut.getStackAnalysisHtml(tmpFile.toString());
+      var htmlTxt = crdaApiSut.getStackAnalysisHtml(tmpFile.toString());
       // verify we got the correct html response
       then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>");
     }
@@ -134,7 +135,7 @@ class Api_Test {
         .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a json stack analysis report
-      var responseAnalysis = apiSut.getStackAnalysisJson(tmpFile.toString());
+      var responseAnalysis = crdaApiSut.getStackAnalysisJson(tmpFile.toString());
       // verify we got the correct analysis report
       then(responseAnalysis.get()).isEqualTo(expectedAnalysis);
     }

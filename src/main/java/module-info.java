@@ -12,4 +12,5 @@ module com.redhat.crda {
 
   exports com.redhat.crda;
   exports com.redhat.crda.backend;
+    exports com.redhat.crda.impl;
 }

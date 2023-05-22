@@ -40,7 +40,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    name: Create a snapshot release
+    name: Release snapshot
     environment: staging
     needs: deploy
     if: |

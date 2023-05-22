@@ -14,7 +14,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy snapshot
-    environment: staging
+    outputs:
+      project_version: ${{ steps.project.outputs.version }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
@@ -36,3 +37,57 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn deploy -Pprepare-deployment,deploy-github -B -ff
+
+  release:
+    runs-on: ubuntu-latest
+    name: Create a snapshot release
+    environment: staging
+    needs: deploy
+    if: |
+      contains(needs.deploy.outputs.project_version, 'SNAPSHOT') &&
+      github.repository == 'RHEcosystemAppEng/crda-java-api'
+    steps:
+      - name: Check for existing ${{ needs.deploy.outputs.project_version }} release
+        id: existing_release
+        uses: actions/github-script@v6
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.STAGING_PAT }}
+          script: |
+            const repo_name = context.payload.repository.full_name
+            var response = await github.request('GET /repos/' + repo_name + '/releases/tags/${{ needs.deploy.outputs.project_version }}')
+            // if the request fails (ie 404) the next steps will not occur and the output will not be set
+            core.setOutput('id', response.data.id)
+
+      - name: Delete ${{ needs.deploy.outputs.project_version }} release if exists
+        if: ${{ steps.existing_release.outputs.id }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.STAGING_PAT }}
+          script: |
+            const repo_name = context.payload.repository.full_name
+            await github.request('DELETE /repos/' + repo_name + '/releases/' + ${{ steps.existing_release.outputs.id }})
+
+      - name: Delete ${{ needs.deploy.outputs.project_version }} tag if exists
+        continue-on-error: true
+        run: git push --delete origin ${{ needs.deploy.outputs.project_version }}
+
+      # a little pause between deleting the release and creating a new one
+      # without it, the new release might be a weird release, i.e. a draft release
+      - name: Sleep 5
+        run: sleep 5
+
+      - name: Create new ${{ needs.deploy.outputs.project_version }} release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.STAGING_PAT }}
+          script: |
+            const repo_name = context.payload.repository.full_name
+            const response = await github.request('POST /repos/' + repo_name + '/releases', {
+              tag_name: '${{ needs.deploy.outputs.project_version }}',
+              name: '${{ needs.deploy.outputs.project_version }}',
+              draft: false,
+              prerelease: true,
+              generate_release_notes: true,
+              make_latest: 'false'
+            })

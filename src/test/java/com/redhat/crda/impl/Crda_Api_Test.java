@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda;
+package com.redhat.crda.impl;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,8 +24,8 @@ import static org.mockito.BDDMockito.given;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.crda.Provider;
 import com.redhat.crda.backend.AnalysisReport;
-import com.redhat.crda.impl.CrdaApi;
 import com.redhat.crda.tools.Ecosystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +42,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @ExtendWith(MockitoExtension.class)
-class Api_Test {
+class Crda_Api_Test {
   @Mock
   Provider mockProvider;
   @Mock

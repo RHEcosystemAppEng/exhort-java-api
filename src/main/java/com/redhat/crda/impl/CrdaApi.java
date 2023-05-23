@@ -48,14 +48,14 @@ public final class CrdaApi implements Api {
   }
 
   @Override
-  public CompletableFuture<String> getStackAnalysisHtml(final String manifestFile) throws IOException {
+  public CompletableFuture<String> stackAnalysisHtmlAsync(final String manifestFile) throws IOException {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body);
   }
 
   @Override
-  public CompletableFuture<AnalysisReport> getStackAnalysisJson(final String manifestFile) throws IOException {
+  public CompletableFuture<AnalysisReport> stackAnalysisAsync(final String manifestFile) throws IOException {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "application/json"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body)

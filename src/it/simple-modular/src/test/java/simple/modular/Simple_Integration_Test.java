@@ -64,12 +64,12 @@ class Simple_Integration_Test {
     }
 
     // get the html report from the api
-    var htmlAnalysis = new ApiWrapper(crdaApi).getHtmlAnalysis("src/test/resources/it_poms/pom.xml");
+    var htmlAnalysis = new ApiWrapper(crdaApi).getAnalysisHtml("src/test/resources/it_poms/pom.xml");
     assert expectedHtmlAnalysis.equals(htmlAnalysis);
   }
 
   @Test
-  void test_stack_analysis_json_report() throws Exception {
+  void test_stack_analysis_report() throws Exception {
     // load the pre-configured expected json response
     var expectedJsonAnalysis = Files.readString(Paths.get("src/test/resources/it_poms/response.json"));
     if (mockRealAPI) {
@@ -83,7 +83,7 @@ class Simple_Integration_Test {
     }
 
     // get the analysis report object from the api
-    var analysisReport = new ApiWrapper(crdaApi).getJsonAnalysis("src/test/resources/it_poms/pom.xml");
+    var analysisReport = new ApiWrapper(crdaApi).getAnalysis("src/test/resources/it_poms/pom.xml");
     // convert analysis report to json
     var jsonAnalysis = new ObjectMapper().writeValueAsString(analysisReport);
     assert expectedJsonAnalysis.replaceAll("\\s+","")

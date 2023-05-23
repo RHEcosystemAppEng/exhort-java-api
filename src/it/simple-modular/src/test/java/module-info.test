@@ -1,8 +1,10 @@
 --add-modules
-  jdk.attach,org.mockito,net.bytebuddy,net.bytebuddy.agent
+  jdk.attach,org.assertj.core,org.mockito,net.bytebuddy,net.bytebuddy.agent
 
 --add-reads
   com.redhat.crda.simple.modular.it=com.fasterxml.jackson.databind
+--add-reads
+  com.redhat.crda.simple.modular.it=org.assertj.core
 --add-reads
   com.redhat.crda.simple.modular.it=org.mockito
 --add-reads

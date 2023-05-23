@@ -15,12 +15,14 @@
  */
 package simple.modular;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.crda.backend.AnalysisReport;
 import com.redhat.crda.impl.CrdaApi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,17 +67,19 @@ class Simple_Integration_Test {
 
     // get the html report from the api
     var htmlAnalysis = new ApiWrapper(crdaApi).getAnalysisHtml("src/test/resources/it_poms/pom.xml");
-    assert expectedHtmlAnalysis.equals(htmlAnalysis);
+    assertThat(htmlAnalysis).isEqualTo(expectedHtmlAnalysis);
   }
 
   @Test
   void test_stack_analysis_report() throws Exception {
     // load the pre-configured expected json response
-    var expectedJsonAnalysis = Files.readString(Paths.get("src/test/resources/it_poms/response.json"));
+    var expectedAnalysisJson = Files.readString(Paths.get("src/test/resources/it_poms/response.json"));
+    // deserialize the expected response
+    var expectedAnalysis = new ObjectMapper().readValue(expectedAnalysisJson, AnalysisReport.class);
     if (mockRealAPI) {
       // mock a http response object and stub it to return the expected json report as a body
       var mockJsonResponse = mock(HttpResponse.class);
-      when(mockJsonResponse.body()).thenReturn(expectedJsonAnalysis);
+      when(mockJsonResponse.body()).thenReturn(expectedAnalysisJson);
       // stub the mocked http client to return the mocked http response for requests accepting json application
       when(mockHttpClient.sendAsync(
         argThat(r -> r.headers().firstValue("Accept").get().equals("application/json")), any())
@@ -84,9 +88,6 @@ class Simple_Integration_Test {
 
     // get the analysis report object from the api
     var analysisReport = new ApiWrapper(crdaApi).getAnalysis("src/test/resources/it_poms/pom.xml");
-    // convert analysis report to json
-    var jsonAnalysis = new ObjectMapper().writeValueAsString(analysisReport);
-    assert expectedJsonAnalysis.replaceAll("\\s+","")
-      .equals(jsonAnalysis.replaceAll("\\s+",""));
+    assertThat(analysisReport).isEqualTo(expectedAnalysis);
   }
 }

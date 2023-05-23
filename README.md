@@ -6,6 +6,7 @@ The _Crda JAVA API_ module is deployed to _GitHub Package Registry_.
 
 <details>
 <summary>Click here for configuring <em>GHPR</em> and gaining access to the <em>crda-java-api</em> module.</summary>
+<h3>Configure GHPR</h3>
 <ol>
 <li>Create a <a href="https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages">token</a> with the <strong>read:packages</strong> scope</li>
 <li>Encrypt your token:
@@ -51,6 +52,10 @@ encrypted-token-will-be-here-including-curly-braces
 </ol>
 </details>
 
+<h3>Usage</h3>
+<ol>
+<li>Declare the dependency:
+
 ```xml
 <dependency>
     <groupId>com.redhat.crda</groupId>
@@ -58,12 +63,16 @@ encrypted-token-will-be-here-including-curly-braces
     <version>${crda-java-api.version}</version>
 </dependency>
 ```
+</li>
+<li>If working with modules, configure module read:
 
 ```java
 module x { // module-info.java
     requires com.redhat.crda;
 }
 ```
+</li>
+<li>Code example:
 
 ```java
 import com.redhat.crda.impl.CrdaApi;
@@ -85,6 +94,8 @@ public class CrdaExample {
     }
 }
 ```
+</li>
+</ol>
 
 <!-- Badge links -->
 [0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/crda-java-api?color=green&label=latest

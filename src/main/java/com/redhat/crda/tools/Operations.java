@@ -17,13 +17,23 @@ package com.redhat.crda.tools;
 
 import java.io.IOException;
 
+/** Utility class used for executing process on the operating system. **/
 public final class Operations {
-  private Operations(){}
+  private Operations(){
+    // constructor not required for a utility class
+  }
 
+  /**
+   * Function for building a command from the command parts list and execute it as a process on
+   * the operating system. Will throw a RuntimeException if the command build or execution failed.
+   *
+   * @param cmdList list of command parts
+   */
   public static void runProcess(final String... cmdList) {
     var processBuilder = new ProcessBuilder();
     processBuilder.command(cmdList);
 
+    // create a process builder or throw a runtime exception
     Process process = null;
     try {
       process = processBuilder.start();
@@ -37,6 +47,7 @@ public final class Operations {
       );
     }
 
+    // execute the command or throw runtime exception if failed
     int exitCode = 0;
     try {
       exitCode = process.waitFor();
@@ -50,6 +61,7 @@ public final class Operations {
       );
     }
 
+    // verify the command was executed successfully or throw a runtime exception
     if (exitCode != 0) {
       throw new RuntimeException(
         String.format(

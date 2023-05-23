@@ -521,7 +521,7 @@ limitations under the License.]]>
         </executions>
       </plugin>
 
-      <!-- crda_backend-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from crda_backend spec -->
+      <!-- openapi-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from crda_backend spec -->
       <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -561,7 +561,7 @@ limitations under the License.]]>
   </build>
 
   <profiles>
-    <!-- use this profile for development stage. -->
+    <!-- use this profile for development stage -->
     <profile>
       <id>dev</id>
       <properties>
@@ -581,7 +581,7 @@ limitations under the License.]]>
         </plugins>
       </build>
     </profile>
-    <!-- Use this profile to create jacoco execution report. -->
+    <!-- use this profile to create jacoco execution reports -->
     <profile>
       <id>cov</id>
       <build>
@@ -602,7 +602,7 @@ limitations under the License.]]>
         </plugins>
       </build>
     </profile>
-    <!-- Use this profile to execute integration testing. -->
+    <!-- use this profile to execute integration testing -->
     <profile>
       <id>its</id>
       <build>
@@ -632,7 +632,7 @@ limitations under the License.]]>
         </plugins>
       </build>
     </profile>
-    <!-- Use this profile to execute mutation testing. -->
+    <!-- use this profile to execute mutation testing -->
     <profile>
       <id>mut</id>
       <dependencies>
@@ -661,7 +661,7 @@ limitations under the License.]]>
         </plugins>
       </build>
     </profile>
-    <!-- use this profile manually when deploying to github. -->
+    <!-- use this profile to include github registry distribution definition -->
     <!-- requires credentials set for github in ~/.m2/settings.xml -->
     <profile>
       <id>deploy-github</id>
@@ -676,7 +676,7 @@ limitations under the License.]]>
         </snapshotRepository>
       </distributionManagement>
     </profile>
-    <!-- use this profile manually for packaging of jars to deploy to artifact repository. -->
+    <!-- use this profile for packaging of jars to deploy to artifact repository -->
     <profile>
       <id>prepare-deployment</id>
       <build>

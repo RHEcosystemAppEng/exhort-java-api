@@ -20,7 +20,23 @@ import com.redhat.crda.backend.AnalysisReport;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
+/** The Api interface is used for contracting API implementations. **/
 public interface Api {
-  CompletableFuture<String> getStackAnalysisHtml(String manifestFile) throws IOException, InterruptedException;
-  CompletableFuture<AnalysisReport> getStackAnalysisJson(String manifestFile) throws IOException, InterruptedException;
+  /**
+   * Use for creating a stack analysis HTML report for a given manifest file.
+   *
+   * @param manifestFile the path for the manifest file
+   * @return the HTML report as a String wrapped in a CompletableFuture
+   * @throws IOException when failed to load the manifest file
+   */
+  CompletableFuture<String> getStackAnalysisHtml(String manifestFile) throws IOException;
+
+  /**
+   * Use for creating a stack analysis deserialized Json report for a given manifest file.
+   *
+   * @param manifestFile the path for the manifest file
+   * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
+   * @throws IOException when failed to load the manifest file
+   */
+  CompletableFuture<AnalysisReport> getStackAnalysisJson(String manifestFile) throws IOException;
 }

@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-/** Crda API Service **/
+/** Concrete implementation of the Crda {@link Api} Service. **/
 public final class CrdaApi implements Api {
   private static final String ENDPOINT = "http://crda-backend-dev-crda.apps.sssc-cl01.appeng.rhecoeng.com";
 
@@ -47,13 +47,15 @@ public final class CrdaApi implements Api {
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 
-  public CompletableFuture<String> getStackAnalysisHtml(final String manifestFile) throws IOException, InterruptedException {
+  @Override
+  public CompletableFuture<String> getStackAnalysisHtml(final String manifestFile) throws IOException {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body);
   }
 
-  public CompletableFuture<AnalysisReport> getStackAnalysisJson(final String manifestFile) throws IOException, InterruptedException {
+  @Override
+  public CompletableFuture<AnalysisReport> getStackAnalysisJson(final String manifestFile) throws IOException {
     return this.client
       .sendAsync(this.buildRequest(manifestFile, "application/json"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body)
@@ -68,7 +70,15 @@ public final class CrdaApi implements Api {
       );
   }
 
-  private HttpRequest buildRequest(final String manifestFile, final String acceptType) throws IOException, InterruptedException {
+  /**
+   *  Build and HTTP request for sending to the Backend API.
+   *
+   * @param manifestFile the path for the manifest file
+   * @param acceptType the type of requested content, typically text/html or application/json
+   * @return a HttpRequest ready to be sent to the Backend API
+   * @throws IOException  when failed to load the manifest file
+   */
+  private HttpRequest buildRequest(final String manifestFile, final String acceptType) throws IOException {
     var manifestPath = Paths.get(manifestFile);
     var manifest = Ecosystem.getManifest(manifestPath);
 

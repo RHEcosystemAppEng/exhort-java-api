@@ -16,13 +16,26 @@
 package com.redhat.crda;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Stream;
 
+/**
+ * The Provider interface is a functional interface used for contracting
+ * providers providing a {@link Content} per manifest {@link Path}.
+ **/
 @FunctionalInterface
 public interface Provider {
+  /**
+   * Content is used to aggregate a content buffer and a content type.
+   * These will be used to construct the backend API request.
+   **/
   record Content(byte[] buffer, String type){}
-  Content ProvideFor(Path manifestPath) throws IOException, InterruptedException;
+
+  /**
+   * Use for creating a {@link Content} per manifest {@link Path}.
+   *
+   * @param manifestPath the Path for the manifest file
+   * @return A Content record aggregating the body content and content type.
+   * @throws IOException when failed to load the manifest file
+   */
+  Content ProvideFor(Path manifestPath) throws IOException;
 }

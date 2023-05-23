@@ -78,10 +78,10 @@ public class CrdaExample {
         var crdaApi = new CrdaApi();
 
         // get a String future holding a html report
-        CompletableFuture<String> htmlReport = crdaApi.getStackAnalysisHtml("/path/to/pom.xml");
+        CompletableFuture<String> htmlReport = crdaApi.stackAnalysisHtmlAsync("/path/to/pom.xml");
 
         // get a AnalysisReport future holding a deserialized report
-        CompletableFuture<AnalysisReport> jsonReport = crdaApi.getStackAnalysisJson("/path/to/pom.xml");
+        CompletableFuture<AnalysisReport> analysisReport = crdaApi.stackAnalysisAsync("/path/to/pom.xml");
     }
 }
 ```

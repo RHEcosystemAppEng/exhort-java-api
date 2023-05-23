@@ -29,7 +29,7 @@ public interface Api {
    * @return the HTML report as a String wrapped in a CompletableFuture
    * @throws IOException when failed to load the manifest file
    */
-  CompletableFuture<String> getStackAnalysisHtml(String manifestFile) throws IOException;
+  CompletableFuture<String> stackAnalysisHtmlAsync(String manifestFile) throws IOException;
 
   /**
    * Use for creating a stack analysis deserialized Json report for a given manifest file.
@@ -38,5 +38,5 @@ public interface Api {
    * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
    * @throws IOException when failed to load the manifest file
    */
-  CompletableFuture<AnalysisReport> getStackAnalysisJson(String manifestFile) throws IOException;
+  CompletableFuture<AnalysisReport> stackAnalysisAsync(String manifestFile) throws IOException;
 }

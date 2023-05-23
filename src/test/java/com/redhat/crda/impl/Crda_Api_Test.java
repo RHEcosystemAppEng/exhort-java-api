@@ -51,7 +51,7 @@ class Crda_Api_Test {
   CrdaApi crdaApiSut;
 
   @Test
-  void the_getStackAnalysisHtml_method_should_return_html_report_from_the_backend()
+  void the_stackAnalysisHtmlAsync_method_should_return_html_report_from_the_backend()
       throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile(null, null);
@@ -85,7 +85,7 @@ class Crda_Api_Test {
         .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a html stack analysis report
-      var htmlTxt = crdaApiSut.getStackAnalysisHtml(tmpFile.toString());
+      var htmlTxt = crdaApiSut.stackAnalysisHtmlAsync(tmpFile.toString());
       // verify we got the correct html response
       then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>");
     }
@@ -94,7 +94,7 @@ class Crda_Api_Test {
   }
 
   @Test
-  void the_getStackAnalysisJson_method_should_return_json_object_from_the_backend()
+  void the_stackAnalysisAsync_method_should_return_json_object_from_the_backend()
     throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile(null, null);
@@ -135,7 +135,7 @@ class Crda_Api_Test {
         .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a json stack analysis report
-      var responseAnalysis = crdaApiSut.getStackAnalysisJson(tmpFile.toString());
+      var responseAnalysis = crdaApiSut.stackAnalysisAsync(tmpFile.toString());
       // verify we got the correct analysis report
       then(responseAnalysis.get()).isEqualTo(expectedAnalysis);
     }

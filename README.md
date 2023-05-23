@@ -1,12 +1,12 @@
 # CodeReady Dependency Analytics Java API<br/>![latest-no-snapshot][0] ![latest-snapshot][1]
 
-> This project is still in development mode. For analysis, currently, only Java's Maven ecosystem is implemented.
+> This project is still a WIP. For analysis, currently, only Java's Maven ecosystem is implemented.
 
 The _Crda JAVA API_ module is deployed to _GitHub Package Registry_.
 
 <details>
 <summary>Click here for configuring <em>GHPR</em> and gaining access to the <em>crda-java-api</em> module.</summary>
-<ul>
+<ol>
 <li>Create a <a href="https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages">token</a> with the <strong>read:packages</strong> scope</li>
 <li>Encrypt your token:
 
@@ -48,7 +48,7 @@ encrypted-token-will-be-here-including-curly-braces
 ```
 
 </li>
-</ul>
+</ol>
 </details>
 
 ```xml

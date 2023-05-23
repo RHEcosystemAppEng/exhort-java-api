@@ -5,7 +5,7 @@
   com.redhat.crda=org.assertj.core
 
 --add-opens
-  com.redhat.crda/com.redhat.crda=org.junit.platform.commons
+  com.redhat.crda/com.redhat.crda.impl=org.junit.platform.commons
 --add-opens
   com.redhat.crda/com.redhat.crda.providers=org.junit.platform.commons
 --add-opens

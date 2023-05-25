@@ -14,7 +14,7 @@ The _Crda JAVA API_ module is deployed to _GitHub Package Registry_.
 ```shell
 $ mvn --encrypt-password created-token-goes-here
 
-encrypted-token-will-be-here-including-curly-braces
+encrypted-token-will-appear-here
 ```
 
 </li>
@@ -26,7 +26,7 @@ encrypted-token-will-be-here-including-curly-braces
     <server>
         <id>github</id>
         <username>github-userid-goes-here</username>
-        <password>encrypted-token-goes-here</password>
+        <password>encrypted-token-goes-here-including-curly-brackets</password>
     </server>
     ...
 </servers>

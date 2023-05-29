@@ -39,8 +39,8 @@ class Java_Maven_Provider_Test {
     // when providing for our pom
     var content = new JavaMavenProvider().ProvideFor(tmpPomFile);
     // verify expected dot graph is returned
-    assertThat(content.type()).isEqualTo("text/vnd.graphviz");
-    assertThat(new String(content.buffer()).replaceAll("\\s+",""))
+    assertThat(content.type).isEqualTo("text/vnd.graphviz");
+    assertThat(new String(content.buffer).replaceAll("\\s+",""))
       .isEqualTo(expectedDotGraph.replaceAll("\\s+",""));
     // cleanup
     Files.deleteIfExists(tmpPomFile);

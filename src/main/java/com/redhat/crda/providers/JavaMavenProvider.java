@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.redhat.crda.Provider;
 import com.redhat.crda.tools.Operations;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,15 +71,12 @@ public final class JavaMavenProvider implements Provider {
    * @throws IOException when failed to load the manifest file
    */
   private List<String> getIgnored(final Path manifestPath) throws IOException {
-    record Dependency(String groupId, String artifactId, String version){}
-    record Pom(Dependency[] dependencies){}
-
     var ignoredList = new ArrayList<String>();
 
     var mapper = new XmlMapper()
       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     var con = mapper.readValue(Files.newInputStream(manifestPath), Pom.class);
-    for (var dep : con.dependencies()) {
+    for (var dep : con.dependencies) {
       if (false) { // TODO replace this with condition for crdaignore comment
         var version = dep.version != null ? dep.version : "*";
         ignoredList.add(String.format("%s:%s:*:%s", dep.groupId, dep.artifactId, version));
@@ -88,5 +84,15 @@ public final class JavaMavenProvider implements Provider {
     }
 
     return ignoredList;
+  }
+
+  private static class Dependency{
+    public String groupId;
+    public String artifactId;
+    public String version;
+  }
+
+  private static class Pom{
+    public Dependency[] dependencies;
   }
 }

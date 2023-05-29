@@ -28,7 +28,14 @@ public interface Provider {
    * Content is used to aggregate a content buffer and a content type.
    * These will be used to construct the backend API request.
    **/
-  record Content(byte[] buffer, String type){}
+  class Content{
+    public final byte[] buffer;
+    public final String type;
+    public Content(byte[] buffer, String type){
+      this.buffer = buffer;
+      this.type = type;
+    }
+  }
 
   /**
    * Use for creating a {@link Content} per manifest {@link Path}.

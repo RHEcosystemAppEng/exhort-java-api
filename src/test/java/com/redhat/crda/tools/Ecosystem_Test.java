@@ -35,9 +35,9 @@ class Ecosystem_Test {
     var manifestPath = Paths.get("/supported/manifest/pom.xml");
     var manifest = Ecosystem.getManifest(manifestPath);
 
-    assertThat(manifest.manifestPath()).isEqualTo(manifestPath);
-    assertThat(manifest.packageManager()).isEqualTo(Ecosystem.PackageManager.MAVEN);
-    assertThat(manifest.provider()).isInstanceOf(JavaMavenProvider.class);
+    assertThat(manifest.manifestPath).isEqualTo(manifestPath);
+    assertThat(manifest.packageManager).isEqualTo(Ecosystem.PackageManager.MAVEN);
+    assertThat(manifest.provider).isInstanceOf(JavaMavenProvider.class);
   }
 
 }

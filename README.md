@@ -6,9 +6,24 @@ The _Crda JAVA API_ module is deployed to _GitHub Package Registry_.
 
 <details>
 <summary>Click here for configuring <em>GHPR</em> and gaining access to the <em>crda-java-api</em> module.</summary>
-<h3>Configure GHPR</h3>
+
+<h3>Create your token</h3>
+<p>
+Create a
+<a href="https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages">token</a>
+with the <strong>read:packages</strong> scope<br/>
+
+> Based on
+> <a href="https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry">GitHub documentation</a>,
+> In <em>Actions</em> you can use <em>GITHUB_TOKEN</em>
+
+</p>
+
+<details>
+<summary>Click here for <em>Maven</em> instructions</summary>
+
+<h3>Configure GHPR for <em>Maven</em></h3>
 <ol>
-<li>Create a <a href="https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages">token</a> with the <strong>read:packages</strong> scope</li>
 <li>Encrypt your token:
 
 ```shell
@@ -52,9 +67,45 @@ encrypted-token-will-appear-here
 </ol>
 </details>
 
+<details>
+<summary>Click here for <em>Gradle</em> instructions</summary>
+
+<h3>Configure GHPR for <em>Gradle</em></h3>
+<ol>
+<li>Save your token and username as environment variables:
+<ul>
+<li><em>GITHUB_USERNAME</em></li>
+<li><em>GITHUB_TOKEN</em></li>
+</ul>
+</li>
+<li> Add a <em>maven-type repository</em> definition in your <em>build.gradle</em>:
+
+```groovy
+repositories {
+    ...
+    maven {
+        url 'https://maven.pkg.github.com/RHEcosystemAppEng/crda-java-api'
+        credentials {
+            username System.getenv("GITHUB_USERNAME")
+            password System.getenv("GITHUB_TOKEN")
+        }
+    }
+    ...
+}
+```
+
+</li>
+
+</ol>
+</details>
+
+</details>
+
 <h3>Usage</h3>
 <ol>
 <li>Declare the dependency:
+<ul>
+<li>For <em>Maven</em> in <em>pom.xml</em>:
 
 ```xml
 <dependency>
@@ -63,6 +114,17 @@ encrypted-token-will-appear-here
     <version>${crda-java-api.version}</version>
 </dependency>
 ```
+</li>
+
+<li>For <em>Gradle</em> in <em>build.gradle</em>:
+
+```groovy
+implementation 'com.redhat.crda:crda-java-api:${crda-java-api.version}'
+```
+
+</li>
+</ul>
+
 </li>
 <li>If working with modules, configure module read:
 

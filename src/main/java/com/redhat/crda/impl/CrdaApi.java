@@ -48,9 +48,9 @@ public final class CrdaApi implements Api {
   }
 
   @Override
-  public CompletableFuture<String> stackAnalysisHtmlAsync(final String manifestFile) throws IOException {
+  public CompletableFuture<byte[]> stackAnalysisHtmlAsync(final String manifestFile) throws IOException {
     return this.client
-      .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofString())
+      .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofByteArray())
       .thenApply(HttpResponse::body);
   }
 

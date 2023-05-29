@@ -148,8 +148,8 @@ public class CrdaExample {
         // instantiate the Crda API implementation
         var crdaApi = new CrdaApi();
 
-        // get a String future holding a html report
-        CompletableFuture<String> htmlReport = crdaApi.stackAnalysisHtmlAsync("/path/to/pom.xml");
+        // get a byte array future holding a html report
+        CompletableFuture<byte[]> htmlReport = crdaApi.stackAnalysisHtmlAsync("/path/to/pom.xml");
 
         // get a AnalysisReport future holding a deserialized report
         CompletableFuture<AnalysisReport> analysisReport = crdaApi.stackAnalysisAsync("/path/to/pom.xml");

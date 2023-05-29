@@ -16,7 +16,7 @@
     <code.coverage.threshold>85%</code.coverage.threshold>
     <mutation.coverage.threshold>50</mutation.coverage.threshold>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.release>11</maven.compiler.release>
     <!-- Dependencies -->
     <jackson.version>2.15.0</jackson.version>
     <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
@@ -478,7 +478,7 @@ limitations under the License.]]>
           <rules>
             <dependencyConvergence />
             <requireJavaVersion>
-              <version>[17,)</version>
+              <version>[11,)</version>
             </requireJavaVersion>
             <requireMavenVersion>
               <version>[3.8,)</version>

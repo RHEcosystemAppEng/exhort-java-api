@@ -87,4 +87,4 @@ contribution. See the [DCO](DCO) file for details.
 [1]: https://github.com/RHEcosystemAppEng/crda-backend/blob/main/src/main/resources/META-INF/openapi.yaml
 
 <!-- Badge links -->
-[10]: https://badgen.net/badge/Java%20Version/17/5382a1
+[10]: https://badgen.net/badge/Java%20Version/11/5382a1

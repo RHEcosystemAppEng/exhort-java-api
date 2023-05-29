@@ -14,10 +14,10 @@ jobs:
       checks: write
       pull-requests: write
     env:
-      MAIN_JAVA_VER: 17
+      MAIN_JAVA_VER: 11
     strategy:
       matrix:
-        java: [17, 20]
+        java: [11, 20]
     steps:
     - name: Checkout sources
       uses: actions/checkout@v3

@@ -17,7 +17,6 @@ package com.redhat.crda.tools;
 
 import com.redhat.crda.Provider;
 import com.redhat.crda.providers.JavaMavenProvider;
-
 import java.nio.file.Path;
 
 /** Utility class used for instantiating providers. **/
@@ -37,7 +36,17 @@ public final class Ecosystem {
    * Manifest is used for aggregating a manifest {@link Path}, a {@link PackageManager},
    * and a {@link Provider}.
    **/
-  public record Manifest(Path manifestPath, PackageManager packageManager, Provider provider){}
+  public static class Manifest{
+    public final Path manifestPath;
+    public final PackageManager packageManager;
+    public final Provider provider;
+
+    public Manifest(Path manifestPath, PackageManager packageManager, Provider provider){
+      this.manifestPath = manifestPath;
+      this.packageManager = packageManager;
+      this.provider = provider;
+    }
+  }
   private Ecosystem(){
     // constructor not required for a utility class
   }
@@ -52,11 +61,10 @@ public final class Ecosystem {
   public static Manifest getManifest(final Path manifestPath) {
     var filename = manifestPath.getFileName().toString();
     switch (filename) {
-      case "pom.xml" -> {
+      case "pom.xml":
         return new Manifest(manifestPath, PackageManager.MAVEN, new JavaMavenProvider());
-      }
-      default -> throw new IllegalStateException(
-        String.format("Unknown manifest file %s", filename)
+      default:
+        throw new IllegalStateException(String.format("Unknown manifest file %s", filename)
       );
     }
   }

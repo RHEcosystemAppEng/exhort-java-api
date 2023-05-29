@@ -83,14 +83,14 @@ public final class CrdaApi implements Api {
     var manifest = Ecosystem.getManifest(manifestPath);
 
     var uri = URI.create(
-      String.format("%s/api/v3/dependency-analysis/%s", CrdaApi.ENDPOINT, manifest.packageManager().toString()));
+      String.format("%s/api/v3/dependency-analysis/%s", CrdaApi.ENDPOINT, manifest.packageManager.toString()));
 
-    var content = manifest.provider().ProvideFor(manifestPath);
+    var content = manifest.provider.ProvideFor(manifestPath);
 
     return HttpRequest.newBuilder(uri)
       .setHeader("Accept", acceptType)
-      .setHeader("Content-Type", content.type())
-      .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer()))
+      .setHeader("Content-Type", content.type)
+      .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer))
       .build();
   }
 }

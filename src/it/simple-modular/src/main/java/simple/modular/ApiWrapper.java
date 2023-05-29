@@ -25,7 +25,7 @@ public final class ApiWrapper {
     this.crdaApi = crdaApi;
   }
 
-  public String getAnalysisHtml(final String manifestPath) throws Exception {
+  public byte[] getAnalysisHtml(final String manifestPath) throws Exception {
     return crdaApi.stackAnalysisHtmlAsync(manifestPath).get();
   }
 

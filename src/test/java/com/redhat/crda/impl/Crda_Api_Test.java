@@ -73,7 +73,7 @@ class Crda_Api_Test {
 
     // mock and http response object and stub it to return a fake body
     var mockHttpResponse = mock(HttpResponse.class);
-    given(mockHttpResponse.body()).willReturn("<html>hello-crda</html>");
+    given(mockHttpResponse.body()).willReturn("<html>hello-crda</html>".getBytes());
 
     // mock static getManifest utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
@@ -87,7 +87,7 @@ class Crda_Api_Test {
       // when invoking the api for a html stack analysis report
       var htmlTxt = crdaApiSut.stackAnalysisHtmlAsync(tmpFile.toString());
       // verify we got the correct html response
-      then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>");
+      then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>".getBytes());
     }
     // cleanup
     Files.deleteIfExists(tmpFile);

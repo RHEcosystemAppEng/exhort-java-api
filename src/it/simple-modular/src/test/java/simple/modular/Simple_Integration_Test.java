@@ -54,7 +54,7 @@ class Simple_Integration_Test {
   @Test
   void test_stack_analysis_html_report() throws Exception {
     // load the pre-configured expected html response
-    var expectedHtmlAnalysis = Files.readString(Paths.get("src/test/resources/it_poms/response.html"));
+    var expectedHtmlAnalysis = Files.readAllBytes(Paths.get("src/test/resources/it_poms/response.html"));
     if (mockRealAPI) {
       // mock a http response object and stub it to return the expected html report as a body
       var mockHtmlResponse = mock(HttpResponse.class);

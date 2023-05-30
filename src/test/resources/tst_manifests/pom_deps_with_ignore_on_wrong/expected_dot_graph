@@ -1,0 +1,4 @@
+digraph "pom-with-deps-no-ignore:pom-with-dependency-not-ignored-for-tests:jar:0.0.1" {
+      "pom-with-deps-no-ignore:pom-with-dependency-not-ignored-for-tests:jar:0.0.1" -> "log4j:log4j:jar:1.2.17:compile" ;
+ }
+

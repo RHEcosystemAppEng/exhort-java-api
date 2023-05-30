@@ -15,15 +15,19 @@
  */
 package com.redhat.crda.providers;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.redhat.crda.Provider;
 import com.redhat.crda.tools.Operations;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Concrete implementation of the {@link Provider} used for converting dependency trees
@@ -66,33 +70,101 @@ public final class JavaMavenProvider implements Provider {
    *
    * @param manifestPath the Path for the manifest file
    * @return a list of string in a format suited for the dependency:tree goal's excludes property.
-   *    ie. group-id:artifact-id:*:version (the * marks any type, if not version specified,
+   *    ie. group-id:artifact-id:*:version (the * marks any type, if no version specified,
    *    * will be used.
-   * @throws IOException when failed to load the manifest file
+   * @throws IOException when failed to load or parse the manifest file
    */
   private List<String> getIgnored(final Path manifestPath) throws IOException {
     var ignoredList = new ArrayList<String>();
 
-    var mapper = new XmlMapper()
-      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    var con = mapper.readValue(Files.newInputStream(manifestPath), Pom.class);
-    for (var dep : con.dependencies) {
-      if (false) { // TODO replace this with condition for crdaignore comment
-        var version = dep.version != null ? dep.version : "*";
-        ignoredList.add(String.format("%s:%s:*:%s", dep.groupId, dep.artifactId, version));
+    XMLStreamReader reader = null;
+    try {
+      //get a xml stream reader for the manifest file
+      reader = XMLInputFactory.newInstance().createXMLStreamReader(Files.newInputStream(manifestPath));
+      // the following dependencyIgnore object is used to aggregate dependency data over iterations
+      // when a "dependency" tag starts, it will be initiated,
+      // when a "dependency" tag ends, it will be parsed, act upon, and reset
+      DependencyIgnore dependencyIgnore = null;
+      while (reader.hasNext()) {
+        reader.next(); // get the next event
+        if (reader.isStartElement() && "dependency".equals(reader.getLocalName())) {
+          // starting "dependency" tag, initiate aggregator
+          dependencyIgnore = new DependencyIgnore();
+          continue;
+        }
+
+        // if dependency aggregator haven't been initiated,
+        // we're currently not iterating over a "dependency" tag - no need for further parsing
+        if (!Objects.isNull(dependencyIgnore)) {
+          // if we hit an ignore comment, mark aggregator to be ignored
+          if (reader.getEventType() == XMLStreamConstants.COMMENT
+              && "crdaignore".equals(reader.getText().strip())
+          ) {
+            dependencyIgnore.ignored = true;
+            continue;
+          }
+
+          if (reader.isStartElement()) {
+            // NOTE if we want to include "scope" tags in ignore,
+            // add a case here and a property in DependencyIgnore
+            switch (reader.getLocalName()) {
+              case "groupId": // starting "groupId" tag, get next event and set to aggregator
+                reader.next();
+                dependencyIgnore.groupId = reader.getText();
+                break;
+              case "artifactId": // starting "artifactId" tag, get next event and set to aggregator
+                reader.next();
+                dependencyIgnore.artifactId = reader.getText();
+                break;
+              case "version": // starting "version" tag, get next event and set to aggregator
+                reader.next();
+                dependencyIgnore.version = reader.getText();
+                break;
+            }
+          }
+
+          if (reader.isEndElement() && "dependency".equals(reader.getLocalName())) {
+            // ending "dependency" tag, if ignored include in ignored list
+            if (dependencyIgnore.ignored) {
+              ignoredList.add(dependencyIgnore.toString());
+            }
+            // reset dependency aggregator
+            dependencyIgnore = null;
+          }
+        }
+      }
+    } catch (XMLStreamException exc) {
+      throw new IOException(exc);
+    } finally {
+      if (!Objects.isNull(reader)) {
+        try {
+          reader.close(); // close stream if open
+        } catch (XMLStreamException e) {
+          //
+        }
       }
     }
 
     return ignoredList;
   }
 
-  private static class Dependency{
-    public String groupId;
-    public String artifactId;
-    public String version;
-  }
+  // NOTE if we want to include "scope" tags in ignore,
+  // add property here and a case in the start-element-switch in the getIgnored method
+  /** Aggregator class for aggregating Dependency data over stream iterations, **/
+  private static class DependencyIgnore {
+    private String groupId = "";
+    private String artifactId = "";
+    private String version = "*";
+    boolean ignored = false;
 
-  private static class Pom{
-    public Dependency[] dependencies;
+    /**
+     * Get the string representation of the dependency to use as excludes
+     * @return an exclude string for the dependency:tree plugin, ie. group-id:artifact-id:*:version
+     */
+    @Override
+    public String toString() {
+      // NOTE if you add scope, don't forget to replace the * with its value
+      return String.format("%s:%s:*:%s", groupId, artifactId, version);
+    }
   }
 }

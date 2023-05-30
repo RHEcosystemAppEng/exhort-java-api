@@ -24,7 +24,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class Java_Maven_Provider_Test {
   @ParameterizedTest
-  @ValueSource(strings = {"pom_deps_no_ignore"}) // TODO add "pom_deps_with_ignore" when done implementing crdaignore
+  @ValueSource(strings = {
+    "pom_deps_with_no_ignore",
+    "pom_deps_with_ignore_on_group",
+    "pom_deps_with_ignore_on_dependency",
+    "pom_deps_with_ignore_on_artifact",
+    "pom_deps_with_ignore_on_version",
+    "pom_deps_with_ignore_on_wrong"
+  })
   void test_the_provideFor_a_pom_with_no_deps_ignored(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut pom.xml
     var tmpPomFile = Files.createTempFile(null, null);

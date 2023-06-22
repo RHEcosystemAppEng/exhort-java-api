@@ -75,6 +75,27 @@ This module is also being tested in a *modular* environment. Use
     * Look for the *PackageManager Enum* and add a member representing the new provider.
     * Look for the *getManifest function* and add a *switch case* instantiating the new provider per file type.
 
+### Integration Tests
+
+Integration tests are performed with the _maven-invoker-plugin_ invoking _maven_ projects stored in [src/it](src/it).<br/>
+Integration tests are bound to the _verify_ phase of the _default_ goal and activated using the designated _its_ profile:
+
+```shell
+# run integration tests
+$ mvn verify -Pits
+# clean build prior
+$ mvn clean verify -Pits
+# while in development, the dev profile will make the build not fail for coverage and enforcement  
+$ mvn clean verify -Pits,dev
+```
+
+Integration tests are executed against a mocked _Backend_ server.<br/>
+If you need to run against the actual _Backend_ server, use the _CRDA_ITS_USE_REAL_API_ environment variable:
+
+```shell
+CRDA_ITS_USE_REAL_API=true mvn clean verify -Pits
+```
+
 ## Certificate of Origin
 
 By contributing to this project you agree to the Developer Certificate of

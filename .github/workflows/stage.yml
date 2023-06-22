@@ -6,9 +6,9 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - ".github/**"
-      - "**.md"
+    paths:
+      - "src/main/**"
+      - "pom.xml"
 
 jobs:
   deploy:

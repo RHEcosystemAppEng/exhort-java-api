@@ -35,6 +35,10 @@
 * `deploy-github` - use this profile to include github registry distribution definition,
   used for deploying and releasing
 
+### Good to know
+
+* You can override the default backend url by setting another one in the _CRDA_BACKEND_URL_ environment variable.
+
 ### OpenAPI Specifications
 
 We use our [Backend's OpenAPI spec file][1] for generating types used for deserialization of the Backend's

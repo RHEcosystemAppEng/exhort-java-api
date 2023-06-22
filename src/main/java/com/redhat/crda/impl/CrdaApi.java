@@ -28,13 +28,39 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Stream;
 
 /** Concrete implementation of the Crda {@link Api} Service. **/
 public final class CrdaApi implements Api {
-  private static final String ENDPOINT = "http://crda-backend-crda.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String DEFAULT_ENDPOINT = "http://crda-backend-crda.apps.sssc-cl01.appeng.rhecoeng.com";
+  private final String endpoint;
 
+  /**
+   * Enum for identifying token environment variables and their
+   * corresponding request headers.
+   */
+  private enum TokenProvider {
+    SNYK;
+
+    /**
+     * Get the expected environment variable name.
+     * @return i.e. CRDA_SNYK_TOKEN
+     */
+    String getVarName() {
+      return String.format("CRDA_%s_TOKEN", this);
+    }
+
+    /**
+     * Get the expected request header name.
+     * @return i.e. crda-snyk-token
+     */
+    String getHeaderName() {
+      return String.format("crda-%s-token", this.toString().toLowerCase());
+    }
+  }
   private final HttpClient client;
   private final ObjectMapper mapper;
 
@@ -45,6 +71,8 @@ public final class CrdaApi implements Api {
   CrdaApi(final HttpClient client) {
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    var endpoint = System.getenv("CRDA_BACKEND_URL");
+    this.endpoint = Objects.nonNull(endpoint) ? endpoint : CrdaApi.DEFAULT_ENDPOINT;
   }
 
   @Override
@@ -83,14 +111,23 @@ public final class CrdaApi implements Api {
     var manifest = Ecosystem.getManifest(manifestPath);
 
     var uri = URI.create(
-      String.format("%s/api/v3/dependency-analysis/%s", CrdaApi.ENDPOINT, manifest.packageManager.toString()));
+      String.format("%s/api/v3/dependency-analysis/%s", this.endpoint, manifest.packageManager.toString()));
 
     var content = manifest.provider.ProvideFor(manifestPath);
 
-    return HttpRequest.newBuilder(uri)
+    var request = HttpRequest.newBuilder(uri)
       .setHeader("Accept", acceptType)
       .setHeader("Content-Type", content.type)
-      .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer))
-      .build();
+      .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer));
+
+    // include converted token environment variables into request headers
+    Stream.of(CrdaApi.TokenProvider.values()).forEach(p -> {
+      var token = System.getenv(p.getVarName());
+      if (Objects.nonNull(token)) {
+        request.setHeader(p.getHeaderName(), token);
+      }
+    });
+
+    return request.build();
   }
 }

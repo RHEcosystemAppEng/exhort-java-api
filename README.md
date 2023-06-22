@@ -1,8 +1,10 @@
 # CodeReady Dependency Analytics Java API<br/>![latest-no-snapshot][0] ![latest-snapshot][1]
 
-> This project is still a WIP. For analysis, currently, only Java's Maven ecosystem is implemented.
+> This project is still a WIP. Currently, only Java's Maven ecosystem is implemented.
 
-The _Crda JAVA API_ module is deployed to _GitHub Package Registry_.
+The _Crda Java API_ module is deployed to _GitHub Package Registry_.
+
+Looking for our JavaScript/TypeScript API? Try [Crda JavaScript API](https://github.com/RHEcosystemAppEng/crda-javascript-api).
 
 <details>
 <summary>Click here for configuring <em>GHPR</em> and gaining access to the <em>crda-java-api</em> module.</summary>
@@ -22,12 +24,12 @@ with the <strong>read:packages</strong> scope<br/>
 <details>
 <summary>Click here for <em>Maven</em> instructions</summary>
 
-<h3>Configure GHPR for <em>Maven</em></h3>
+<h3>Configure <em>GHPR</em> for <em>Maven</em></h3>
 <ol>
 <li>Encrypt your token:
 
 ```shell
-$ mvn --encrypt-password created-token-goes-here
+$ mvn --encrypt-password your-ghp-token-goes-here
 
 encrypted-token-will-appear-here
 ```
@@ -158,6 +160,24 @@ public class CrdaExample {
 ```
 </li>
 </ol>
+
+<h3>Excluding Packages</h3>
+<p>
+Excluding a package from any analysis can be achieved by marking the package for exclusion.
+</p>
+
+<ul>
+<li>Java Maven (pom.xml)</li>
+
+```xml
+<dependency> <!--crdaignore-->
+  <groupId>...</groupId>
+  <artifactId>...</artifactId>
+  <version>...</version>
+</dependency>
+```
+
+</ul>
 
 <!-- Badge links -->
 [0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/crda-java-api?color=green&label=latest

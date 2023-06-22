@@ -4,7 +4,8 @@
 
 The _Crda Java API_ module is deployed to _GitHub Package Registry_.
 
-Looking for our JavaScript/TypeScript API? Try [Crda JavaScript API](https://github.com/RHEcosystemAppEng/crda-javascript-api).
+* Looking for our JavaScript/TypeScript API? Try [Crda JavaScript API](https://github.com/RHEcosystemAppEng/crda-javascript-api).
+* Looking for our Backend implementation? Try [Crda Backend](https://github.com/RHEcosystemAppEng/crda-backend).
 
 <details>
 <summary>Click here for configuring <em>GHPR</em> and gaining access to the <em>crda-java-api</em> module.</summary>
@@ -189,6 +190,12 @@ Available token environment variables:
 
 <ul>
 <li><em>CRDA_SNYK_TOKEN</em></li>
+</ul>
+
+<h3>Used By</h3>
+
+<ul>
+<li><a href="https://github.com/redhat-developer/intellij-dependency-analytics">IntelliJ Dependency Analytics Plugin</a></li>
 </ul>
 
 <!-- Badge links -->

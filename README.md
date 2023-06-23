@@ -147,13 +147,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class CrdaExample {
     public static void main(String... args) throws Exception {
-
         // instantiate the Crda API implementation
         var crdaApi = new CrdaApi();
 
         // get a byte array future holding a html report
         CompletableFuture<byte[]> htmlReport = crdaApi.stackAnalysisHtmlAsync("/path/to/pom.xml");
-
         // get a AnalysisReport future holding a deserialized report
         CompletableFuture<AnalysisReport> analysisReport = crdaApi.stackAnalysisAsync("/path/to/pom.xml");
     }
@@ -182,8 +180,8 @@ Excluding a package from any analysis can be achieved by marking the package for
 
 <h3>Tokens</h3>
 <p>
-If you wish the result to include other vulnerabilities data and resolutions which are only available to vendor
-registered users. You can include the various vendor tokens as environment variables.
+For including extra vulnerability data and resolutions, otherwise only available to vendor registered users. You can
+set the various vendor tokens as environment variables.
 
 Available token environment variables:
 </p>
@@ -201,14 +199,14 @@ Available token environment variables:
 
 <h3>Custom Executables</h3>
 <p>
-This project uses each ecosystem executable for creating dependency trees. These executables are expected to be present
-on the system PATH. If they are not, or perhaps you want to use a custom one. Use can use the following environment
-variables to use set custom paths for the said executables.
+This project uses each ecosystem's executable for creating dependency trees. These executables are expected to be
+present on the system PATH. If they are not, or perhaps you want to use custom ones. Use can use the following
+environment variables for setting custom paths for the said executables.
 </p>
 
 <table>
 <tr>
-<th>Executable</th>
+<th>Ecosystem</th>
 <th>Default</th>
 <th>Environment Variable</th>
 </tr>

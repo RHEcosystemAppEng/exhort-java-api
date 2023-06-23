@@ -37,7 +37,6 @@ public final class Operations {
     var target = defaultExecutable.toUpperCase()
       .replaceAll(" ", "_")
       .replaceAll("-", "_");
-    System.out.println(target);
     var customPath = System.getenv(String.format("CRDA_%s_PATH", target));
     return Objects.requireNonNullElse(customPath, defaultExecutable);
   }

@@ -188,9 +188,36 @@ You can include the various vulnerability vendor data token as environment varia
 Available token environment variables:
 </p>
 
-<ul>
-<li><em>CRDA_SNYK_TOKEN</em></li>
-</ul>
+<table>
+<tr>
+<th>Vendor</th>
+<th>Token Environment Variable</th>
+</tr>
+<tr>
+<td><a href="https://app.snyk.io/redhat/snyk-token">Snyk</a></td>
+<td>CRDA_SNYK_TOKEN</td>
+</tr>
+</table>
+
+<h3>Custom Executables</h3>
+<p>
+This project uses the ecosystem executables for creating dependency trees. These executables are expected to be present
+on the system PATH. If the said executables are not available via the PATH environment variable, or perhaps you want to
+use a custom one. Use the following environment to use a custom paths.
+</p>
+
+<table>
+<tr>
+<th>Executable</th>
+<th>Default</th>
+<th>Environment Variable</th>
+</tr>
+<tr>
+<td><a href="https://maven.apache.org/">Maven</a></td>
+<td><em>mvn</em></td>
+<td>CRDA_MVN_PATH</td>
+</tr>
+</table>
 
 <h3>Used By</h3>
 

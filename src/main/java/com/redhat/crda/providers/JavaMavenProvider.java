@@ -37,15 +37,17 @@ import java.util.Objects;
 public final class JavaMavenProvider implements Provider {
   @Override
   public Content ProvideFor(final Path manifestPath) throws IOException {
+    // check for custom mvn executable in CRDA_MVN_PATH env var
+    var mvn = Operations.getCustomPathOrElse("mvn");
     // clean command used to clean build target
-    var mvnCleanCmd = new String[]{"mvn", "-q", "clean", "-f", manifestPath.toString()};
+    var mvnCleanCmd = new String[]{mvn, "-q", "clean", "-f", manifestPath.toString()};
     // execute the clean command
     Operations.runProcess(mvnCleanCmd);
     // create a temp file for storing the dependency tree in
     var tmpFile = Files.createTempFile(null, null);
     // the tree command will build the project and create the dependency tree in the temp file
     var mvnTreeCmd = new ArrayList<String>() {{
-      add("mvn");
+      add(mvn);
       add("-q");
       add("dependency:tree");
       add("-DoutputType=dot");

@@ -16,11 +16,30 @@
 package com.redhat.crda.tools;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /** Utility class used for executing process on the operating system. **/
 public final class Operations {
   private Operations(){
     // constructor not required for a utility class
+  }
+
+  /**
+   * Function for looking up custom executable path based on the default one provides as an
+   * argument. I.e. if defaultExecutable=mvn, this function will look for a custom mvn path
+   * set as an environment variable with the name CRDA_MVN_PATH. If not found, the original
+   * mvn passed as defaultExecutable will be returned.
+   *
+   * @param defaultExecutable default executable (uppercase spaces and dashes will be replaced with underscores).
+   * @return the custom path from the relevant environment variable or the original argument.
+   */
+  public static String getCustomPathOrElse(String defaultExecutable) {
+    var target = defaultExecutable.toUpperCase()
+      .replaceAll(" ", "_")
+      .replaceAll("-", "_");
+    System.out.println(target);
+    var customPath = System.getenv(String.format("CRDA_%s_PATH", target));
+    return Objects.requireNonNullElse(customPath, defaultExecutable);
   }
 
   /**

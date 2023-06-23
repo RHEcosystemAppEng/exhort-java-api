@@ -15,8 +15,11 @@
  */
 package com.redhat.crda;
 
+import com.redhat.crda.impl.CrdaApi;
+
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * The Provider interface is a functional interface used for contracting

@@ -182,8 +182,8 @@ Excluding a package from any analysis can be achieved by marking the package for
 
 <h3>Tokens</h3>
 <p>
-If you wish the report to include other vulnerabilities data and resolutions which is only available to registered users.
-You can include the various vulnerability vendor data token as environment variables.
+If you wish the result to include other vulnerabilities data and resolutions which are only available to vendor
+registered users. You can include the various vendor tokens as environment variables.
 
 Available token environment variables:
 </p>
@@ -201,9 +201,9 @@ Available token environment variables:
 
 <h3>Custom Executables</h3>
 <p>
-This project uses the ecosystem executables for creating dependency trees. These executables are expected to be present
-on the system PATH. If the said executables are not available via the PATH environment variable, or perhaps you want to
-use a custom one. Use the following environment to use a custom paths.
+This project uses each ecosystem executable for creating dependency trees. These executables are expected to be present
+on the system PATH. If they are not, or perhaps you want to use a custom one. Use can use the following environment
+variables to use set custom paths for the said executables.
 </p>
 
 <table>

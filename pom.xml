@@ -23,6 +23,7 @@
     <!-- Testing Dependencies -->
     <assertj.version>3.24.2</assertj.version>
     <junit-jupiter.version>5.9.1</junit-jupiter.version>
+    <junit-pioneer.version>2.0.1</junit-pioneer.version>
     <mockito.version>5.3.1</mockito.version>
     <!-- Plugins -->
     <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
@@ -125,6 +126,11 @@
         <version>${junit-jupiter.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.junit-pioneer</groupId>
+        <artifactId>junit-pioneer</artifactId>
+        <version>${junit-pioneer.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
         <version>${junit-jupiter.version}</version>
@@ -174,6 +180,12 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit-pioneer</groupId>
+      <artifactId>junit-pioneer</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

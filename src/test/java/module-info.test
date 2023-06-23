@@ -12,3 +12,7 @@
   com.redhat.crda/com.redhat.crda.tools=org.junit.platform.commons
 --add-opens
   com.redhat.crda/com.redhat.crda=org.mockito
+--add-opens
+  java.base/java.lang=org.junitpioneer
+--add-opens
+  java.base/java.util=org.junitpioneer

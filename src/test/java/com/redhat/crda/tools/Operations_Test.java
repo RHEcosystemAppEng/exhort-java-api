@@ -17,7 +17,11 @@ package com.redhat.crda.tools;
 
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
 class Operations_Test {
   @Test
@@ -28,5 +32,16 @@ class Operations_Test {
   @Test
   void when_running_process_for_non_existing_command_should_throw_runtime_exception() {
     assertThatRuntimeException().isThrownBy(() -> Operations.runProcess("unknown", "--command"));
+  }
+
+  @Test
+  void when_executable_custom_path_env_var_not_found_should_return_the_default_executable() {
+    assertThat(Operations.getCustomPathOrElse("madeupcmd")).isEqualTo("madeupcmd");
+  }
+
+  @Test
+  @SetEnvironmentVariable(key="CRDA_MADE_UP_CMD_PATH", value="/path/to/custom/made_up_cmd")
+  void when_executable_custom_path_was_specified_with_env_var_return_the_custom_path() {
+    assertThat(Operations.getCustomPathOrElse("made-up cmd")).isEqualTo("/path/to/custom/made_up_cmd");
   }
 }

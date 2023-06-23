@@ -61,6 +61,7 @@ public final class CrdaApi implements Api {
       return String.format("crda-%s-token", this.toString().toLowerCase());
     }
   }
+
   private final HttpClient client;
   private final ObjectMapper mapper;
 

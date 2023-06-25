@@ -14,6 +14,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy snapshot
+    if: github.repository_owner == 'RHEcosystemAppEng'
     outputs:
       project_version: ${{ steps.project.outputs.version }}
     steps:
@@ -47,7 +48,7 @@ jobs:
     needs: deploy
     if: |
       contains(needs.deploy.outputs.project_version, 'SNAPSHOT') &&
-      github.repository == 'RHEcosystemAppEng/crda-java-api'
+      github.repository_owner == 'RHEcosystemAppEng'
     steps:
       - name: Check for existing ${{ needs.deploy.outputs.project_version }} release
         id: existing_release

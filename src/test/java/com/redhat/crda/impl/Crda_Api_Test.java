@@ -51,10 +51,10 @@ class Crda_Api_Test {
   CrdaApi crdaApiSut;
 
   @Test
-  void the_stackAnalysisHtmlAsync_method_should_return_html_report_from_the_backend()
+  void stackAnalysisHtml_with_pom_xml_should_return_html_report_from_the_backend()
       throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
-    var tmpFile = Files.createTempFile(null, null);
+    var tmpFile = Files.createTempFile("crda_test_pom_", ".xml");
     try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
@@ -92,10 +92,10 @@ class Crda_Api_Test {
   }
 
   @Test
-  void the_stackAnalysisAsync_method_should_return_json_object_from_the_backend()
+  void stackAnalysis_with_pom_xml_should_return_json_object_from_the_backend()
     throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
-    var tmpFile = Files.createTempFile(null, null);
+    var tmpFile = Files.createTempFile("crda_test_pom_", ".xml");
     try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
@@ -113,7 +113,7 @@ class Crda_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedAnalysis;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/stack_analysis.json")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.json")) {
       expectedAnalysis = mapper.readValue(is, AnalysisReport.class);
     }
 
@@ -137,5 +137,51 @@ class Crda_Api_Test {
     }
     // cleanup
     Files.deleteIfExists(tmpFile);
+  }
+
+  @Test
+  void componentAnalysis_with_pom_xml_should_return_json_object_from_the_backend()
+    throws IOException, ExecutionException, InterruptedException {
+    // load pom.xml
+    byte[] targetPom;
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
+      targetPom = is.readAllBytes();
+    }
+
+    // stub the mocked provider with a fake content object
+    given(mockProvider.provideComponent(targetPom))
+      .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
+
+    // create an argument matcher to make sure we mock the response for the right request
+    ArgumentMatcher<HttpRequest> matchesRequest = r ->
+      r.headers().firstValue("Content-Type").get().equals("fake-content-type") &&
+        r.headers().firstValue("Accept").get().equals("application/json") &&
+        r.method().equals("POST");
+
+    // load dummy json and set as the expected analysis
+    var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    AnalysisReport expectedReport;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.json")) {
+      expectedReport = mapper.readValue(is, AnalysisReport.class);
+    }
+
+    // mock and http response object and stub it to return the expected analysis
+    var mockHttpResponse = mock(HttpResponse.class);
+    given(mockHttpResponse.body()).willReturn(mapper.writeValueAsString(expectedReport));
+
+    // mock static getProvider utility function
+    try (var ecosystemTool = mockStatic(Ecosystem.class)) {
+      // stub static getProvider utility function to return our mock provider
+      ecosystemTool.when(() -> Ecosystem.getProvider("pom.xml")).thenReturn(mockProvider);
+
+      // stub the http client to return our mocked response when request matches our arg matcher
+      given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
+        .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
+
+      // when invoking the api for a json stack analysis report
+      var responseAnalysis = crdaApiSut.componentAnalysis("pom.xml", targetPom);
+      // verify we got the correct analysis report
+      then(responseAnalysis.get()).isEqualTo(expectedReport);
+    }
   }
 }

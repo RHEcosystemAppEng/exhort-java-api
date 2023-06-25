@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 /** Concrete implementation of the Crda {@link Api} Service. **/
 public final class CrdaApi implements Api {
-  private static final String DEFAULT_ENDPOINT = "http://crda-backend-crda.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String DEFAULT_ENDPOINT = "http://crda-backend-dev-crda.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   /**

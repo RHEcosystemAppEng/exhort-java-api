@@ -67,6 +67,9 @@
         <extensions>true</extensions>
         <configuration>
           <executor>JAVA</executor>
+          <parameters>
+            <junit.jupiter.displayname.generator.default>org.junit.jupiter.api.DisplayNameGenerator$ReplaceUnderscores</junit.jupiter.displayname.generator.default><!-- editorconfig-checker-disable-line -->
+          </parameters>
         </configuration>
       </plugin>
     </plugins>

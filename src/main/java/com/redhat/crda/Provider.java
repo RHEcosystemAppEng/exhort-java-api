@@ -15,8 +15,12 @@
  */
 package com.redhat.crda;
 
+import jakarta.annotation.Nonnull;
+
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The Provider abstraction is used for contracting providers providing a {@link Content}
@@ -33,6 +37,32 @@ public abstract class Provider {
     public Content(byte[] buffer, String type){
       this.buffer = buffer;
       this.type = type;
+    }
+  }
+
+  /** POJO class used for serializing packages for a component analysis request. */
+  static final public class PackageAggregator {
+    public String name;
+    public String version;
+
+    public PackageAggregator(@Nonnull final String name, @Nonnull final String version) {
+      Objects.requireNonNull(name);
+      Objects.requireNonNull(version);
+      this.name = name;
+      this.version = version;
+    }
+
+    /**
+     * Custom implementation will return also return true if version is *.
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof PackageAggregator)) return false;
+      var that = (PackageAggregator) o;
+      return Objects.equals(this.name, that.name) &&
+        List.of(this.version, "*").contains(that.version);
     }
   }
 

@@ -16,7 +16,6 @@
 package com.redhat.crda;
 
 import com.redhat.crda.backend.AnalysisReport;
-
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,7 +28,7 @@ public interface Api {
    * @return the HTML report as a String wrapped in a CompletableFuture
    * @throws IOException when failed to load the manifest file
    */
-  CompletableFuture<byte[]> stackAnalysisHtmlAsync(String manifestFile) throws IOException;
+  CompletableFuture<byte[]> stackAnalysisHtml(String manifestFile) throws IOException;
 
   /**
    * Use for creating a stack analysis deserialized Json report for a given manifest file.
@@ -38,5 +37,15 @@ public interface Api {
    * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
    * @throws IOException when failed to load the manifest file
    */
-  CompletableFuture<AnalysisReport> stackAnalysisAsync(String manifestFile) throws IOException;
+  CompletableFuture<AnalysisReport> stackAnalysis(String manifestFile) throws IOException;
+
+  /**
+   * Use for creating a component analysis deserialized Json report for a given type and content.
+   *
+   * @param manifestType the type of the manifest, i.e. {@code pom.xml}
+   * @param manifestContent a byte array of the manifest's content
+   * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
+   * @throws IOException when failed to load the manifest content
+   */
+  CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent) throws IOException;
 }

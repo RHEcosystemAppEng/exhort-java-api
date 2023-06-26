@@ -15,23 +15,19 @@
  */
 package com.redhat.crda;
 
-import com.redhat.crda.impl.CrdaApi;
-
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Objects;
 
 /**
- * The Provider interface is a functional interface used for contracting
- * providers providing a {@link Content} per manifest {@link Path}.
+ * The Provider abstraction is used for contracting providers providing a {@link Content}
+ * per manifest type for constructing backend requests.
  **/
-@FunctionalInterface
-public interface Provider {
+public abstract class Provider {
   /**
    * Content is used to aggregate a content buffer and a content type.
    * These will be used to construct the backend API request.
    **/
-  class Content{
+  public static class Content{
     public final byte[] buffer;
     public final String type;
     public Content(byte[] buffer, String type){
@@ -40,12 +36,28 @@ public interface Provider {
     }
   }
 
+  /** The ecosystem of this provider, i.e. maven. */
+  final public String ecosystem;
+
+  protected Provider(String ecosystem) {
+    this.ecosystem = ecosystem;
+  }
+
   /**
-   * Use for creating a {@link Content} per manifest {@link Path}.
+   * Use for providing content for a stack analysis request.
    *
    * @param manifestPath the Path for the manifest file
-   * @return A Content record aggregating the body content and content type.
+   * @return A Content record aggregating the body content and content type
    * @throws IOException when failed to load the manifest file
    */
-  Content ProvideFor(Path manifestPath) throws IOException;
+  public abstract Content provideStack(Path manifestPath) throws IOException;
+
+  /**
+   * Use for providing content for a component analysis request.
+   *
+   * @param manifestContent the content of the manifest file
+   * @return A Content record aggregating the body content and content type
+   * @throws IOException when failed to load the manifest content
+   */
+  public abstract Content provideComponent(byte[] manifestContent) throws IOException;
 }

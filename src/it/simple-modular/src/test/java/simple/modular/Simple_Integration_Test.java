@@ -74,7 +74,7 @@ class Simple_Integration_Test {
     }
 
     // get the html report from the api
-    var htmlAnalysis = crdaApi.stackAnalysisHtmlAsync("src/test/resources/it_poms/pom.xml").get();
+    var htmlAnalysis = crdaApi.stackAnalysisHtml("src/test/resources/it_poms/pom.xml").get();
     assertThat(htmlAnalysis).isEqualTo(expectedHtmlAnalysis);
   }
 
@@ -95,7 +95,7 @@ class Simple_Integration_Test {
     }
 
     // get the analysis report object from the api
-    var analysisReport = crdaApi.stackAnalysisAsync("src/test/resources/it_poms/pom.xml").get();
+    var analysisReport = crdaApi.stackAnalysis("src/test/resources/it_poms/pom.xml").get();
     assertThat(analysisReport).isEqualTo(expectedAnalysis);
   }
 }

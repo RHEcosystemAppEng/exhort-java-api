@@ -73,11 +73,10 @@ This module is also being tested in a *modular* environment. Use
 
 #### Adding a Provider
 
-* Create a concrete implementation of the [Provider](src/main/java/com/redhat/crda/Provider.java) and place it in the
-  [providers](src/main/java/com/redhat/crda/providers) package.
-* In the [Ecosystem](src/main/java/com/redhat/crda/tools/Ecosystem.java) class:
-    * Look for the *PackageManager Enum* and add a member representing the new provider.
-    * Look for the *getManifest function* and add a *switch case* instantiating the new provider per file type.
+* Create a concrete implementation of the [Provider](src/main/java/com/redhat/crda/Provider.java) abstraction and place
+  it in the [providers](src/main/java/com/redhat/crda/providers) package.
+* In the [Ecosystem](src/main/java/com/redhat/crda/tools/Ecosystem.java) class look for the *getProvider function*
+  and add a *switch case* instantiating the new provider per file type.
 
 ### Integration Tests
 

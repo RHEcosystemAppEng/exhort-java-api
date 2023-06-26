@@ -59,10 +59,8 @@ class Crda_Api_Test {
       Files.write(tmpFile, is.readAllBytes());
     }
 
-    // create a fake manifest object serving the mocked provider
-    var fakeManifest = new Ecosystem.Manifest(tmpFile, Ecosystem.PackageManager.MAVEN, mockProvider);
     // stub the mocked provider with a fake content object
-    given(mockProvider.ProvideFor(tmpFile))
+    given(mockProvider.provideStack(tmpFile))
       .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
 
     // create an argument matcher to make sure we mock the response to for right request
@@ -75,17 +73,17 @@ class Crda_Api_Test {
     var mockHttpResponse = mock(HttpResponse.class);
     given(mockHttpResponse.body()).willReturn("<html>hello-crda</html>".getBytes());
 
-    // mock static getManifest utility function
+    // mock static getProvider utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
-      // stub static getManifest utility function to return our fake manifest
-      ecosystemTool.when(() -> Ecosystem.getManifest(tmpFile)).thenReturn(fakeManifest);
+      // stub static getProvider utility function to return our mock provider
+      ecosystemTool.when(() -> Ecosystem.getProvider(tmpFile)).thenReturn(mockProvider);
 
       // stub the http client to return our mocked response when request matches our arg matcher
       given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
         .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a html stack analysis report
-      var htmlTxt = crdaApiSut.stackAnalysisHtmlAsync(tmpFile.toString());
+      var htmlTxt = crdaApiSut.stackAnalysisHtml(tmpFile.toString());
       // verify we got the correct html response
       then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>".getBytes());
     }
@@ -102,10 +100,8 @@ class Crda_Api_Test {
       Files.write(tmpFile, is.readAllBytes());
     }
 
-    // create a fake manifest object serving the mocked provider
-    var fakeManifest = new Ecosystem.Manifest(tmpFile, Ecosystem.PackageManager.MAVEN, mockProvider);
     // stub the mocked provider with a fake content object
-    given(mockProvider.ProvideFor(tmpFile))
+    given(mockProvider.provideStack(tmpFile))
       .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
 
     // create an argument matcher to make sure we mock the response for the right request
@@ -125,17 +121,17 @@ class Crda_Api_Test {
     var mockHttpResponse = mock(HttpResponse.class);
     given(mockHttpResponse.body()).willReturn(mapper.writeValueAsString(expectedAnalysis));
 
-    // mock static getManifest utility function
+    // mock static getProvider utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
-      // stub static getManifest utility function to return our fake manifest
-      ecosystemTool.when(() -> Ecosystem.getManifest(tmpFile)).thenReturn(fakeManifest);
+      // stub static getProvider utility function to return our mock provider
+      ecosystemTool.when(() -> Ecosystem.getProvider(tmpFile)).thenReturn(mockProvider);
 
       // stub the http client to return our mocked response when request matches our arg matcher
       given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
         .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a json stack analysis report
-      var responseAnalysis = crdaApiSut.stackAnalysisAsync(tmpFile.toString());
+      var responseAnalysis = crdaApiSut.stackAnalysis(tmpFile.toString());
       // verify we got the correct analysis report
       then(responseAnalysis.get()).isEqualTo(expectedAnalysis);
     }

@@ -142,7 +142,8 @@ module x { // module-info.java
 ```java
 import com.redhat.crda.impl.CrdaApi;
 import com.redhat.crda.backend.AnalysisReport;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
 public class CrdaExample {
@@ -150,10 +151,13 @@ public class CrdaExample {
         // instantiate the Crda API implementation
         var crdaApi = new CrdaApi();
 
-        // get a byte array future holding a html report
-        CompletableFuture<byte[]> htmlReport = crdaApi.stackAnalysisHtmlAsync("/path/to/pom.xml");
-        // get a AnalysisReport future holding a deserialized report
-        CompletableFuture<AnalysisReport> analysisReport = crdaApi.stackAnalysisAsync("/path/to/pom.xml");
+        // get a byte array future holding a html Stack Analysis report
+        CompletableFuture<byte[]> htmlStackReport = crdaApi.stackAnalysisHtml("/path/to/pom.xml");
+        // get a AnalysisReport future holding a deserialized Stack Analysis report
+        CompletableFuture<AnalysisReport> stackReport = crdaApi.stackAnalysis("/path/to/pom.xml");
+        // get a AnalysisReport future holding a deserialized Component Analysis report
+        var manifestContent = Files.readAllBytes(Paths.get("/path/to/pom.xml"));
+        CompletableFuture<AnalysisReport> componentReport = crdaApi.componentAnalysis("pom.xml", manifestContent);
     }
 }
 ```

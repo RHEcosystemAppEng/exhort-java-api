@@ -17,7 +17,6 @@ package com.redhat.crda.providers;
 
 import com.redhat.crda.Provider;
 import com.redhat.crda.tools.Operations;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -31,12 +30,16 @@ import java.util.Objects;
 
 /**
  * Concrete implementation of the {@link Provider} used for converting dependency trees
- * for Java Maven projects (pom.xml) into a content Dot Graphs.
- * The text/vnd.graphviz is used to relay the content type.
+ * for Java Maven projects (pom.xml) into a content Dot Graphs for Stack analysis or Json for
+ * Component analysis.
  **/
-public final class JavaMavenProvider implements Provider {
+public final class JavaMavenProvider extends Provider {
+  public JavaMavenProvider(final String ecosystem) {
+    super(ecosystem);
+  }
+
   @Override
-  public Content ProvideFor(final Path manifestPath) throws IOException {
+  public Content provideStack(final Path manifestPath) throws IOException {
     // check for custom mvn executable in CRDA_MVN_PATH env var
     var mvn = Operations.getCustomPathOrElse("mvn");
     // clean command used to clean build target
@@ -64,6 +67,12 @@ public final class JavaMavenProvider implements Provider {
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new));
 
     return new Content(Files.readAllBytes(tmpFile), "text/vnd.graphviz");
+  }
+
+  @Override
+  public Content provideComponent(byte[] manifestContent) throws IOException {
+    // TODO
+    return null;
   }
 
   /**

@@ -44,7 +44,7 @@ class Java_Maven_Provider_Test {
       expectedDotGraph = new String(is.readAllBytes());
     }
     // when providing for our pom
-    var content = new JavaMavenProvider().ProvideFor(tmpPomFile);
+    var content = new JavaMavenProvider("maven").provideStack(tmpPomFile);
     // verify expected dot graph is returned
     assertThat(content.type).isEqualTo("text/vnd.graphviz");
     assertThat(new String(content.buffer).replaceAll("\\s+",""))

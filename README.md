@@ -182,18 +182,30 @@ Excluding a package from any analysis can be achieved by marking the package for
 
 </ul>
 
-<h3>Tokens</h3>
+<h3>Customization</h3>
 <p>
-For including extra vulnerability data and resolutions, otherwise only available to vendor registered users. You can
-set the various vendor tokens as environment variables.
+There are 2 approaches for customizing <em>Crda Java API</em>. Using <em>Environment Variables</em> or
+<em>Java Properties</em>:
 
-Available token environment variables:
+```java
+System.setProperty("CRDA_SNYK_TOKEN", "my-private-snyk-token");
+System.setProperty("CRDA_MVN_PATH", "/path/to/custom/mvn");
+```
+
+> NOTE: If the same key is used in both environment variables and properties, the environment variable takes precedence.
+
+</p>
+
+<h4>Customizing Tokens</h4>
+<p>
+For including extra vulnerability data and resolutions, otherwise only available only to vendor registered users. You
+can use the following keys for setting various vendor tokens.
 </p>
 
 <table>
 <tr>
 <th>Vendor</th>
-<th>Token Environment Variable</th>
+<th>Token Key</th>
 </tr>
 <tr>
 <td><a href="https://app.snyk.io/redhat/snyk-token">Snyk</a></td>
@@ -201,18 +213,18 @@ Available token environment variables:
 </tr>
 </table>
 
-<h3>Custom Executables</h3>
+<h4>Customizing Executables</h4>
 <p>
 This project uses each ecosystem's executable for creating dependency trees. These executables are expected to be
-present on the system PATH. If they are not, or perhaps you want to use custom ones. Use can use the following
-environment variables for setting custom paths for the said executables.
+present on the system's PATH environment. If they are not, or perhaps you want to use custom ones. Use can use the
+following keys for setting custom paths for the said executables.
 </p>
 
 <table>
 <tr>
 <th>Ecosystem</th>
 <th>Default</th>
-<th>Environment Variable</th>
+<th>Executable Key</th>
 </tr>
 <tr>
 <td><a href="https://maven.apache.org/">Maven</a></td>
@@ -220,12 +232,6 @@ environment variables for setting custom paths for the said executables.
 <td>CRDA_MVN_PATH</td>
 </tr>
 </table>
-
-<h3>Used By</h3>
-
-<ul>
-<li><a href="https://github.com/redhat-developer/intellij-dependency-analytics">IntelliJ Dependency Analytics Plugin</a></li>
-</ul>
 
 <!-- Badge links -->
 [0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/crda-java-api?color=green&label=latest

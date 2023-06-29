@@ -18,7 +18,7 @@
 * `mvn verify -Pits` run integration tests
 * `mvn verify -Pmut` run mutation tests, will fail the build if success threshold failed to meet requirements
 * `mvn verify -Pmut,dev` run mutation testing, will not fail the build
-* `mvn verify -Pcov,its,mut` run the entire project, including enforcement and unit, integration, and mutation tests 
+* `mvn verify -Pcov,its,mut` run the entire project, including coverage reports, unit, integration, and mutation tests 
 * `mvn install` install the module locally to make at accessible to other modules running locally
 
 ### Profiles Info
@@ -73,11 +73,10 @@ This module is also being tested in a *modular* environment. Use
 
 #### Adding a Provider
 
-* Create a concrete implementation of the [Provider](src/main/java/com/redhat/crda/Provider.java) and place it in the
-  [providers](src/main/java/com/redhat/crda/providers) package.
-* In the [Ecosystem](src/main/java/com/redhat/crda/tools/Ecosystem.java) class:
-    * Look for the *PackageManager Enum* and add a member representing the new provider.
-    * Look for the *getManifest function* and add a *switch case* instantiating the new provider per file type.
+* Create a concrete implementation of the [Provider](src/main/java/com/redhat/crda/Provider.java) abstraction and place
+  it in the [providers](src/main/java/com/redhat/crda/providers) package.
+* In the [Ecosystem](src/main/java/com/redhat/crda/tools/Ecosystem.java) class look for the *getProvider function*
+  and add a *switch case* instantiating the new provider per file type.
 
 ### Integration Tests
 
@@ -89,7 +88,7 @@ Integration tests are bound to the _verify_ phase of the _default_ goal and acti
 $ mvn verify -Pits
 # clean build prior
 $ mvn clean verify -Pits
-# while in development, the dev profile will make the build not fail for coverage and enforcement  
+# while in development, the dev profile will make the build not fail for coverage and other enforcements  
 $ mvn clean verify -Pits,dev
 ```
 

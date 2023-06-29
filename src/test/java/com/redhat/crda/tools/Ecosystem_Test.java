@@ -25,19 +25,15 @@ import java.nio.file.Paths;
 class Ecosystem_Test {
 
   @Test
-  void get_a_manifest_for_an_unknown_package_file_should_throw_an_exception() {
+  void get_a_provider_for_an_unknown_package_file_should_throw_an_exception() {
     var manifestPath = Paths.get("/not/a/supported/mani.fest");
-    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> Ecosystem.getManifest(manifestPath));
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> Ecosystem.getProvider(manifestPath));
   }
 
   @Test
-  void get_a_manifest_for_a_pom_xml_file_should_return_java_maven_manifest() {
+  void get_a_provider_for_a_pom_xml_file_should_return_java_maven_manifest() {
     var manifestPath = Paths.get("/supported/manifest/pom.xml");
-    var manifest = Ecosystem.getManifest(manifestPath);
-
-    assertThat(manifest.manifestPath).isEqualTo(manifestPath);
-    assertThat(manifest.packageManager).isEqualTo(Ecosystem.PackageManager.MAVEN);
-    assertThat(manifest.provider).isInstanceOf(JavaMavenProvider.class);
+    assertThat(Ecosystem.getProvider(manifestPath)).isInstanceOf(JavaMavenProvider.class);
   }
 
 }

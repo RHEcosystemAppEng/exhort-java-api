@@ -19,9 +19,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.crda.Api;
+import com.redhat.crda.Provider;
 import com.redhat.crda.backend.AnalysisReport;
 import com.redhat.crda.tools.Ecosystem;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 /** Concrete implementation of the Crda {@link Api} Service. **/
 public final class CrdaApi implements Api {
-  private static final String DEFAULT_ENDPOINT = "http://crda-backend-crda.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String DEFAULT_ENDPOINT = "http://crda-backend-dev-crda.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   /**
@@ -72,21 +72,43 @@ public final class CrdaApi implements Api {
   CrdaApi(final HttpClient client) {
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    var endpoint = System.getenv("CRDA_BACKEND_URL");
-    this.endpoint = Objects.nonNull(endpoint) ? endpoint : CrdaApi.DEFAULT_ENDPOINT;
+    this.endpoint = Objects.requireNonNullElse(
+      System.getenv("CRDA_BACKEND_URL"), CrdaApi.DEFAULT_ENDPOINT
+    );
   }
 
   @Override
-  public CompletableFuture<byte[]> stackAnalysisHtmlAsync(final String manifestFile) throws IOException {
+  public CompletableFuture<byte[]> stackAnalysisHtml(final String manifestFile) throws IOException {
     return this.client
-      .sendAsync(this.buildRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofByteArray())
+      .sendAsync(this.buildStackRequest(manifestFile, "text/html"), HttpResponse.BodyHandlers.ofByteArray())
       .thenApply(HttpResponse::body);
   }
 
   @Override
-  public CompletableFuture<AnalysisReport> stackAnalysisAsync(final String manifestFile) throws IOException {
+  public CompletableFuture<AnalysisReport> stackAnalysis(final String manifestFile) throws IOException {
     return this.client
-      .sendAsync(this.buildRequest(manifestFile, "application/json"), HttpResponse.BodyHandlers.ofString())
+      .sendAsync(this.buildStackRequest(manifestFile, "application/json"), HttpResponse.BodyHandlers.ofString())
+      .thenApply(HttpResponse::body)
+      .thenApply(
+        s -> {
+          try {
+            return this.mapper.readValue(s, AnalysisReport.class);
+          } catch (JsonProcessingException e) {
+            throw new CompletionException(e);
+          }
+        }
+      );
+  }
+
+  @Override
+  public CompletableFuture<AnalysisReport> componentAnalysis(final String manifestType, final byte[] manifestContent) throws IOException {
+    var provider = Ecosystem.getProvider(manifestType);
+    var uri = URI.create(
+      String.format("%s/api/v3/component-analysis/%s", this.endpoint, provider.ecosystem));
+    var content = provider.provideComponent(manifestContent);
+
+    return this.client
+      .sendAsync(this.buildRequest(content, uri, "application/json"), HttpResponse.BodyHandlers.ofString())
       .thenApply(HttpResponse::body)
       .thenApply(
         s -> {
@@ -100,22 +122,32 @@ public final class CrdaApi implements Api {
   }
 
   /**
-   *  Build and HTTP request for sending to the Backend API.
+   *  Build an HTTP request wrapper for sending to the Backend API for Stack Analysis only.
    *
    * @param manifestFile the path for the manifest file
    * @param acceptType the type of requested content, typically text/html or application/json
    * @return a HttpRequest ready to be sent to the Backend API
    * @throws IOException  when failed to load the manifest file
    */
-  private HttpRequest buildRequest(final String manifestFile, final String acceptType) throws IOException {
+  private HttpRequest buildStackRequest(final String manifestFile, final String acceptType) throws IOException {
     var manifestPath = Paths.get(manifestFile);
-    var manifest = Ecosystem.getManifest(manifestPath);
-
+    var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(
-      String.format("%s/api/v3/dependency-analysis/%s", this.endpoint, manifest.packageManager.toString()));
+      String.format("%s/api/v3/dependency-analysis/%s", this.endpoint, provider.ecosystem));
+    var content = provider.provideStack(manifestPath);
 
-    var content = manifest.provider.ProvideFor(manifestPath);
+    return buildRequest(content, uri, acceptType);
+  }
 
+  /**
+   * Build an HTTP request for sending to the Backend API.
+   *
+   * @param content the {@link com.redhat.crda.Provider.Content} info for the request body
+   * @param uri the {@link URI} for sending the request to
+   * @param acceptType value the Accept header in the request, indicating the required response type
+   * @return  a HttpRequest ready to be sent to the Backend API
+   */
+  private HttpRequest buildRequest(final Provider.Content content, final URI uri, final String acceptType) {
     var request = HttpRequest.newBuilder(uri)
       .setHeader("Accept", acceptType)
       .setHeader("Content-Type", content.type)

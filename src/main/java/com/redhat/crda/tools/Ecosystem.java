@@ -21,51 +21,33 @@ import java.nio.file.Path;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {
-  /** Enum used for relaying supported package managers. **/
-  public enum PackageManager {
-    // MAVEN is used to identify Java's Maven
-    MAVEN;
-
-    @Override
-    public String toString() {
-      return this.name().toLowerCase();
-    }
-  }
-
-  /**
-   * Manifest is used for aggregating a manifest {@link Path}, a {@link PackageManager},
-   * and a {@link Provider}.
-   **/
-  public static class Manifest{
-    public final Path manifestPath;
-    public final PackageManager packageManager;
-    public final Provider provider;
-
-    public Manifest(Path manifestPath, PackageManager packageManager, Provider provider){
-      this.manifestPath = manifestPath;
-      this.packageManager = packageManager;
-      this.provider = provider;
-    }
-  }
   private Ecosystem(){
     // constructor not required for a utility class
   }
 
   /**
-   * Utility function for instantiating {@link Provider} implementations encapsulated in
-   * a {@link Manifest} record based on file names and types.
+   * Utility function for instantiating {@link Provider} implementations.
    *
    * @param manifestPath the manifest Path
    * @return a Manifest record
    */
-  public static Manifest getManifest(final Path manifestPath) {
-    var filename = manifestPath.getFileName().toString();
-    switch (filename) {
+  public static Provider getProvider(final Path manifestPath) {
+    return Ecosystem.getProvider(manifestPath.getFileName().toString());
+  }
+
+  /**
+   * Utility function for instantiating {@link Provider} implementations.
+   *
+   * @param manifestType the type (filename + type) of the manifest
+   * @return a Manifest record
+   */
+  public static Provider getProvider(final String manifestType) {
+    switch (manifestType) {
       case "pom.xml":
-        return new Manifest(manifestPath, PackageManager.MAVEN, new JavaMavenProvider());
+        return new JavaMavenProvider("maven");
       default:
-        throw new IllegalStateException(String.format("Unknown manifest file %s", filename)
-      );
+        throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
+        );
     }
   }
 }

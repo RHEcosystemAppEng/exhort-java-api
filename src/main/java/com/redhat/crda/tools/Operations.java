@@ -27,8 +27,9 @@ public final class Operations {
   /**
    * Function for looking up custom executable path based on the default one provides as an
    * argument. I.e. if defaultExecutable=mvn, this function will look for a custom mvn path
-   * set as an environment variable with the name CRDA_MVN_PATH. If not found, the original
-   * mvn passed as defaultExecutable will be returned.
+   * set as an environment variable or a java property with the name CRDA_MVN_PATH. If not found,
+   * the original mvn passed as defaultExecutable will be returned.
+   * Note, environment variables takes precedence on java properties.
    *
    * @param defaultExecutable default executable (uppercase spaces and dashes will be replaced with underscores).
    * @return the custom path from the relevant environment variable or the original argument.
@@ -37,8 +38,10 @@ public final class Operations {
     var target = defaultExecutable.toUpperCase()
       .replaceAll(" ", "_")
       .replaceAll("-", "_");
-    var customPath = System.getenv(String.format("CRDA_%s_PATH", target));
-    return Objects.requireNonNullElse(customPath, defaultExecutable);
+    var executableKey = String.format("CRDA_%s_PATH", target);
+    return Objects.requireNonNullElseGet(
+      System.getenv(executableKey),
+      () -> Objects.requireNonNullElse(System.getProperty(executableKey) ,defaultExecutable));
   }
 
   /**

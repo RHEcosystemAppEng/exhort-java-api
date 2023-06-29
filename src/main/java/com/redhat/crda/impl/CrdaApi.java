@@ -153,11 +153,16 @@ public final class CrdaApi implements Api {
       .setHeader("Content-Type", content.type)
       .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer));
 
-    // include converted token environment variables into request headers
+    // include tokens from environment variables of java properties as request headers
     Stream.of(CrdaApi.TokenProvider.values()).forEach(p -> {
-      var token = System.getenv(p.getVarName());
-      if (Objects.nonNull(token)) {
-        request.setHeader(p.getHeaderName(), token);
+      var envToken = System.getenv(p.getVarName());
+      if (Objects.nonNull(envToken)) {
+        request.setHeader(p.getHeaderName(), envToken);
+      } else {
+        var propToken = System.getProperty(p.getVarName());
+        if (Objects.nonNull(propToken)) {
+          request.setHeader(p.getHeaderName(), propToken);
+        }
       }
     });
 

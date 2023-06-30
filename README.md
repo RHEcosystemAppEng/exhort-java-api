@@ -159,6 +159,9 @@ public class CrdaExample {
 </li>
 </ol>
 
+<h3>Supported Ecosystems</h3>
+* [Java](https://www.java.com/) - [Maven](https://maven.apache.org/)
+
 <h3>Excluding Packages</h3>
 <p>
 Excluding a package from any analysis can be achieved by marking the package for exclusion.

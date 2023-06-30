@@ -1,16 +1,13 @@
 # CodeReady Dependency Analytics Java API<br/>![latest-no-snapshot][0] ![latest-snapshot][1]
 
-> This project is still a WIP. Currently, only Java's Maven ecosystem is implemented.
-
-The _Crda Java API_ module is deployed to _GitHub Package Registry_.
-
 * Looking for our JavaScript/TypeScript API? Try [Crda JavaScript API](https://github.com/RHEcosystemAppEng/crda-javascript-api).
 * Looking for our Backend implementation? Try [Crda Backend](https://github.com/RHEcosystemAppEng/crda-backend).
 
-<details>
-<summary>Click here for configuring <em>GHPR</em> and gaining access to the <em>crda-java-api</em> module.</summary>
+The _Crda Java API_ module is deployed to _GitHub Package Registry_.
 
-<h3>Create your token</h3>
+<details>
+<summary>Click here for configuring <em>GHPR</em> registry access.</summary>
+<h3>Configure Registry Access</h3>
 <p>
 Create a
 <a href="https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages">token</a>
@@ -19,24 +16,21 @@ with the <strong>read:packages</strong> scope<br/>
 > Based on
 > <a href="https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry">GitHub documentation</a>,
 > In <em>Actions</em> you can use <em>GITHUB_TOKEN</em>
-
 </p>
 
-<details>
-<summary>Click here for <em>Maven</em> instructions</summary>
-
-<h3>Configure <em>GHPR</em> for <em>Maven</em></h3>
+<ul>
+<li>
+<p><em>Maven</em> users</p>
 <ol>
-<li>Encrypt your token:
+<li>Encrypt your token
 
 ```shell
 $ mvn --encrypt-password your-ghp-token-goes-here
 
 encrypted-token-will-appear-here
 ```
-
 </li>
-<li>Add a <em>server</em> definition in your <em>$HOME/.m2/settings.xml</em> (note the <em>id</em>):
+<li>Add a <em>server</em> definition in your <em>$HOME/.m2/settings.xml</em>
 
 ```xml
 <servers>
@@ -50,7 +44,25 @@ encrypted-token-will-appear-here
 </servers>
 ```
 </li>
-<li> Add a <em>repository</em> definition in your <em>pom.xml</em> (note the <em>id</em>):
+</ol>
+</li>
+
+<li>
+<em>Gradle</em> users, save your token and username as environment variables
+<ul>
+<li><em>GITHUB_USERNAME</em></li>
+<li><em>GITHUB_TOKEN</em></li>
+</ul>
+</li>
+</ul>
+</details>
+
+<h3>Usage</h3>
+<ol>
+<li>Configure Registry</li>
+<ul>
+<li>
+<em>Maven</em> users, add a <em>repository</em> definition in <em>pom.xml</em>
 
 ```xml
   <repositories>
@@ -58,30 +70,14 @@ encrypted-token-will-appear-here
     <repository>
       <id>github</id>
       <url>https://maven.pkg.github.com/RHEcosystemAppEng/crda-java-api</url>
-      <snapshots>
-        <enabled>true</enabled> <!-- omit or set to false if not using snapshots -->
-      </snapshots>
     </repository>
     ...
   </repositories>
 ```
-
 </li>
-</ol>
-</details>
 
-<details>
-<summary>Click here for <em>Gradle</em> instructions</summary>
-
-<h3>Configure GHPR for <em>Gradle</em></h3>
-<ol>
-<li>Save your token and username as environment variables:
-<ul>
-<li><em>GITHUB_USERNAME</em></li>
-<li><em>GITHUB_TOKEN</em></li>
-</ul>
-</li>
-<li> Add a <em>maven-type repository</em> definition in your <em>build.gradle</em>:
+<li>
+<em>Gradle</em> users, add a <em>maven-type repository</em> definition in <em>build.gradle</em>
 
 ```groovy
 repositories {
@@ -96,19 +92,13 @@ repositories {
     ...
 }
 ```
-
 </li>
+</ul>
 
-</ol>
-</details>
-
-</details>
-
-<h3>Usage</h3>
-<ol>
-<li>Declare the dependency:
+<li>Declare the dependency
 <ul>
-<li>For <em>Maven</em> in <em>pom.xml</em>:
+<li>
+<em>Maven</em> users, add a dependency in <em>pom.xml</em>
 
 ```xml
 <dependency>
@@ -119,17 +109,18 @@ repositories {
 ```
 </li>
 
-<li>For <em>Gradle</em> in <em>build.gradle</em>:
+<li>
+<em>Gradle</em> users, add a dependency in <em>build.gradle</em>
 
 ```groovy
 implementation 'com.redhat.crda:crda-java-api:${crda-java-api.version}'
 ```
-
 </li>
 </ul>
-
 </li>
-<li>If working with modules, configure module read:
+
+<li>
+If working with modules, configure module read
 
 ```java
 module x { // module-info.java
@@ -137,7 +128,9 @@ module x { // module-info.java
 }
 ```
 </li>
-<li>Code example:
+
+<li>
+Code example
 
 ```java
 import com.redhat.crda.impl.CrdaApi;
@@ -153,8 +146,10 @@ public class CrdaExample {
 
         // get a byte array future holding a html Stack Analysis report
         CompletableFuture<byte[]> htmlStackReport = crdaApi.stackAnalysisHtml("/path/to/pom.xml");
+
         // get a AnalysisReport future holding a deserialized Stack Analysis report
         CompletableFuture<AnalysisReport> stackReport = crdaApi.stackAnalysis("/path/to/pom.xml");
+
         // get a AnalysisReport future holding a deserialized Component Analysis report
         var manifestContent = Files.readAllBytes(Paths.get("/path/to/pom.xml"));
         CompletableFuture<AnalysisReport> componentReport = crdaApi.componentAnalysis("pom.xml", manifestContent);
@@ -170,7 +165,8 @@ Excluding a package from any analysis can be achieved by marking the package for
 </p>
 
 <ul>
-<li>Java Maven (pom.xml)</li>
+<li>
+<em>Java Maven</em> users can add a comment in <em>pom.xml</em>
 
 ```xml
 <dependency> <!--crdaignore-->
@@ -179,6 +175,7 @@ Excluding a package from any analysis can be achieved by marking the package for
   <version>...</version>
 </dependency>
 ```
+</li>
 
 </ul>
 
@@ -192,13 +189,12 @@ System.setProperty("CRDA_SNYK_TOKEN", "my-private-snyk-token");
 System.setProperty("CRDA_MVN_PATH", "/path/to/custom/mvn");
 ```
 
-> NOTE: If the same key is used in both environment variables and properties, the environment variable takes precedence.
-
+> Environment variables takes precedence.
 </p>
 
 <h4>Customizing Tokens</h4>
 <p>
-For including extra vulnerability data and resolutions, otherwise only available only to vendor registered users. You
+For including extra vulnerability data and resolutions, otherwise only available only for vendor registered users. You
 can use the following keys for setting various vendor tokens.
 </p>
 

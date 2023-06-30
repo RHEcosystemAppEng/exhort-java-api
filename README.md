@@ -160,7 +160,9 @@ public class CrdaExample {
 </ol>
 
 <h3>Supported Ecosystems</h3>
-* [Java](https://www.java.com/) - [Maven](https://maven.apache.org/)
+<ul>
+<li><a href="https://www.java.com/">Java</a> - <a href="https://maven.apache.org/">Maven</a></li>
+</ul>
 
 <h3>Excluding Packages</h3>
 <p>

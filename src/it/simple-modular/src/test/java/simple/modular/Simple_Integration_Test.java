@@ -15,12 +15,14 @@
  */
 package simple.modular;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.crda.backend.AnalysisReport;
 import com.redhat.crda.impl.CrdaApi;
@@ -39,6 +41,8 @@ class Simple_Integration_Test {
   CrdaApi crdaApi;
   HttpClient mockHttpClient;
 
+  ObjectMapper mapper;
+
   @BeforeAll
   static void prepare() {
     var useRealApi = System.getenv("CRDA_ITS_USE_REAL_API");
@@ -46,6 +50,7 @@ class Simple_Integration_Test {
   }
   @BeforeEach
   void initialize() throws Exception {
+    mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     if (Simple_Integration_Test.useRealAPI) {
       crdaApi = new CrdaApi();
     } else {
@@ -78,11 +83,36 @@ class Simple_Integration_Test {
   }
 
   @Test
+  void test_stack_analysis_mixed_report() throws Exception {
+    // load the pre-configured expected html and json responses
+    var expectedHtmlAnalysis = Files.readAllBytes(Paths.get("src/test/resources/it_poms/analysis-report.html"));
+    var expectedAnalysisJson = Files.readString(Paths.get("src/test/resources/it_poms/analysis-report.json"));
+    // deserialize the json expected response
+    var expectedAnalysis = mapper.readValue(expectedAnalysisJson, AnalysisReport.class);
+
+    var expectedMixedAnalysis = Files.readAllBytes(Paths.get("src/test/resources/it_poms/analysis-report.mixed"));
+    if (!Simple_Integration_Test.useRealAPI) {
+      // mock a http response object and stub it to return the expected html report as a body
+      var mockMixedResponse = mock(HttpResponse.class);
+      when(mockMixedResponse.body()).thenReturn(expectedMixedAnalysis);
+      // stub the mocked http client to return the mocked http response for requests accepting text/html
+      when(mockHttpClient.sendAsync(
+        argThat(r -> r.headers().firstValue("Accept").get().equals("multipart/mixed")), any())
+      ).thenReturn(CompletableFuture.completedFuture(mockMixedResponse));
+    }
+
+    // get the html report from the api
+    var mixedAnalysis = crdaApi.stackAnalysisMixed("src/test/resources/it_poms/pom.xml").get();
+    assertThat(new String(mixedAnalysis.html).trim()).isEqualTo(new String(expectedHtmlAnalysis).trim());
+    assertThat(mixedAnalysis.json).isEqualTo(expectedAnalysis);
+  }
+
+  @Test
   void test_stack_analysis_report() throws Exception {
     // load the pre-configured expected json response
     var expectedAnalysisJson = Files.readString(Paths.get("src/test/resources/it_poms/analysis-report.json"));
     // deserialize the expected response
-    var expectedAnalysis = new ObjectMapper().readValue(expectedAnalysisJson, AnalysisReport.class);
+    var expectedAnalysis = mapper.readValue(expectedAnalysisJson, AnalysisReport.class);
     if (!Simple_Integration_Test.useRealAPI) {
       // mock a http response object and stub it to return the expected json report as a body
       var mockJsonResponse = mock(HttpResponse.class);
@@ -103,7 +133,7 @@ class Simple_Integration_Test {
     // load the pre-configured expected json response
     var expectedAnalysisJson = Files.readString(Paths.get("src/test/resources/it_poms/analysis-report.json"));
     // deserialize the expected response
-    var expectedAnalysis = new ObjectMapper().readValue(expectedAnalysisJson, AnalysisReport.class);
+    var expectedAnalysis = mapper.readValue(expectedAnalysisJson, AnalysisReport.class);
     if (!Simple_Integration_Test.useRealAPI) {
       // mock a http response object and stub it to return the expected json report as a body
       var mockJsonResponse = mock(HttpResponse.class);

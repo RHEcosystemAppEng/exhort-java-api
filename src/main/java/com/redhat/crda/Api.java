@@ -16,11 +16,59 @@
 package com.redhat.crda;
 
 import com.redhat.crda.backend.AnalysisReport;
+import jakarta.annotation.Nonnull;
+
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /** The Api interface is used for contracting API implementations. **/
 public interface Api {
+  enum MediaType {
+    APPLICATION_JSON,
+    TEXT_HTML,
+    MULTIPART_MIXED;
+
+    @Override
+    public String toString() {
+      return this.name().toLowerCase().replace("_", "/");
+    }
+  }
+
+  /** POJO class used for aggregating multipart/mixed analysis requests. */
+  class MixedReport {
+    final public byte[] html;
+    final public AnalysisReport json;
+
+    public MixedReport(final byte[] html, final AnalysisReport json) {
+      this.html = html;
+      this.json = json;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) return true;
+      if (o == null || this.getClass() != o.getClass()) return false;
+      var that = (MixedReport) o;
+      return Arrays.equals(this.html, that.html) && Objects.equals(this.json, that.json);
+    }
+
+    @Override
+    public int hashCode() {
+      return 31 * Objects.hash(json) + Arrays.hashCode(html);
+    }
+  }
+
+  /**
+   * Use for creating a stack analysis HTML report for a given manifest file.
+   *
+   * @param manifestFile the path for the manifest file
+   * @return a mixed reports for both HTML and JSON wrapped in a CompletableFuture
+   * @throws IOException when failed to load the manifest file
+   */
+  CompletableFuture<MixedReport> stackAnalysisMixed(String manifestFile) throws IOException;
+
   /**
    * Use for creating a stack analysis HTML report for a given manifest file.
    *

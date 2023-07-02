@@ -1,27 +1,35 @@
 {
   "summary": {
     "dependencies": {
-      "scanned": 10,
-      "transitive": 193
+      "scanned": 1,
+      "transitive": 0
     },
     "vulnerabilities": {
-      "total": 14,
-      "direct": 4,
-      "critical": 0,
+      "total": 7,
+      "direct": 1,
+      "critical": 1,
       "high": 3,
-      "medium": 8,
-      "low": 3
-    }
+      "medium": 2,
+      "low": 1
+    },
+    "providerStatuses": [
+      {
+        "ok": true,
+        "provider": "snyk",
+        "status": 200,
+        "message": "OK"
+      }
+    ]
   },
   "dependencies": [
     {
       "ref": {
-        "name": "io.quarkus:quarkus-hibernate-orm",
-        "version": "2.13.5.Final"
+        "name": "log4j:log4j",
+        "version": "1.2.16"
       },
       "highestVulnerability": {
-        "id": "SNYK-JAVA-ORGGRAALVMSDK-5457933",
-        "title": "Information Exposure",
+        "id": "SNYK-JAVA-LOG4J-1300176",
+        "title": "Man-in-the-Middle (MitM)",
         "source": "snyk",
         "cvss": {
           "attackVector": "Network",
@@ -29,453 +37,25 @@
           "privilegesRequired": "None",
           "userInteraction": "None",
           "scope": "Unchanged",
-          "confidentialityImpact": "High",
-          "integrityImpact": "High",
-          "availabilityImpact": "None",
-          "exploitCodeMaturity": null,
-          "remediationLevel": null,
-          "reportConfidence": null,
-          "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
-        },
-        "cvssScore": 7.4,
-        "severity": "HIGH",
-        "cves": [
-          "CVE-2023-21930"
-        ]
-      },
-      "issues": [],
-      "transitive": [
-        {
-          "ref": {
-            "name": "org.graalvm.sdk:graal-sdk",
-            "version": "22.3.0"
-          },
-          "highestVulnerability": {
-            "id": "SNYK-JAVA-ORGGRAALVMSDK-5457933",
-            "title": "Information Exposure",
-            "source": "snyk",
-            "cvss": {
-              "attackVector": "Network",
-              "attackComplexity": "High",
-              "privilegesRequired": "None",
-              "userInteraction": "None",
-              "scope": "Unchanged",
-              "confidentialityImpact": "High",
-              "integrityImpact": "High",
-              "availabilityImpact": "None",
-              "exploitCodeMaturity": null,
-              "remediationLevel": null,
-              "reportConfidence": null,
-              "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
-            },
-            "cvssScore": 7.4,
-            "severity": "HIGH",
-            "cves": [
-              "CVE-2023-21930"
-            ]
-          },
-          "issues": [
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457921",
-              "title": "Improper Input Validation",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "None",
-                "integrityImpact": "Low",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
-              },
-              "cvssScore": 3.7,
-              "severity": "LOW",
-              "cves": [
-                "CVE-2023-21968"
-              ]
-            },
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457923",
-              "title": "Improper Neutralization of Null Byte or NUL Character",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "None",
-                "integrityImpact": "Low",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
-              },
-              "cvssScore": 3.7,
-              "severity": "LOW",
-              "cves": [
-                "CVE-2023-21937"
-              ]
-            },
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457925",
-              "title": "Improper Input Validation",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "Low",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "None",
-                "integrityImpact": "Low",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
-              },
-              "cvssScore": 5.3,
-              "severity": "MEDIUM",
-              "cves": [
-                "CVE-2023-21939"
-              ]
-            },
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457927",
-              "title": "Information Exposure",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "High",
-                "integrityImpact": "None",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
-              },
-              "cvssScore": 5.9,
-              "severity": "MEDIUM",
-              "cves": [
-                "CVE-2023-21954"
-              ]
-            },
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457929",
-              "title": "Denial of Service (DoS)",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "None",
-                "integrityImpact": "None",
-                "availabilityImpact": "High",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
-              },
-              "cvssScore": 5.9,
-              "severity": "MEDIUM",
-              "cves": [
-                "CVE-2023-21967"
-              ]
-            },
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457931",
-              "title": "Remote Code Execution (RCE)",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "None",
-                "integrityImpact": "Low",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N"
-              },
-              "cvssScore": 3.7,
-              "severity": "LOW",
-              "cves": [
-                "CVE-2023-21938"
-              ]
-            },
-            {
-              "id": "SNYK-JAVA-ORGGRAALVMSDK-5457933",
-              "title": "Information Exposure",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "High",
-                "integrityImpact": "High",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
-              },
-              "cvssScore": 7.4,
-              "severity": "HIGH",
-              "cves": [
-                "CVE-2023-21930"
-              ]
-            }
-          ],
-          "remediations": {}
-        }
-      ],
-      "remediations": {},
-      "recommendation": null
-    },
-    {
-      "ref": {
-        "name": "io.quarkus:quarkus-resteasy",
-        "version": "2.13.5.Final"
-      },
-      "highestVulnerability": {
-        "id": "SNYK-JAVA-ORGJBOSSRESTEASY-3338627",
-        "title": "Creation of Temporary File With Insecure Permissions",
-        "source": "snyk",
-        "cvss": {
-          "attackVector": "Local",
-          "attackComplexity": "Low",
-          "privilegesRequired": "Low",
-          "userInteraction": "None",
-          "scope": "Unchanged",
           "confidentialityImpact": "Low",
-          "integrityImpact": "Low",
-          "availabilityImpact": "Low",
-          "exploitCodeMaturity": null,
-          "remediationLevel": null,
-          "reportConfidence": null,
-          "cvss": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
-        },
-        "cvssScore": 5.3,
-        "severity": "MEDIUM",
-        "cves": [
-          "CVE-2023-0482"
-        ]
-      },
-      "issues": [],
-      "transitive": [
-        {
-          "ref": {
-            "name": "org.jboss.resteasy:resteasy-core",
-            "version": "4.7.7.Final"
-          },
-          "highestVulnerability": {
-            "id": "SNYK-JAVA-ORGJBOSSRESTEASY-3338627",
-            "title": "Creation of Temporary File With Insecure Permissions",
-            "source": "snyk",
-            "cvss": {
-              "attackVector": "Local",
-              "attackComplexity": "Low",
-              "privilegesRequired": "Low",
-              "userInteraction": "None",
-              "scope": "Unchanged",
-              "confidentialityImpact": "Low",
-              "integrityImpact": "Low",
-              "availabilityImpact": "Low",
-              "exploitCodeMaturity": null,
-              "remediationLevel": null,
-              "reportConfidence": null,
-              "cvss": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
-            },
-            "cvssScore": 5.3,
-            "severity": "MEDIUM",
-            "cves": [
-              "CVE-2023-0482"
-            ]
-          },
-          "issues": [
-            {
-              "id": "SNYK-JAVA-ORGJBOSSRESTEASY-3338627",
-              "title": "Creation of Temporary File With Insecure Permissions",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Local",
-                "attackComplexity": "Low",
-                "privilegesRequired": "Low",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "Low",
-                "integrityImpact": "Low",
-                "availabilityImpact": "Low",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
-              },
-              "cvssScore": 5.3,
-              "severity": "MEDIUM",
-              "cves": [
-                "CVE-2023-0482"
-              ]
-            }
-          ],
-          "remediations": {}
-        }
-      ],
-      "remediations": {},
-      "recommendation": null
-    },
-    {
-      "ref": {
-        "name": "io.quarkus:quarkus-jdbc-postgresql",
-        "version": "2.13.5.Final"
-      },
-      "highestVulnerability": {
-        "id": "SNYK-JAVA-ORGPOSTGRESQL-3146847",
-        "title": "Information Exposure",
-        "source": "snyk",
-        "cvss": {
-          "attackVector": "Local",
-          "attackComplexity": "High",
-          "privilegesRequired": "Low",
-          "userInteraction": "None",
-          "scope": "Unchanged",
-          "confidentialityImpact": "High",
           "integrityImpact": "None",
           "availabilityImpact": "None",
           "exploitCodeMaturity": null,
           "remediationLevel": null,
           "reportConfidence": null,
-          "cvss": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N"
+          "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
         },
-        "cvssScore": 4.7,
-        "severity": "MEDIUM",
+        "cvssScore": 3.7,
+        "severity": "LOW",
         "cves": [
-          "CVE-2022-41946"
-        ]
-      },
-      "issues": [],
-      "transitive": [
-        {
-          "ref": {
-            "name": "org.postgresql:postgresql",
-            "version": "42.5.0"
-          },
-          "highestVulnerability": {
-            "id": "SNYK-JAVA-ORGPOSTGRESQL-3146847",
-            "title": "Information Exposure",
-            "source": "snyk",
-            "cvss": {
-              "attackVector": "Local",
-              "attackComplexity": "High",
-              "privilegesRequired": "Low",
-              "userInteraction": "None",
-              "scope": "Unchanged",
-              "confidentialityImpact": "High",
-              "integrityImpact": "None",
-              "availabilityImpact": "None",
-              "exploitCodeMaturity": null,
-              "remediationLevel": null,
-              "reportConfidence": null,
-              "cvss": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N"
-            },
-            "cvssScore": 4.7,
-            "severity": "MEDIUM",
-            "cves": [
-              "CVE-2022-41946"
-            ]
-          },
-          "issues": [
-            {
-              "id": "SNYK-JAVA-ORGPOSTGRESQL-3146847",
-              "title": "Information Exposure",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Local",
-                "attackComplexity": "High",
-                "privilegesRequired": "Low",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "High",
-                "integrityImpact": "None",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N"
-              },
-              "cvssScore": 4.7,
-              "severity": "MEDIUM",
-              "cves": [
-                "CVE-2022-41946"
-              ]
-            }
-          ],
-          "remediations": {
-            "CVE-2022-41946": {
-              "issueRef": "CVE-2022-41946",
-              "mavenPackage": {
-                "name": "io.quarkus:quarkus-jdbc-postgresql",
-                "version": "2.13.7.Final-redhat-00003"
-              },
-              "productStatus": "fixed"
-            }
-          }
-        }
-      ],
-      "remediations": {},
-      "recommendation": null
-    },
-    {
-      "ref": {
-        "name": "io.quarkus:quarkus-vertx-http",
-        "version": "2.13.5.Final"
-      },
-      "highestVulnerability": {
-        "id": "SNYK-JAVA-IOQUARKUS-3149918",
-        "title": "Access Restriction Bypass",
-        "source": "snyk",
-        "cvss": {
-          "attackVector": "Network",
-          "attackComplexity": "Low",
-          "privilegesRequired": "None",
-          "userInteraction": "None",
-          "scope": "Unchanged",
-          "confidentialityImpact": "None",
-          "integrityImpact": "Low",
-          "availabilityImpact": "High",
-          "exploitCodeMaturity": null,
-          "remediationLevel": null,
-          "reportConfidence": null,
-          "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H"
-        },
-        "cvssScore": 8.2,
-        "severity": "HIGH",
-        "cves": [
-          "CVE-2022-4147"
-        ]
+          "CVE-2020-9488"
+        ],
+        "unique": false
       },
       "issues": [
         {
-          "id": "SNYK-JAVA-IOQUARKUS-3149918",
-          "title": "Access Restriction Bypass",
+          "id": "SNYK-JAVA-LOG4J-572732",
+          "title": "Deserialization of Untrusted Data",
           "source": "snyk",
           "cvss": {
             "attackVector": "Network",
@@ -483,224 +63,174 @@
             "privilegesRequired": "None",
             "userInteraction": "None",
             "scope": "Unchanged",
-            "confidentialityImpact": "None",
-            "integrityImpact": "Low",
+            "confidentialityImpact": "High",
+            "integrityImpact": "High",
+            "availabilityImpact": "High",
+            "exploitCodeMaturity": "Proof of concept code",
+            "remediationLevel": null,
+            "reportConfidence": null,
+            "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P"
+          },
+          "cvssScore": 9.8,
+          "severity": "CRITICAL",
+          "cves": [
+            "CVE-2019-17571"
+          ],
+          "unique": false
+        },
+        {
+          "id": "SNYK-JAVA-LOG4J-2342645",
+          "title": "SQL Injection",
+          "source": "snyk",
+          "cvss": {
+            "attackVector": "Network",
+            "attackComplexity": "High",
+            "privilegesRequired": "None",
+            "userInteraction": "None",
+            "scope": "Unchanged",
+            "confidentialityImpact": "High",
+            "integrityImpact": "High",
             "availabilityImpact": "High",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
             "reportConfidence": null,
-            "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H"
+            "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
           },
-          "cvssScore": 8.2,
+          "cvssScore": 8.1,
           "severity": "HIGH",
           "cves": [
-            "CVE-2022-4147"
-          ]
+            "CVE-2022-23305"
+          ],
+          "unique": false
         },
         {
-          "id": "SNYK-JAVA-IOQUARKUS-3330765",
-          "title": "Cross-site Scripting (XSS)",
+          "id": "SNYK-JAVA-LOG4J-2342646",
+          "title": "Deserialization of Untrusted Data",
           "source": "snyk",
           "cvss": {
             "attackVector": "Network",
-            "attackComplexity": "Low",
+            "attackComplexity": "High",
             "privilegesRequired": "None",
-            "userInteraction": "Required",
+            "userInteraction": "None",
+            "scope": "Unchanged",
+            "confidentialityImpact": "High",
+            "integrityImpact": "High",
+            "availabilityImpact": "High",
+            "exploitCodeMaturity": null,
+            "remediationLevel": null,
+            "reportConfidence": null,
+            "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "cvssScore": 8.1,
+          "severity": "HIGH",
+          "cves": [
+            "CVE-2022-23307"
+          ],
+          "unique": false
+        },
+        {
+          "id": "SNYK-JAVA-LOG4J-2342647",
+          "title": "Deserialization of Untrusted Data",
+          "source": "snyk",
+          "cvss": {
+            "attackVector": "Network",
+            "attackComplexity": "High",
+            "privilegesRequired": "None",
+            "userInteraction": "None",
+            "scope": "Unchanged",
+            "confidentialityImpact": "High",
+            "integrityImpact": "High",
+            "availabilityImpact": "High",
+            "exploitCodeMaturity": null,
+            "remediationLevel": null,
+            "reportConfidence": null,
+            "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "cvssScore": 8.1,
+          "severity": "HIGH",
+          "cves": [
+            "CVE-2022-23302"
+          ],
+          "unique": false
+        },
+        {
+          "id": "SNYK-JAVA-LOG4J-2316893",
+          "title": "Arbitrary Code Execution",
+          "source": "snyk",
+          "cvss": {
+            "attackVector": "Network",
+            "attackComplexity": "High",
+            "privilegesRequired": "High",
+            "userInteraction": "None",
+            "scope": "Unchanged",
+            "confidentialityImpact": "High",
+            "integrityImpact": "High",
+            "availabilityImpact": "High",
+            "exploitCodeMaturity": "Proof of concept code",
+            "remediationLevel": null,
+            "reportConfidence": null,
+            "cvss": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H/E:P"
+          },
+          "cvssScore": 6.6,
+          "severity": "MEDIUM",
+          "cves": [
+            "CVE-2021-4104"
+          ],
+          "unique": false
+        },
+        {
+          "id": "SNYK-JAVA-LOG4J-3358774",
+          "title": "Denial of Service (DoS)",
+          "source": "snyk",
+          "cvss": {
+            "attackVector": "Network",
+            "attackComplexity": "High",
+            "privilegesRequired": "None",
+            "userInteraction": "None",
+            "scope": "Unchanged",
+            "confidentialityImpact": "None",
+            "integrityImpact": "None",
+            "availabilityImpact": "High",
+            "exploitCodeMaturity": null,
+            "remediationLevel": null,
+            "reportConfidence": null,
+            "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "cvssScore": 5.9,
+          "severity": "MEDIUM",
+          "cves": [
+            "CVE-2023-26464"
+          ],
+          "unique": false
+        },
+        {
+          "id": "SNYK-JAVA-LOG4J-1300176",
+          "title": "Man-in-the-Middle (MitM)",
+          "source": "snyk",
+          "cvss": {
+            "attackVector": "Network",
+            "attackComplexity": "High",
+            "privilegesRequired": "None",
+            "userInteraction": "None",
             "scope": "Unchanged",
             "confidentialityImpact": "Low",
-            "integrityImpact": "Low",
+            "integrityImpact": "None",
             "availabilityImpact": "None",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
             "reportConfidence": null,
-            "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N"
+            "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
           },
-          "cvssScore": 5.4,
-          "severity": "MEDIUM",
+          "cvssScore": 3.7,
+          "severity": "LOW",
           "cves": [
-            "CVE-2023-0044"
-          ]
+            "CVE-2020-9488"
+          ],
+          "unique": false
         }
       ],
-      "transitive": [
-        {
-          "ref": {
-            "name": "io.netty:netty-handler",
-            "version": "4.1.82.Final"
-          },
-          "highestVulnerability": {
-            "id": "SNYK-JAVA-IONETTY-1042268",
-            "title": "Improper Certificate Validation",
-            "source": "snyk",
-            "cvss": {
-              "attackVector": "Adjacent Network",
-              "attackComplexity": "High",
-              "privilegesRequired": "Low",
-              "userInteraction": "Required",
-              "scope": "Unchanged",
-              "confidentialityImpact": "High",
-              "integrityImpact": "Low",
-              "availabilityImpact": "Low",
-              "exploitCodeMaturity": "Unproven that exploit exists",
-              "remediationLevel": "Unavailable",
-              "reportConfidence": "Reasonable",
-              "cvss": "CVSS:3.1/AV:A/AC:H/PR:L/UI:R/S:U/C:H/I:L/A:L/E:U/RL:U/RC:R"
-            },
-            "cvssScore": 5.6,
-            "severity": "MEDIUM",
-            "cves": []
-          },
-          "issues": [
-            {
-              "id": "SNYK-JAVA-IONETTY-1042268",
-              "title": "Improper Certificate Validation",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Adjacent Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "Low",
-                "userInteraction": "Required",
-                "scope": "Unchanged",
-                "confidentialityImpact": "High",
-                "integrityImpact": "Low",
-                "availabilityImpact": "Low",
-                "exploitCodeMaturity": "Unproven that exploit exists",
-                "remediationLevel": "Unavailable",
-                "reportConfidence": "Reasonable",
-                "cvss": "CVSS:3.1/AV:A/AC:H/PR:L/UI:R/S:U/C:H/I:L/A:L/E:U/RL:U/RC:R"
-              },
-              "cvssScore": 5.6,
-              "severity": "MEDIUM",
-              "cves": []
-            }
-          ],
-          "remediations": {}
-        },
-        {
-          "ref": {
-            "name": "io.netty:netty-codec-haproxy",
-            "version": "4.1.82.Final"
-          },
-          "highestVulnerability": {
-            "id": "SNYK-JAVA-IONETTY-3167776",
-            "title": "Denial of Service (DoS)",
-            "source": "snyk",
-            "cvss": {
-              "attackVector": "Network",
-              "attackComplexity": "Low",
-              "privilegesRequired": "None",
-              "userInteraction": "None",
-              "scope": "Unchanged",
-              "confidentialityImpact": "None",
-              "integrityImpact": "None",
-              "availabilityImpact": "High",
-              "exploitCodeMaturity": null,
-              "remediationLevel": null,
-              "reportConfidence": null,
-              "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
-            },
-            "cvssScore": 7.5,
-            "severity": "HIGH",
-            "cves": [
-              "CVE-2022-41881"
-            ]
-          },
-          "issues": [
-            {
-              "id": "SNYK-JAVA-IONETTY-3167776",
-              "title": "Denial of Service (DoS)",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "Low",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "None",
-                "integrityImpact": "None",
-                "availabilityImpact": "High",
-                "exploitCodeMaturity": null,
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
-              },
-              "cvssScore": 7.5,
-              "severity": "HIGH",
-              "cves": [
-                "CVE-2022-41881"
-              ]
-            }
-          ],
-          "remediations": {}
-        },
-        {
-          "ref": {
-            "name": "io.vertx:vertx-web",
-            "version": "4.3.4"
-          },
-          "highestVulnerability": {
-            "id": "SNYK-JAVA-IOVERTX-3318108",
-            "title": "Directory Traversal",
-            "source": "snyk",
-            "cvss": {
-              "attackVector": "Network",
-              "attackComplexity": "High",
-              "privilegesRequired": "None",
-              "userInteraction": "None",
-              "scope": "Unchanged",
-              "confidentialityImpact": "Low",
-              "integrityImpact": "Low",
-              "availabilityImpact": "None",
-              "exploitCodeMaturity": "Proof of concept code",
-              "remediationLevel": null,
-              "reportConfidence": null,
-              "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P"
-            },
-            "cvssScore": 4.8,
-            "severity": "MEDIUM",
-            "cves": [
-              "CVE-2023-24815"
-            ]
-          },
-          "issues": [
-            {
-              "id": "SNYK-JAVA-IOVERTX-3318108",
-              "title": "Directory Traversal",
-              "source": "snyk",
-              "cvss": {
-                "attackVector": "Network",
-                "attackComplexity": "High",
-                "privilegesRequired": "None",
-                "userInteraction": "None",
-                "scope": "Unchanged",
-                "confidentialityImpact": "Low",
-                "integrityImpact": "Low",
-                "availabilityImpact": "None",
-                "exploitCodeMaturity": "Proof of concept code",
-                "remediationLevel": null,
-                "reportConfidence": null,
-                "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P"
-              },
-              "cvssScore": 4.8,
-              "severity": "MEDIUM",
-              "cves": [
-                "CVE-2023-24815"
-              ]
-            }
-          ],
-          "remediations": {}
-        }
-      ],
-      "remediations": {
-        "CVE-2023-0044": {
-          "issueRef": "CVE-2023-0044",
-          "mavenPackage": {
-            "name": "io.quarkus:quarkus-vertx-http",
-            "version": "2.13.7.Final-redhat-00003"
-          },
-          "productStatus": "fixed"
-        }
-      },
+      "transitive": [],
+      "remediations": {},
       "recommendation": null
     }
   ]

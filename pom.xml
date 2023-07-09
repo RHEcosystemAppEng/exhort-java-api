@@ -409,9 +409,12 @@ limitations under the License.]]>
               <jacoco>${jacoco.java.option}</jacoco>
             </additionalOptions>
           </javaOptions>
+          <tags>
+            <!-- in development, you can uncomment the following and tag specific tests you want to run -->
+            <!--<tag>test_only</tag>-->
+          </tags>
           <parameters>
             <junit.jupiter.execution.parallel.enabled>false</junit.jupiter.execution.parallel.enabled>
-            <junit.jupiter.execution.parallel.mode.default>concurrent</junit.jupiter.execution.parallel.mode.default>
             <junit.jupiter.displayname.generator.default>org.junit.jupiter.api.DisplayNameGenerator$ReplaceUnderscores</junit.jupiter.displayname.generator.default><!-- editorconfig-checker-disable-line -->
           </parameters>
         </configuration>

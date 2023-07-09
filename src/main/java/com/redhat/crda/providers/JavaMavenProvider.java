@@ -100,7 +100,7 @@ public final class JavaMavenProvider extends Provider {
       .filter(i -> i.ignored)
       .collect(Collectors.toList());
     // get all dependencies from effective pom as packages excluding the ignored ones
-    var packages = Objects.requireNonNull(this.getDependencies(tmpEffPom)).stream()
+    var packages = this.getDependencies(tmpEffPom).stream()
       .dropWhile(ignored::contains)
       .map(DependencyAggregator::toPackage)
       .toArray(PackageAggregator[]::new);
@@ -224,8 +224,10 @@ public final class JavaMavenProvider extends Provider {
       if (this == o) return true;
       if (!(o instanceof DependencyAggregator)) return false;
       var that = (DependencyAggregator) o;
-      return this.ignored == that.ignored &&
-        Objects.equals(this.groupId, that.groupId) &&
+      // NOTE we do not compare the ignored field
+      // This is required for comparing pom.xml with effective_pom.xml as the latter doesn't
+      // contain comments indicating ignore
+      return Objects.equals(this.groupId, that.groupId) &&
         Objects.equals(this.artifactId, that.artifactId) &&
         Objects.equals(this.version, that.version);
     }

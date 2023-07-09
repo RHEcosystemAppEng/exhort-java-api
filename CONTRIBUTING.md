@@ -99,6 +99,8 @@ If you need to run against the actual _Backend_ server, use the _CRDA_ITS_USE_RE
 CRDA_ITS_USE_REAL_API=true mvn clean verify -Pits
 ```
 
+> TIP: When working on a new integration test project, it's helpful opening the IDE directly in the test project folder.
+
 ## Certificate of Origin
 
 By contributing to this project you agree to the Developer Certificate of

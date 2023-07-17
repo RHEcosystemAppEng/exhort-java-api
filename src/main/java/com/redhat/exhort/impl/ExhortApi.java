@@ -15,6 +15,13 @@
  */
 package com.redhat.exhort.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.crda.Api;
+import com.redhat.crda.Provider;
+import com.redhat.crda.backend.AnalysisReport;
+import com.redhat.crda.tools.Ecosystem;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -72,6 +79,14 @@ public final class ExhortApi implements Api {
 
   public ExhortApi() {
     this(HttpClient.newHttpClient());
+  }
+
+  /**
+   * Get the HTTP protocol Version set by client in environment variable, if not set, the default is HTTP Protocol Version 1.1
+   * @return i.e. HttpClient.Version.HTTP_1.1
+   */
+  static HttpClient.Version getHttpVersion() {
+    return (System.getenv("HTTP_VERSION_EXHORT_CLIENT") != null && System.getenv("HTTP_VERSION_EXHORT_CLIENT").contains("2")) ? HttpClient.Version.HTTP_2 : HttpClient.Version.HTTP_1_1 ;
   }
 
   ExhortApi(final HttpClient client) {

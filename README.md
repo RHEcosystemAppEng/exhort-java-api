@@ -218,6 +218,26 @@ can use the following keys for setting various vendor tokens.
 <td><a href="https://app.snyk.io/redhat/snyk-token">Snyk</a></td>
 <td>EXHORT_SNYK_TOKEN</td>
 </tr>
+
+</table>
+<h4>Customizing HTTP Version</h4>
+<p>
+The HTTP Client Library can be configured to use HTTP Protocol version through environment variables, so if there is a problem with one of the HTTP Versions, the other can be configured through a dedicated environment variable.  
+</p>
+
+<table>
+<tr>
+<th>Environment Variable</th>
+<th>Accepted Values</th>
+<th>Default</th>
+
+
+</tr>
+<tr>
+<td>HTTP_VERSION_CRDA_CLIENT</td>
+<td>[HTTP_1_1 , HTTP_2]</td>
+<td>HTTP_1_1</td>
+</tr>
 </table>
 
 <h4>Customizing Executables</h4>

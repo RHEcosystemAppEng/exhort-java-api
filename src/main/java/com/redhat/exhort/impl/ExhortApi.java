@@ -164,7 +164,7 @@ public final class ExhortApi implements Api {
   ) throws IOException {
     var provider = Ecosystem.getProvider(manifestType);
     var uri = URI.create(
-      String.format("%s/api/v3/component-analysis/%s", this.endpoint, provider.ecosystem));
+      String.format("%s/api/v3/dependency-analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
 
     return this.client
@@ -197,7 +197,7 @@ public final class ExhortApi implements Api {
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(
-      String.format("%s/api/v3/dependency-analysis/%s", this.endpoint, provider.ecosystem));
+      String.format("%s/api/v3/dependency-analysis", this.endpoint));
     var content = provider.provideStack(manifestPath);
 
     return buildRequest(content, uri, acceptType);

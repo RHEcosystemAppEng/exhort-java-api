@@ -4,12 +4,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.redhat.crda</groupId>
-  <artifactId>crda-java-api</artifactId>
+  <groupId>com.redhat.exhort</groupId>
+  <artifactId>exhort-java-api</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>Crda Java API</name>
-  <description>Code-Ready Dependency Analytics Java API.</description>
-  <url>https://github.com/RHEcosystemAppEng/crda-java-api#readme</url>
+  <name>Exhort Java API</name>
+  <description>Exhort Java API</description>
+  <url>https://github.com/RHEcosystemAppEng/exhort-java-api#readme</url>
   <inceptionYear>2023</inceptionYear>
 
   <properties>
@@ -72,19 +72,19 @@
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>https://github.com/RHEcosystemAppEng/crda-java-api/issues</url>
+    <url>https://github.com/RHEcosystemAppEng/exhort-java-api/issues</url>
   </issueManagement>
 
   <scm>
-    <url>https://github.com/RHEcosystemAppEng/crda-java-api</url>
-    <connection>scm:git:git@github.com:RHEcosystemAppEng/crda-java-api.git</connection>
-    <developerConnection>scm:git:git@github.com:RHEcosystemAppEng/crda-java-api.git</developerConnection>
+    <url>https://github.com/RHEcosystemAppEng/exhort-java-api</url>
+    <connection>scm:git:git@github.com:RHEcosystemAppEng/exhort-java-api.git</connection>
+    <developerConnection>scm:git:git@github.com:RHEcosystemAppEng/exhort-java-api.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <ciManagement>
     <system>GitHub Workflows</system>
-    <url>https://github.com/RHEcosystemAppEng/crda-java-api/actions</url>
+    <url>https://github.com/RHEcosystemAppEng/exhort-java-api/actions</url>
   </ciManagement>
 
   <dependencyManagement>
@@ -360,7 +360,7 @@ limitations under the License.]]>
           <version>${jacoco-maven-plugin.version}</version>
           <configuration>
             <excludes>
-              <exclude>com/redhat/crda/backend/*</exclude>
+              <exclude>com/redhat/exhort/api/*</exclude>
             </excludes>
             <propertyName>jacoco.java.option</propertyName>
             <rules>
@@ -393,7 +393,7 @@ limitations under the License.]]>
           <configuration>
             <exportLineCoverage>true</exportLineCoverage>
             <excludedClasses>
-              <excludedClass>com.redhat.crda.backend.*</excludedClass>
+              <excludedClass>com.redhat.exhort.api.*</excludedClass>
             </excludedClasses>
             <mutationThreshold>${mutation.coverage.threshold}</mutationThreshold>
             <mutators>
@@ -537,7 +537,7 @@ limitations under the License.]]>
         </executions>
       </plugin>
 
-      <!-- openapi-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from crda_backend spec -->
+      <!-- openapi-generator-maven-plugin:generate is bound to the generate-sources phase and will generate sources from exhort spec -->
       <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -547,9 +547,9 @@ limitations under the License.]]>
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/src/main/resources/crda_backend/openapi.yaml</inputSpec>
+              <inputSpec>${project.basedir}/src/main/resources/exhort/openapi.yaml</inputSpec>
               <generatorName>java</generatorName>
-              <modelPackage>com.redhat.crda.backend</modelPackage>
+              <modelPackage>com.redhat.exhort.api</modelPackage>
               <output>${project.build.directory}</output>
               <configOptions>
                 <documentationProvider>none</documentationProvider>
@@ -684,11 +684,11 @@ limitations under the License.]]>
       <distributionManagement>
         <repository>
           <id>github</id>
-          <url>https://maven.pkg.github.com/RHEcosystemAppEng/crda-java-api</url>
+          <url>https://maven.pkg.github.com/RHEcosystemAppEng/exhort-java-api</url>
         </repository>
         <snapshotRepository>
           <id>github</id>
-          <url>https://maven.pkg.github.com/RHEcosystemAppEng/crda-java-api</url>
+          <url>https://maven.pkg.github.com/RHEcosystemAppEng/exhort-java-api</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>

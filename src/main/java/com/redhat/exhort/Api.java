@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda;
-
-import com.redhat.crda.backend.AnalysisReport;
-import jakarta.annotation.Nonnull;
+package com.redhat.exhort;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+
+import com.redhat.exhort.api.AnalysisReport;
 
 /** The Api interface is used for contracting API implementations. **/
 public interface Api {

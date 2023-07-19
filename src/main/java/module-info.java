@@ -1,4 +1,4 @@
-module com.redhat.crda {
+module com.redhat.exhort {
   requires java.net.http;
 
   requires com.fasterxml.jackson.annotation;
@@ -8,10 +8,10 @@ module com.redhat.crda {
   requires java.xml;
   requires jakarta.mail;
 
-  opens com.redhat.crda.backend to com.fasterxml.jackson.databind;
-  opens com.redhat.crda.providers to com.fasterxml.jackson.databind;
+  opens com.redhat.exhort.api to com.fasterxml.jackson.databind;
+  opens com.redhat.exhort.providers to com.fasterxml.jackson.databind;
 
-  exports com.redhat.crda;
-  exports com.redhat.crda.backend;
-  exports com.redhat.crda.impl;
+  exports com.redhat.exhort;
+  exports com.redhat.exhort.api;
+  exports com.redhat.exhort.impl;
 }

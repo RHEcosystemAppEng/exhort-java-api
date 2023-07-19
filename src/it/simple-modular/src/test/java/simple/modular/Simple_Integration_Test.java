@@ -24,8 +24,8 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.crda.backend.AnalysisReport;
-import com.redhat.crda.impl.CrdaApi;
+import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.impl.ExhortApi;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -38,28 +38,28 @@ import java.util.concurrent.CompletableFuture;
 
 class Simple_Integration_Test {
   static boolean useRealAPI = true;
-  CrdaApi crdaApi;
+  ExhortApi exhortApi;
   HttpClient mockHttpClient;
 
   ObjectMapper mapper;
 
   @BeforeAll
   static void prepare() {
-    var useRealApi = System.getenv("CRDA_ITS_USE_REAL_API");
+    var useRealApi = System.getenv("EXHORT_ITS_USE_REAL_API");
     Simple_Integration_Test.useRealAPI = Boolean.parseBoolean(useRealApi);
   }
   @BeforeEach
   void initialize() throws Exception {
     mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     if (Simple_Integration_Test.useRealAPI) {
-      crdaApi = new CrdaApi();
+      exhortApi = new ExhortApi();
     } else {
       // mock a http client instance
       mockHttpClient = mock(HttpClient.class);
       // use reflection to make the constructor that takes a http client accessible
-      var sutConstructor = CrdaApi.class.getDeclaredConstructor(HttpClient.class);
+      var sutConstructor = ExhortApi.class.getDeclaredConstructor(HttpClient.class);
       sutConstructor.setAccessible(true);
-      crdaApi = sutConstructor.newInstance(mockHttpClient);
+      exhortApi = sutConstructor.newInstance(mockHttpClient);
     }
   }
 
@@ -78,7 +78,7 @@ class Simple_Integration_Test {
     }
 
     // get the html report from the api
-    var htmlAnalysis = crdaApi.stackAnalysisHtml("src/test/resources/it_poms/pom.xml").get();
+    var htmlAnalysis = exhortApi.stackAnalysisHtml("src/test/resources/it_poms/pom.xml").get();
     assertThat(htmlAnalysis).isEqualTo(expectedHtmlAnalysis);
   }
 
@@ -102,7 +102,7 @@ class Simple_Integration_Test {
     }
 
     // get the html report from the api
-    var mixedAnalysis = crdaApi.stackAnalysisMixed("src/test/resources/it_poms/pom.xml").get();
+    var mixedAnalysis = exhortApi.stackAnalysisMixed("src/test/resources/it_poms/pom.xml").get();
     assertThat(new String(mixedAnalysis.html).trim()).isEqualTo(new String(expectedHtmlAnalysis).trim());
     assertThat(mixedAnalysis.json).isEqualTo(expectedAnalysis);
   }
@@ -124,7 +124,7 @@ class Simple_Integration_Test {
     }
 
     // get the analysis report object from the api
-    var analysisReport = crdaApi.stackAnalysis("src/test/resources/it_poms/pom.xml").get();
+    var analysisReport = exhortApi.stackAnalysis("src/test/resources/it_poms/pom.xml").get();
     assertThat(analysisReport).isEqualTo(expectedAnalysis);
   }
 
@@ -145,7 +145,7 @@ class Simple_Integration_Test {
     }
     // get the analysis report object from the api
     var pomContent = Files.readAllBytes(Paths.get("src/test/resources/it_poms/pom.xml"));
-    var analysisReport = crdaApi.componentAnalysis("pom.xml", pomContent).get();
+    var analysisReport = exhortApi.componentAnalysis("pom.xml", pomContent).get();
     assertThat(analysisReport).isEqualTo(expectedAnalysis);
   }
 }

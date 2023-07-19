@@ -22,8 +22,8 @@ jobs:
 
       - name: Download OpenAPI spec
         run: >
-          wget https://raw.githubusercontent.com/RHEcosystemAppEng/crda-backend/main/src/main/resources/META-INF/openapi.yaml
-          -O src/main/resources/crda_backend/openapi.yaml
+          wget https://raw.githubusercontent.com/RHEcosystemAppEng/exhort/0.1.x/src/main/resources/META-INF/openapi.yaml
+          -O src/main/resources/exhort/openapi.yaml
 
       - name: Verify nothing was changed
         run: git diff -s --exit-code

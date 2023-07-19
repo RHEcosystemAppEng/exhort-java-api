@@ -32,6 +32,7 @@ target
 
 # Vscode configuration
 *.code-workspace
+.vscode
 
 # Node
 node_modules

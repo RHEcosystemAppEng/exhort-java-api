@@ -3,10 +3,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.redhat.crda.integration.tests</groupId>
-  <artifactId>crda-java-api-simple-modular-it</artifactId>
+  <groupId>com.redhat.exhort.integration.tests</groupId>
+  <artifactId>exhort-java-api-simple-modular-it</artifactId>
   <version>0.0.1</version>
-  <name>crda-java-api-simple-modular-it</name>
+  <name>exhort-java-api-simple-modular-it</name>
 
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
@@ -17,8 +17,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.redhat.crda</groupId>
-      <artifactId>crda-java-api</artifactId>
+      <groupId>com.redhat.exhort</groupId>
+      <artifactId>exhort-java-api</artifactId>
       <version>@project.version@</version>
     </dependency>
     <dependency>

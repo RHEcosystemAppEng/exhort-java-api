@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.tools;
+package com.redhat.exhort.tools;
 
-import com.redhat.crda.Provider;
-import com.redhat.crda.providers.JavaMavenProvider;
 import java.nio.file.Path;
+
+import com.redhat.exhort.Provider;
+import com.redhat.exhort.providers.JavaMavenProvider;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {

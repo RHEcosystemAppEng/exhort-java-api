@@ -1,4 +1,4 @@
-# Contributing to *crda-java-api*<br/>![java-version][10]
+# Contributing to *exhort-java-api*<br/>![java-version][10]
 
 * Fork the repository
 * Create a new branch
@@ -37,16 +37,16 @@
 
 ### Good to know
 
-* You can override the default backend url by setting another one in the _CRDA_BACKEND_URL_ environment variable.
+* You can override the default backend url by setting another one in the _EXHORT_URL_ environment variable.
 
 ### OpenAPI Specifications
 
 We use our [Backend's OpenAPI spec file][1] for generating types used for deserialization of the Backend's
 API responses.<br/>
-The generated classes target package is the `com.redhat.crda.backend`. It is skipped when calculating coverage
+The generated classes target package is the `com.redhat.exhort.api`. It is skipped when calculating coverage
 thresholds. **Avoid writing code in this package.**<br/> 
 When the [Backend's spec file][1] is modified, we need to **manually** copy it here in
-[src/main/resources/crda_backend](src/main/resources/crda_backend/openapi.yaml),
+[src/main/resources/exhort](src/main/resources/exhort/openapi.yaml),
 for the *openapi-generator-maven-plugin* to pick it up at **build time**.
 
 ### Modular (JPMS)
@@ -59,23 +59,23 @@ This module is also being tested in a *modular* environment. Use
 
 ### Code Walkthrough
 
-* The [CrdaApi](src/main/java/com/redhat/crda/impl/CrdaApi.java) is the *Crda Service*. It implements the
-  [Api](src/main/java/com/redhat/crda/Api.java) interface and provide various methods for requesting analysis reports.
-* The [providers](src/main/java/com/redhat/crda/providers) are concrete implementations of the
-  [Provider](src/main/java/com/redhat/crda/Provider.java) interface. And are in charge of providing content and a
+* The [ExhortApi](src/main/java/com/redhat/exhort/impl/ExhortApi.java) is the *Exhort Service*. It implements the
+  [Api](src/main/java/com/redhat/exhort/Api.java) interface and provide various methods for requesting analysis reports.
+* The [providers](src/main/java/com/redhat/exhort/providers) are concrete implementations of the
+  [Provider](src/main/java/com/redhat/exhort/Provider.java) interface. And are in charge of providing content and a
   content type to be encapsulated in the request to the Backend. At the time of writing this, we only have one
-  implementation, the [JavaMavenProvider](src/main/java/com/redhat/crda/providers/JavaMavenProvider.java)
+  implementation, the [JavaMavenProvider](src/main/java/com/redhat/exhort/providers/JavaMavenProvider.java)
   implementation.
-* The [tools](src/main/java/com/redhat/crda/tools) package hosts various utility tools and functions used throughout
-  the project. Tools such as the [Ecosystem](src/main/java/com/redhat/crda/tools/Ecosystem.java) for instantiating
-  providers per manifest. And the [Operations](src/main/java/com/redhat/crda/tools/Operations.java) for executing
+* The [tools](src/main/java/com/redhat/exhort/tools) package hosts various utility tools and functions used throughout
+  the project. Tools such as the [Ecosystem](src/main/java/com/redhat/exhort/tools/Ecosystem.java) for instantiating
+  providers per manifest. And the [Operations](src/main/java/com/redhat/exhort/tools/Operations.java) for executing
   process on the operating system.
 
 #### Adding a Provider
 
-* Create a concrete implementation of the [Provider](src/main/java/com/redhat/crda/Provider.java) abstraction and place
-  it in the [providers](src/main/java/com/redhat/crda/providers) package.
-* In the [Ecosystem](src/main/java/com/redhat/crda/tools/Ecosystem.java) class look for the *getProvider function*
+* Create a concrete implementation of the [Provider](src/main/java/com/redhat/exhort/Provider.java) abstraction and place
+  it in the [providers](src/main/java/com/redhat/exhort/providers) package.
+* In the [Ecosystem](src/main/java/com/redhat/exhort/tools/Ecosystem.java) class look for the *getProvider function*
   and add a *switch case* instantiating the new provider per file type.
 
 ### Integration Tests
@@ -93,10 +93,10 @@ $ mvn clean verify -Pits,dev
 ```
 
 Integration tests are executed against a mocked _Backend_ server.<br/>
-If you need to run against the actual _Backend_ server, use the _CRDA_ITS_USE_REAL_API_ environment variable:
+If you need to run against the actual _Backend_ server, use the _EXHORT_ITS_USE_REAL_API_ environment variable:
 
 ```shell
-CRDA_ITS_USE_REAL_API=true mvn clean verify -Pits
+EXHORT_ITS_USE_REAL_API=true mvn clean verify -Pits
 ```
 
 > TIP: When working on a new integration test project, it's helpful opening the IDE directly in the test project folder.
@@ -110,7 +110,7 @@ contribution. See the [DCO](DCO) file for details.
 
 <!-- Real links -->
 [0]: https://www.conventionalcommits.org/en/v1.0.0/
-[1]: https://github.com/RHEcosystemAppEng/crda-backend/blob/main/src/main/resources/META-INF/openapi.yaml
+[1]: https://github.com/RHEcosystemAppEng/exhort/blob/main/src/main/resources/META-INF/openapi.yaml
 
 <!-- Badge links -->
 [10]: https://badgen.net/badge/Java%20Version/11/5382a1

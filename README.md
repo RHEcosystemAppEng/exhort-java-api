@@ -1,9 +1,9 @@
 # CodeReady Dependency Analytics Java API<br/>![latest-no-snapshot][0] ![latest-snapshot][1]
 
-* Looking for our JavaScript/TypeScript API? Try [Crda JavaScript API](https://github.com/RHEcosystemAppEng/crda-javascript-api).
-* Looking for our Backend implementation? Try [Crda Backend](https://github.com/RHEcosystemAppEng/crda-backend).
+* Looking for our JavaScript/TypeScript API? Try [Exhort JavaScript API](https://github.com/RHEcosystemAppEng/exhort-javascript-api).
+* Looking for our Backend implementation? Try [Exhort](https://github.com/RHEcosystemAppEng/exhort).
 
-The _Crda Java API_ module is deployed to _GitHub Package Registry_.
+The _Exhort Java API_ module is deployed to _GitHub Package Registry_.
 
 <details>
 <summary>Click here for configuring <em>GHPR</em> registry access.</summary>
@@ -69,7 +69,7 @@ encrypted-token-will-appear-here
     ...
     <repository>
       <id>github</id>
-      <url>https://maven.pkg.github.com/RHEcosystemAppEng/crda-java-api</url>
+      <url>https://maven.pkg.github.com/RHEcosystemAppEng/exhort-java-api</url>
     </repository>
     ...
   </repositories>
@@ -83,7 +83,7 @@ encrypted-token-will-appear-here
 repositories {
     ...
     maven {
-        url 'https://maven.pkg.github.com/RHEcosystemAppEng/crda-java-api'
+        url 'https://maven.pkg.github.com/RHEcosystemAppEng/exhort-java-api'
         credentials {
             username System.getenv("GITHUB_USERNAME")
             password System.getenv("GITHUB_TOKEN")
@@ -102,9 +102,9 @@ repositories {
 
 ```xml
 <dependency>
-    <groupId>com.redhat.crda</groupId>
-    <artifactId>crda-java-api</artifactId>
-    <version>${crda-java-api.version}</version>
+    <groupId>com.redhat.exhort</groupId>
+    <artifactId>exhort-java-api</artifactId>
+    <version>${exhort-java-api.version}</version>
 </dependency>
 ```
 </li>
@@ -113,7 +113,7 @@ repositories {
 <em>Gradle</em> users, add a dependency in <em>build.gradle</em>
 
 ```groovy
-implementation 'com.redhat.crda:crda-java-api:${crda-java-api.version}'
+implementation 'com.redhat.exhort:exhort-java-api:${exhort-java-api.version}'
 ```
 </li>
 </ul>
@@ -124,7 +124,7 @@ If working with modules, configure module read
 
 ```java
 module x { // module-info.java
-    requires com.redhat.crda;
+    requires com.redhat.exhort;
 }
 ```
 </li>
@@ -133,32 +133,32 @@ module x { // module-info.java
 Code example
 
 ```java
-import com.redhat.crda.Api.MixedReport;
-import com.redhat.crda.impl.CrdaApi;
-import com.redhat.crda.backend.AnalysisReport;
+import com.redhat.exhort.Api.MixedReport;
+import com.redhat.exhort.impl.ExhortApi;
+import com.redhat.exhort.AnalysisReport;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
-public class CrdaExample {
+public class ExhortExample {
     public static void main(String... args) throws Exception {
-        // instantiate the Crda API implementation
-        var crdaApi = new CrdaApi();
+        // instantiate the Exhort API implementation
+        var exhortApi = new ExhortApi();
 
         // get a byte array future holding a html Stack Analysis report
-        CompletableFuture<byte[]> htmlStackReport = crdaApi.stackAnalysisHtml("/path/to/pom.xml");
+        CompletableFuture<byte[]> htmlStackReport = exhortApi.stackAnalysisHtml("/path/to/pom.xml");
 
         // get a AnalysisReport future holding a deserialized Stack Analysis report
-        CompletableFuture<AnalysisReport> stackReport = crdaApi.stackAnalysis("/path/to/pom.xml");
+        CompletableFuture<AnalysisReport> stackReport = exhortApi.stackAnalysis("/path/to/pom.xml");
 
         // get a AnalysisReport future holding a mixed report object aggregating:
         // - (json) deserialized Stack Analysis report
         // - (html) html Stack Analysis report
-        CompletableFuture<MixedReport> mixedStackReport = crdaApi.stackAnalysisMixed("/path/to/pom.xml");
+        CompletableFuture<MixedReport> mixedStackReport = exhortApi.stackAnalysisMixed("/path/to/pom.xml");
         
         // get a AnalysisReport future holding a deserialized Component Analysis report
         var manifestContent = Files.readAllBytes(Paths.get("/path/to/pom.xml"));
-        CompletableFuture<AnalysisReport> componentReport = crdaApi.componentAnalysis("pom.xml", manifestContent);
+        CompletableFuture<AnalysisReport> componentReport = exhortApi.componentAnalysis("pom.xml", manifestContent);
     }
 }
 ```
@@ -180,7 +180,7 @@ Excluding a package from any analysis can be achieved by marking the package for
 <em>Java Maven</em> users can add a comment in <em>pom.xml</em>
 
 ```xml
-<dependency> <!--crdaignore-->
+<dependency> <!--exhortignore-->
   <groupId>...</groupId>
   <artifactId>...</artifactId>
   <version>...</version>
@@ -192,12 +192,12 @@ Excluding a package from any analysis can be achieved by marking the package for
 
 <h3>Customization</h3>
 <p>
-There are 2 approaches for customizing <em>Crda Java API</em>. Using <em>Environment Variables</em> or
+There are 2 approaches for customizing <em>Exhort Java API</em>. Using <em>Environment Variables</em> or
 <em>Java Properties</em>:
 
 ```java
-System.setProperty("CRDA_SNYK_TOKEN", "my-private-snyk-token");
-System.setProperty("CRDA_MVN_PATH", "/path/to/custom/mvn");
+System.setProperty("EXHORT_SNYK_TOKEN", "my-private-snyk-token");
+System.setProperty("EXHORT_MVN_PATH", "/path/to/custom/mvn");
 ```
 
 > Environment variables takes precedence.
@@ -216,7 +216,7 @@ can use the following keys for setting various vendor tokens.
 </tr>
 <tr>
 <td><a href="https://app.snyk.io/redhat/snyk-token">Snyk</a></td>
-<td>CRDA_SNYK_TOKEN</td>
+<td>EXHORT_SNYK_TOKEN</td>
 </tr>
 </table>
 
@@ -236,10 +236,10 @@ following keys for setting custom paths for the said executables.
 <tr>
 <td><a href="https://maven.apache.org/">Maven</a></td>
 <td><em>mvn</em></td>
-<td>CRDA_MVN_PATH</td>
+<td>EXHORT_MVN_PATH</td>
 </tr>
 </table>
 
 <!-- Badge links -->
-[0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/crda-java-api?color=green&label=latest
-[1]: https://img.shields.io/github/v/release/RHEcosystemAppEng/crda-java-api?color=yellow&include_prereleases&label=snapshot
+[0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/exhort-java-api?color=green&label=latest
+[1]: https://img.shields.io/github/v/release/RHEcosystemAppEng/exhort-java-api?color=yellow&include_prereleases&label=snapshot

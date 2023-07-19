@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutionException;
 
 @ExtendWith(MockitoExtension.class)
 @ClearEnvironmentVariable(key="CRDA_SNYK_TOKEN")
+@SuppressWarnings("unchecked")
 class Crda_Api_Test {
   @Mock
   Provider mockProvider;
@@ -81,9 +82,15 @@ class Crda_Api_Test {
       r.headers().firstValue("crda-snyk-token").get().equals("snyk-token-from-env-var") &&
       r.method().equals("POST");
 
+    // load dummy html and set as the expected analysis
+    byte[] expectedHtml;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.html")) {
+      expectedHtml = is.readAllBytes();
+    }
+
     // mock and http response object and stub it to return a fake body
     var mockHttpResponse = mock(HttpResponse.class);
-    given(mockHttpResponse.body()).willReturn("<html>hello-crda</html>".getBytes());
+    given(mockHttpResponse.body()).willReturn(expectedHtml);
 
     // mock static getProvider utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
@@ -97,7 +104,7 @@ class Crda_Api_Test {
       // when invoking the api for a html stack analysis report
       var htmlTxt = crdaApiSut.stackAnalysisHtml(tmpFile.toString());
       // verify we got the correct html response
-      then(htmlTxt.get()).isEqualTo("<html>hello-crda</html>".getBytes());
+      then(htmlTxt.get()).isEqualTo(expectedHtml);
     }
     // cleanup
     Files.deleteIfExists(tmpFile);
@@ -206,5 +213,66 @@ class Crda_Api_Test {
       // verify we got the correct analysis report
       then(responseAnalysis.get()).isEqualTo(expectedReport);
     }
+  }
+
+  @Test
+  void stackAnalysisMixed_with_pom_xml_should_return_both_html_text_and_json_object_from_the_backend()
+    throws IOException, ExecutionException, InterruptedException {
+    // load dummy json and set as the expected analysis
+    var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    AnalysisReport expectedJson;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.json")) {
+      expectedJson = mapper.readValue(is, AnalysisReport.class);
+    }
+
+    // load dummy html and set as the expected analysis
+    byte[] expectedHtml;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.html")) {
+      expectedHtml = is.readAllBytes();
+    }
+
+    // create a temporary pom.xml file
+    var tmpFile = Files.createTempFile("crda_test_pom_", ".xml");
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
+      Files.write(tmpFile, is.readAllBytes());
+    }
+
+    // stub the mocked provider with a fake content object
+    given(mockProvider.provideStack(tmpFile))
+      .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
+
+    // create an argument matcher to make sure we mock the response for the right request
+    ArgumentMatcher<HttpRequest> matchesRequest = r ->
+      r.headers().firstValue("Content-Type").get().equals("fake-content-type") &&
+        r.headers().firstValue("Accept").get().equals("multipart/mixed") &&
+        r.method().equals("POST");
+
+    // load dummy mixed and set as the expected analysis
+    byte[] mixedResponse;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.mixed")) {
+      mixedResponse = is.readAllBytes();
+    }
+
+    // mock and http response object and stub it to return the expected analysis
+    var mockHttpResponse = mock(HttpResponse.class);
+    given(mockHttpResponse.body()).willReturn(mixedResponse);
+
+    // mock static getProvider utility function
+    try(var ecosystemTool = mockStatic(Ecosystem.class)) {
+      // stub static getProvider utility function to return our mock provider
+      ecosystemTool.when(() -> Ecosystem.getProvider(tmpFile)).thenReturn(mockProvider);
+
+      // stub the http client to return our mocked response when request matches our arg matcher
+      given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
+        .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
+
+      // when invoking the api for a json stack analysis mixed report
+      var responseAnalysis = crdaApiSut.stackAnalysisMixed(tmpFile.toString()).get();
+      // verify we got the correct mixed report
+      then(new String(responseAnalysis.html).trim()).isEqualTo(new String(expectedHtml).trim());
+      then(responseAnalysis.json).isEqualTo(expectedJson);
+    }
+    // cleanup
+    Files.deleteIfExists(tmpFile);
   }
 }

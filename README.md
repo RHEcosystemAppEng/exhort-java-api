@@ -133,6 +133,7 @@ module x { // module-info.java
 Code example
 
 ```java
+import com.redhat.crda.Api.MixedReport;
 import com.redhat.crda.impl.CrdaApi;
 import com.redhat.crda.backend.AnalysisReport;
 import java.nio.file.Files;
@@ -150,6 +151,11 @@ public class CrdaExample {
         // get a AnalysisReport future holding a deserialized Stack Analysis report
         CompletableFuture<AnalysisReport> stackReport = crdaApi.stackAnalysis("/path/to/pom.xml");
 
+        // get a AnalysisReport future holding a mixed report object aggregating:
+        // - (json) deserialized Stack Analysis report
+        // - (html) html Stack Analysis report
+        CompletableFuture<MixedReport> mixedStackReport = crdaApi.stackAnalysisMixed("/path/to/pom.xml");
+        
         // get a AnalysisReport future holding a deserialized Component Analysis report
         var manifestContent = Files.readAllBytes(Paths.get("/path/to/pom.xml"));
         CompletableFuture<AnalysisReport> componentReport = crdaApi.componentAnalysis("pom.xml", manifestContent);

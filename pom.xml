@@ -20,6 +20,7 @@
     <!-- Dependencies -->
     <jackson.version>2.15.0</jackson.version>
     <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
+    <jakarta.mail.version>2.0.2</jakarta.mail.version>
     <!-- Testing Dependencies -->
     <assertj.version>3.24.2</assertj.version>
     <junit-jupiter.version>5.9.1</junit-jupiter.version>
@@ -109,6 +110,11 @@
         <artifactId>jakarta.annotation-api</artifactId>
         <version>${jakarta.annotation-api.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.eclipse.angus</groupId>
+        <artifactId>jakarta.mail</artifactId>
+        <version>${jakarta.mail.version}</version>
+      </dependency>
       <!-- Testing Dependencies -->
       <dependency>
         <groupId>org.assertj</groupId>
@@ -165,6 +171,10 @@
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.angus</groupId>
+      <artifactId>jakarta.mail</artifactId>
     </dependency>
     <!-- Testing Dependencies -->
     <dependency>

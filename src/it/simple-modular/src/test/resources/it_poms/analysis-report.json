@@ -5,8 +5,8 @@
       "transitive": 0
     },
     "vulnerabilities": {
-      "direct": 1,
       "total": 7,
+      "direct": 1,
       "critical": 1,
       "high": 3,
       "medium": 2,
@@ -25,7 +25,32 @@
     {
       "ref": {
         "name": "log4j:log4j",
-        "version": "1.2.17"
+        "version": "1.2.16"
+      },
+      "highestVulnerability": {
+        "id": "SNYK-JAVA-LOG4J-1300176",
+        "title": "Man-in-the-Middle (MitM)",
+        "source": "snyk",
+        "cvss": {
+          "attackVector": "Network",
+          "attackComplexity": "High",
+          "privilegesRequired": "None",
+          "userInteraction": "None",
+          "scope": "Unchanged",
+          "confidentialityImpact": "Low",
+          "integrityImpact": "None",
+          "availabilityImpact": "None",
+          "exploitCodeMaturity": null,
+          "remediationLevel": null,
+          "reportConfidence": null,
+          "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
+        },
+        "cvssScore": 3.7,
+        "severity": "LOW",
+        "cves": [
+          "CVE-2020-9488"
+        ],
+        "unique": false
       },
       "issues": [
         {
@@ -43,10 +68,10 @@
             "availabilityImpact": "High",
             "exploitCodeMaturity": "Proof of concept code",
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P"
           },
-          "score": null,
+          "cvssScore": 9.8,
           "severity": "CRITICAL",
           "cves": [
             "CVE-2019-17571"
@@ -68,10 +93,10 @@
             "availabilityImpact": "High",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
           },
-          "score": null,
+          "cvssScore": 8.1,
           "severity": "HIGH",
           "cves": [
             "CVE-2022-23305"
@@ -93,10 +118,10 @@
             "availabilityImpact": "High",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
           },
-          "score": null,
+          "cvssScore": 8.1,
           "severity": "HIGH",
           "cves": [
             "CVE-2022-23307"
@@ -118,10 +143,10 @@
             "availabilityImpact": "High",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
           },
-          "score": null,
+          "cvssScore": 8.1,
           "severity": "HIGH",
           "cves": [
             "CVE-2022-23302"
@@ -143,10 +168,10 @@
             "availabilityImpact": "High",
             "exploitCodeMaturity": "Proof of concept code",
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H/E:P"
           },
-          "score": null,
+          "cvssScore": 6.6,
           "severity": "MEDIUM",
           "cves": [
             "CVE-2021-4104"
@@ -168,10 +193,10 @@
             "availabilityImpact": "High",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
           },
-          "score": null,
+          "cvssScore": 5.9,
           "severity": "MEDIUM",
           "cves": [
             "CVE-2023-26464"
@@ -193,10 +218,10 @@
             "availabilityImpact": "None",
             "exploitCodeMaturity": null,
             "remediationLevel": null,
-            "reportConficende": null,
+            "reportConfidence": null,
             "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
           },
-          "score": null,
+          "cvssScore": 3.7,
           "severity": "LOW",
           "cves": [
             "CVE-2020-9488"
@@ -205,33 +230,8 @@
         }
       ],
       "transitive": [],
-      "recommendation": null,
       "remediations": {},
-      "highestVulnerability": {
-        "id": "SNYK-JAVA-LOG4J-1300176",
-        "title": "Man-in-the-Middle (MitM)",
-        "source": "snyk",
-        "cvss": {
-          "attackVector": "Network",
-          "attackComplexity": "High",
-          "privilegesRequired": "None",
-          "userInteraction": "None",
-          "scope": "Unchanged",
-          "confidentialityImpact": "Low",
-          "integrityImpact": "None",
-          "availabilityImpact": "None",
-          "exploitCodeMaturity": null,
-          "remediationLevel": null,
-          "reportConficende": null,
-          "cvss": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N"
-        },
-        "score": null,
-        "severity": "LOW",
-        "cves": [
-          "CVE-2020-9488"
-        ],
-        "unique": false
-      }
+      "recommendation": null
     }
   ]
 }

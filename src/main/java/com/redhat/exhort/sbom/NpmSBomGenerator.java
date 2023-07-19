@@ -15,9 +15,13 @@
  */
 package com.redhat.exhort.sbom;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Dependency;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +30,7 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
 
   private static final String purlPrefix= "pkg:npm/";
   private ObjectMapper objectMapper = new ObjectMapper();
+
   @Override
   protected SBOMFieldsMapperMinimal providePackageMappings(Map<String, Object> packageManagerData) {
     SBOMFieldsMapperMinimal minimalSBOM = new SBOMFieldsMapperMinimal();
@@ -42,9 +47,15 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
     // build components list
      List<MinimalComponent> components = new ArrayList<>();
     createComponents(packageManagerData, components);
+    List<Dependency> dependencies = new ArrayList<>();
+//    build Dependencies list
+    createDependencies(packageManagerData,dependencies);
+//    objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     minimalSBOM.setComponents(components);
 
-//     build Dependencies list
+
+
+
 //    ((Map<String,Map>)packageManagerData.get("dependencies")).forEach((artifactName, properties) -> {
 //         properties.;
 //    });
@@ -52,23 +63,75 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
   }
 
   private void createComponents(Map<String, Object> packageManagerData, List<MinimalComponent> components) {
-    ((Map<String,Map>) packageManagerData.get("dependencies")).forEach((artifactName, properties) -> {
+    ((Map<String, Map>) packageManagerData.get("dependencies")).forEach((artifactName, properties) -> {
       MinimalComponent current = new MinimalComponent();
       current.setName(artifactName);
       current.setType(Component.Type.LIBRARY);
       Map<String, String> stringProperties = properties;
-      current.setBomRef(String.format(this.purlStringFormatForArtifactVersion,artifactName,stringProperties.get("version")));
-      current.setPurl(String.format(purlPrefix + this.purlStringFormatForArtifactVersion,artifactName,stringProperties.get("version")));
-      if(!components.contains(current))
-      {
+      current.setBomRef(String.format(this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")));
+      current.setPurl(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")));
+      if (!components.contains(current)) {
         components.add(current);
       }
-      if(properties.get("dependencies") != null) {
-        createComponents((Map<String, Object>)properties,components);
+      if (properties.get("dependencies") != null) {
+        createComponents((Map<String, Object>) properties, components);
 
       }
-    } );
+    });
   }
+    private void createDependencies(Map<String, Object> packageManagerData, List<Dependency> dependencies)  {
 
+         Dependency main = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, packageManagerData.get("name"), packageManagerData.get("version")));
+         dependencies.add(main);
+      Map<String, Map> dependenciesOfMain = (Map<String, Map>) packageManagerData.get("dependencies");
+      dependenciesOfMain.forEach((name,properties)->{
+        Dependency current = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, name, properties.get("version")));
+        Dependency clonedDep;
+        try {
+
+          clonedDep = objectMapper.readValue(objectMapper.writeValueAsString(current), Dependency.class);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+
+        main.addDependency(current);
+        if(properties.get("dependencies") != null)
+        {
+          getAllDependencies((Map<String,Map>)properties.get("dependencies"),clonedDep,dependencies);
+        }
+      });
+
+
+    }
+
+  private void getAllDependencies(Map<String,Map> depStructure, Dependency main, List<Dependency> dependencies) {
+    if(!dependencies.contains(main)) {
+      dependencies.add(main);
+    }
+      depStructure.forEach((name,properties)->{
+      Dependency current = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, name, properties.get("version")));
+       main.addDependency(current);
+
+        Dependency clonedDep;
+        try {
+          clonedDep = objectMapper.readValue(objectMapper.writeValueAsString(current), Dependency.class);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+//        if(!dependencies.contains(current)) {
+//        dependencies.add(current);
+//      }
+      if(properties.get("dependencies") != null)
+      {
+        getAllDependencies((Map<String,Map>)properties.get("dependencies"),clonedDep,dependencies);
+      }
+      else
+      {
+        if(!dependencies.contains(clonedDep)) {
+          dependencies.add(clonedDep);
+        }
+      }
+    });
+  }
 
 }

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.providers;
+package com.redhat.exhort.providers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.crda.Provider;
-import com.redhat.crda.tools.Operations;
+import com.redhat.exhort.Provider;
+import com.redhat.exhort.tools.Operations;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -49,7 +50,7 @@ public final class JavaMavenProvider extends Provider {
     // execute the clean command
     Operations.runProcess(mvnCleanCmd);
     // create a temp file for storing the dependency tree in
-    var tmpFile = Files.createTempFile("crda_dot_graph_", null);
+    var tmpFile = Files.createTempFile("exhort_dot_graph_", null);
     // the tree command will build the project and create the dependency tree in the temp file
     var mvnTreeCmd = new ArrayList<String>() {{
       add(mvn);
@@ -79,10 +80,10 @@ public final class JavaMavenProvider extends Provider {
     // check for custom mvn executable
     var mvn = Operations.getCustomPathOrElse("mvn");
     // save content in temporary file
-    var originPom = Files.createTempFile("crda_orig_pom_", ".xml");
+    var originPom = Files.createTempFile("exhort_orig_pom_", ".xml");
     Files.write(originPom, manifestContent);
     // create a temp file for storing the effective pom in
-    var tmpEffPom = Files.createTempFile("crda_eff_pom_", ".xml");
+    var tmpEffPom = Files.createTempFile("exhort_eff_pom_", ".xml");
     // build effective pom command
     var mvnEffPomCmd = new String[]{
       mvn,
@@ -112,7 +113,7 @@ public final class JavaMavenProvider extends Provider {
 
   /**
    * Get a list of dependencies including a field marking if it's this dependency is ignored based
-   * on a {@literal <!--crdaignore-->} comment attached to the dependency.
+   * on a {@literal <!--exhortignore-->} comment attached to the dependency.
    *
    * @param manifestPath the Path for the manifest file
    * @return a list of DependencyAggregator, implemented toString will return format suited for the
@@ -145,7 +146,7 @@ public final class JavaMavenProvider extends Provider {
         if (!Objects.isNull(dependencyAggregator)) {
           // if we hit an ignore comment, mark aggregator to be ignored
           if (reader.getEventType() == XMLStreamConstants.COMMENT
-              && "crdaignore".equals(reader.getText().strip())
+              && "exhortignore".equals(reader.getText().strip())
           ) {
             dependencyAggregator.ignored = true;
             continue;

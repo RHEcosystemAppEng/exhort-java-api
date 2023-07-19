@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.tools;
+package com.redhat.exhort.tools;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public final class Operations {
   /**
    * Function for looking up custom executable path based on the default one provides as an
    * argument. I.e. if defaultExecutable=mvn, this function will look for a custom mvn path
-   * set as an environment variable or a java property with the name CRDA_MVN_PATH. If not found,
+   * set as an environment variable or a java property with the name EXHORT_MVN_PATH. If not found,
    * the original mvn passed as defaultExecutable will be returned.
    * Note, environment variables takes precedence on java properties.
    *
@@ -38,7 +38,7 @@ public final class Operations {
     var target = defaultExecutable.toUpperCase()
       .replaceAll(" ", "_")
       .replaceAll("-", "_");
-    var executableKey = String.format("CRDA_%s_PATH", target);
+    var executableKey = String.format("EXHORT_%s_PATH", target);
     return Objects.requireNonNullElseGet(
       System.getenv(executableKey),
       () -> Objects.requireNonNullElse(System.getProperty(executableKey) ,defaultExecutable));

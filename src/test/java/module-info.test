@@ -2,16 +2,16 @@
   jdk.attach,jdk.unsupported,org.assertj.core,org.junit.jupiter.params,org.mockito,net.bytebuddy,net.bytebuddy.agent
 
 --add-reads
-  com.redhat.crda=org.assertj.core
+  com.redhat.exhort=org.assertj.core
 
 --add-opens
-  com.redhat.crda/com.redhat.crda.impl=org.junit.platform.commons
+  com.redhat.exhort/com.redhat.exhort.impl=org.junit.platform.commons
 --add-opens
-  com.redhat.crda/com.redhat.crda.providers=org.junit.platform.commons
+  com.redhat.exhort/com.redhat.exhort.providers=org.junit.platform.commons
 --add-opens
-  com.redhat.crda/com.redhat.crda.tools=org.junit.platform.commons
+  com.redhat.exhort/com.redhat.exhort.tools=org.junit.platform.commons
 --add-opens
-  com.redhat.crda/com.redhat.crda=org.mockito
+  com.redhat.exhort/com.redhat.exhort=org.mockito
 --add-opens
   java.base/java.lang=org.junitpioneer
 --add-opens

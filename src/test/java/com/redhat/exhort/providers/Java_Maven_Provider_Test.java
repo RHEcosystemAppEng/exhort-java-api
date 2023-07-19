@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.providers;
+package com.redhat.exhort.providers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.stream.Stream;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -44,7 +45,7 @@ class Java_Maven_Provider_Test {
   @MethodSource("testFolders")
   void test_the_provideStack_a_pom_with_no_deps_ignored(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut pom.xml
-    var tmpPomFile = Files.createTempFile("crda_test_", ".xml");
+    var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", testFolder, "pom.xml"))) {
       Files.write(tmpPomFile, is.readAllBytes());
     }

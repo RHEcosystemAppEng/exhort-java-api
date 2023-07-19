@@ -9,7 +9,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>log4j</groupId> <!--crdaignore-->
+      <groupId>log4j</groupId> <!--exhortignore-->
       <artifactId>log4j</artifactId>
       <version>1.2.17</version>
     </dependency>

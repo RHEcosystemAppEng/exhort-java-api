@@ -13,34 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.impl;
+package com.redhat.exhort.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.crda.Api;
-import com.redhat.crda.Provider;
-import com.redhat.crda.backend.AnalysisReport;
-import com.redhat.crda.tools.Ecosystem;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-/** Concrete implementation of the Crda {@link Api} Service. **/
-public final class CrdaApi implements Api {
-  private static final String DEFAULT_ENDPOINT = "http://crda-backend-dev-crda.apps.sssc-cl01.appeng.rhecoeng.com";
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.exhort.Api;
+import com.redhat.exhort.Provider;
+import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.tools.Ecosystem;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
+
+/** Concrete implementation of the Exhort {@link Api} Service. **/
+public final class ExhortApi implements Api {
+  private static final String DEFAULT_ENDPOINT = "http://exhort-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   /**
@@ -52,33 +52,33 @@ public final class CrdaApi implements Api {
 
     /**
      * Get the expected environment variable name.
-     * @return i.e. CRDA_SNYK_TOKEN
+     * @return i.e. EXHORT_SNYK_TOKEN
      */
     String getVarName() {
-      return String.format("CRDA_%s_TOKEN", this);
+      return String.format("EXHORT_%s_TOKEN", this);
     }
 
     /**
      * Get the expected request header name.
-     * @return i.e. crda-snyk-token
+     * @return i.e. ex-snyk-token
      */
     String getHeaderName() {
-      return String.format("crda-%s-token", this.toString().toLowerCase());
+      return String.format("ex-%s-token", this.toString().toLowerCase());
     }
   }
 
   private final HttpClient client;
   private final ObjectMapper mapper;
 
-  public CrdaApi() {
+  public ExhortApi() {
     this(HttpClient.newHttpClient());
   }
 
-  CrdaApi(final HttpClient client) {
+  ExhortApi(final HttpClient client) {
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     this.endpoint = Objects.requireNonNullElse(
-      System.getenv("CRDA_BACKEND_URL"), CrdaApi.DEFAULT_ENDPOINT
+      System.getenv("EXHORT_URL"), ExhortApi.DEFAULT_ENDPOINT
     );
   }
 
@@ -191,7 +191,7 @@ public final class CrdaApi implements Api {
   /**
    * Build an HTTP request for sending to the Backend API.
    *
-   * @param content the {@link com.redhat.crda.Provider.Content} info for the request body
+   * @param content the {@link com.redhat.exhort.Provider.Content} info for the request body
    * @param uri the {@link URI} for sending the request to
    * @param acceptType value the Accept header in the request, indicating the required response type
    * @return  a HttpRequest ready to be sent to the Backend API
@@ -205,7 +205,7 @@ public final class CrdaApi implements Api {
       .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer));
 
     // include tokens from environment variables of java properties as request headers
-    Stream.of(CrdaApi.TokenProvider.values()).forEach(p -> {
+    Stream.of(ExhortApi.TokenProvider.values()).forEach(p -> {
       var envToken = System.getenv(p.getVarName());
       if (Objects.nonNull(envToken)) {
         request.setHeader(p.getHeaderName(), envToken);

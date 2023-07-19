@@ -36,7 +36,7 @@ jobs:
       - name: Deploy snapshot to GitHub
         if: |
           contains(steps.project.outputs.version, 'SNAPSHOT') &&
-          github.repository == 'RHEcosystemAppEng/crda-java-api'
+          github.repository == 'RHEcosystemAppEng/exhort-java-api'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn deploy -Pprepare-deployment,deploy-github -B -ff

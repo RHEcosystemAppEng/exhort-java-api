@@ -1,7 +1,7 @@
-package com.redhat.crda.representation;
+package com.redhat.exhort.representation;
 
-import com.redhat.crda.sbom.CycloneDxSBOMGenerator;
-import com.redhat.crda.sbom.SBOMGeneratorFactory;
+import com.redhat.exhort.sbom.CycloneDxSBOMGenerator;
+import com.redhat.exhort.sbom.SBOMGeneratorFactory;
 
 import java.util.Map;
 

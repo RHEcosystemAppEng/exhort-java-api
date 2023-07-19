@@ -1,4 +1,4 @@
-package com.redhat.crda.sbom;
+package com.redhat.exhort.sbom;
 
 public class SBOMGeneratorFactory {
 

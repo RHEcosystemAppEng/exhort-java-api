@@ -20,6 +20,7 @@ import java.nio.file.Path;
 
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.providers.JavaMavenProvider;
+import com.redhat.exhort.providers.JavaScriptNpmProvider;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {

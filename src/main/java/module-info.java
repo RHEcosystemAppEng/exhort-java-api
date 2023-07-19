@@ -7,6 +7,7 @@ module com.redhat.exhort {
   requires jakarta.annotation;
   requires java.xml;
   requires jakarta.mail;
+  requires cyclonedx.core.java;
 
   opens com.redhat.exhort.api to com.fasterxml.jackson.databind;
   opens com.redhat.exhort.providers to com.fasterxml.jackson.databind;

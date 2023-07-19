@@ -234,7 +234,7 @@ The HTTP Client Library can be configured to use HTTP Protocol version through e
 
 </tr>
 <tr>
-<td>HTTP_VERSION_CRDA_CLIENT</td>
+<td>HTTP_VERSION_EXHORT_CLIENT</td>
 <td>[HTTP_1_1 , HTTP_2]</td>
 <td>HTTP_1_1</td>
 </tr>

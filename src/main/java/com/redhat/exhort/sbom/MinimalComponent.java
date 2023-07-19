@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.crda.sbom;
+package com.redhat.exhort.sbom;
 
 import org.cyclonedx.model.Component;
 

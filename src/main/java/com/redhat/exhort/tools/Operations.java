@@ -15,7 +15,10 @@
  */
 package com.redhat.exhort.tools;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 /** Utility class used for executing process on the operating system. **/
@@ -72,6 +75,7 @@ public final class Operations {
     int exitCode = 0;
     try {
       exitCode = process.waitFor();
+
     } catch (final InterruptedException e) {
       throw new RuntimeException(
         String.format(
@@ -92,5 +96,24 @@ public final class Operations {
         )
       );
     }
+  }
+
+  public static String runProcessGetOutput(final String... cmdList) {
+    StringBuilder sb = new StringBuilder();
+    try {
+      Process process = Runtime.getRuntime().exec(String.join(" ",cmdList));
+      InputStream inputStream = process.getInputStream();
+
+      BufferedReader reader = new BufferedReader(
+        new InputStreamReader(inputStream));
+      String line;
+      while((line = reader.readLine()) != null)
+      {
+        sb.append(line);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return sb.toString();
   }
 }

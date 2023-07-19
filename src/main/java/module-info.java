@@ -14,4 +14,7 @@ module com.redhat.exhort {
   exports com.redhat.exhort;
   exports com.redhat.exhort.api;
   exports com.redhat.exhort.impl;
+
+  opens com.redhat.exhort.sbom to com.fasterxml.jackson.databind;
+  exports com.redhat.exhort.representation;
 }

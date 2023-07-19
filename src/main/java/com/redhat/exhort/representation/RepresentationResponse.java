@@ -1,4 +1,4 @@
-package com.redhat.crda.representation;
+package com.redhat.exhort.representation;
 
 
 public class RepresentationResponse {

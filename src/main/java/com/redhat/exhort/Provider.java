@@ -15,6 +15,7 @@
  */
 package com.redhat.exhort;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 
 import java.io.IOException;
@@ -68,9 +69,11 @@ public abstract class Provider {
 
   /** The ecosystem of this provider, i.e. maven. */
   final public String ecosystem;
+  protected ObjectMapper objectMapper;
 
   protected Provider(String ecosystem) {
     this.ecosystem = ecosystem;
+    this.objectMapper= new ObjectMapper();
   }
 
   /**

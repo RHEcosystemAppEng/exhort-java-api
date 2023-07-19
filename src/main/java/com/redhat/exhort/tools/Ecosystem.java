@@ -17,6 +17,7 @@ package com.redhat.exhort.tools;
 
 import java.nio.file.Path;
 
+
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.providers.JavaMavenProvider;
 
@@ -46,6 +47,8 @@ public final class Ecosystem {
     switch (manifestType) {
       case "pom.xml":
         return new JavaMavenProvider("maven");
+      case "package.json":
+        return new JavaScriptNpmProvider("npm");
       default:
         throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
         );

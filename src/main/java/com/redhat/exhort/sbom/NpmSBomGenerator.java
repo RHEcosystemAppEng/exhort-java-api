@@ -52,6 +52,7 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
     createDependencies(packageManagerData,dependencies);
 //    objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     minimalSBOM.setComponents(components);
+    minimalSBOM.setDependencies(dependencies);
 
 
 
@@ -62,14 +63,20 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
     return minimalSBOM;
   }
 
+  /**
+   *
+   * @param packageManagerData - A Map with All npm' package.json Dependencies and hierarchies
+   * @param components - List of Components to be included in final sbom, will be built in this method
+   * @implNote - components list will be populated recursively while traversing the Map.
+   */
   private void createComponents(Map<String, Object> packageManagerData, List<MinimalComponent> components) {
     ((Map<String, Map>) packageManagerData.get("dependencies")).forEach((artifactName, properties) -> {
       MinimalComponent current = new MinimalComponent();
       current.setName(artifactName);
       current.setType(Component.Type.LIBRARY);
       Map<String, String> stringProperties = properties;
-      current.setBomRef(String.format(this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")));
-      current.setPurl(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")));
+      current.setBomRef(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")).trim());
+      current.setPurl(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")).trim());
       if (!components.contains(current)) {
         components.add(current);
       }
@@ -79,25 +86,41 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
       }
     });
   }
-    private void createDependencies(Map<String, Object> packageManagerData, List<Dependency> dependencies)  {
 
+  /**
+   *
+   * @param packageManagerData - A Map with All npm' package.json Dependencies and hierarchies
+   * @param dependencies - List of Components' Dependencies to be included in final sbom, each component and its direct dependencies. will be built in this method.
+   *                       the list will be populated recursively while traversing the Map.
+   */
+    private void createDependencies(Map<String, Object> packageManagerData, List<Dependency> dependencies)  {
+// Main/root Component (the application/library whose package.json belongs to her) structure different then all dependencies, then need to populate it differently before starting to traverse the Map.
          Dependency main = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, packageManagerData.get("name"), packageManagerData.get("version")));
+         // add main component to dependencies list.
          dependencies.add(main);
       Map<String, Map> dependenciesOfMain = (Map<String, Map>) packageManagerData.get("dependencies");
+      //for each dependency of main component, add it to main component, deep clone it and go find all dependencies of it recursively
       dependenciesOfMain.forEach((name,properties)->{
         Dependency current = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, name, properties.get("version")));
         Dependency clonedDep;
         try {
-
+          // deep clone main dependency into a copy.
           clonedDep = objectMapper.readValue(objectMapper.writeValueAsString(current), Dependency.class);
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
-
+         // add it as a dependency to main component
         main.addDependency(current);
+        // if current component has its own dependencies , send the cloned component to calculate its direct dependencies
         if(properties.get("dependencies") != null)
         {
           getAllDependencies((Map<String,Map>)properties.get("dependencies"),clonedDep,dependencies);
+        }
+        else
+        {
+          if(!dependencies.contains(clonedDep)) {
+            dependencies.add(clonedDep);
+          }
         }
       });
 
@@ -105,26 +128,28 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
     }
 
   private void getAllDependencies(Map<String,Map> depStructure, Dependency main, List<Dependency> dependencies) {
+      // add component to dependencies list
     if(!dependencies.contains(main)) {
       dependencies.add(main);
     }
+    // add each one of its dependencies to component' dependencies, deep clone it, and go calculate its dependencies recursively if it has some.
       depStructure.forEach((name,properties)->{
       Dependency current = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, name, properties.get("version")));
        main.addDependency(current);
 
         Dependency clonedDep;
         try {
+          // Deep clone current component to be added as a separate component and only with direct dependencies
           clonedDep = objectMapper.readValue(objectMapper.writeValueAsString(current), Dependency.class);
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
-//        if(!dependencies.contains(current)) {
-//        dependencies.add(current);
-//      }
+        // if current component has dependencies, traverse recursively to find and add them.
       if(properties.get("dependencies") != null)
       {
         getAllDependencies((Map<String,Map>)properties.get("dependencies"),clonedDep,dependencies);
       }
+      /**  otherwise, only add it to {@link dependencies} list as a component with no direct dependencies.*/
       else
       {
         if(!dependencies.contains(clonedDep)) {

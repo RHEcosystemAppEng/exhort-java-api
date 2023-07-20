@@ -217,7 +217,7 @@ public final class ExhortApi implements Api {
     var request = HttpRequest.newBuilder(uri)
       .setHeader("Accept", acceptType.toString())
       .setHeader("Content-Type", content.type)
-      .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer));
+      .POST(HttpRequest.BodyPublishers.ofString(new String(content.buffer)));
 
     // include tokens from environment variables of java properties as request headers
     Stream.of(ExhortApi.TokenProvider.values()).forEach(p -> {

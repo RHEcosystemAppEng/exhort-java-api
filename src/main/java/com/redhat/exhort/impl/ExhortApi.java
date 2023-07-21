@@ -40,7 +40,7 @@ import jakarta.mail.util.ByteArrayDataSource;
 
 /** Concrete implementation of the Exhort {@link Api} Service. **/
 public final class ExhortApi implements Api {
-  private static final String DEFAULT_ENDPOINT = "http://exhort-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String DEFAULT_ENDPOINT = "http://pre-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   /**
@@ -96,7 +96,7 @@ public final class ExhortApi implements Api {
         var ds = new ByteArrayDataSource(resp.body(), MediaType.MULTIPART_MIXED.toString());
         try {
           var mp = new MimeMultipart(ds);
-          for (var i=0; i<= mp.getCount(); i++) {
+          for (var i=0; i < mp.getCount(); i++) {
             if (Objects.isNull(htmlPart) &&
                 MediaType.TEXT_HTML.toString().equals(mp.getBodyPart(i).getContentType())) {
               htmlPart = mp.getBodyPart(i).getInputStream().readAllBytes();

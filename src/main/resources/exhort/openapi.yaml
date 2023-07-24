@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Exhort API
+  title: CodeReady Dependency Analytics API
   description: Vulnerability analysis with Red Hat CodeReady Dependency Analytics
   license:
     name: Apache 2.0
@@ -208,6 +208,10 @@ components:
     PackageRef:
       type: object
       properties:
+        purl:
+          type: string
+          description: PackageURL identifier
+          example: pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.1
         name:
           type: string
           description: <groupId>:<artifactId> for Java packages

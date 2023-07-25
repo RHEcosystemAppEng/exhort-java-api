@@ -75,7 +75,7 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
       current.setName(artifactName);
       current.setType(Component.Type.LIBRARY);
       Map<String, String> stringProperties = properties;
-      current.setBomRef(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")).trim());
+      current.setBomRef(String.format(this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")).trim());
       current.setPurl(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, artifactName, stringProperties.get("version")).trim());
       if (!components.contains(current)) {
         components.add(current);
@@ -95,13 +95,13 @@ public class NpmSBomGenerator extends CycloneDxSBOMGenerator {
    */
     private void createDependencies(Map<String, Object> packageManagerData, List<Dependency> dependencies)  {
 // Main/root Component (the application/library whose package.json belongs to her) structure different then all dependencies, then need to populate it differently before starting to traverse the Map.
-         Dependency main = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, packageManagerData.get("name"), packageManagerData.get("version")));
+         Dependency main = new Dependency(String.format(this.purlStringFormatForArtifactVersion, packageManagerData.get("name"), packageManagerData.get("version")));
          // add main component to dependencies list.
          dependencies.add(main);
       Map<String, Map> dependenciesOfMain = (Map<String, Map>) packageManagerData.get("dependencies");
       //for each dependency of main component, add it to main component, deep clone it and go find all dependencies of it recursively
       dependenciesOfMain.forEach((name,properties)->{
-        Dependency current = new Dependency(String.format(purlPrefix + this.purlStringFormatForArtifactVersion, name, properties.get("version")));
+        Dependency current = new Dependency(String.format(this.purlStringFormatForArtifactVersion, name, properties.get("version")));
         Dependency clonedDep;
         try {
           // deep clone main dependency into a copy.

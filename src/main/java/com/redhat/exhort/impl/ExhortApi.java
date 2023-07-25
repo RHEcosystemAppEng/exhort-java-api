@@ -15,22 +15,17 @@
  */
 package com.redhat.exhort.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.exhort.Api;
-import com.redhat.exhort.Provider;
-import com.redhat.exhort.api.AnalysisReport;
-import com.redhat.exhort.tools.Ecosystem;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,9 +42,15 @@ import jakarta.mail.util.ByteArrayDataSource;
 
 /** Concrete implementation of the Exhort {@link Api} Service. **/
 public final class ExhortApi implements Api {
-  private static final String DEFAULT_ENDPOINT = "http://pre-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  
+  private static final String DEFAULT_ENDPOINT = "http://dev-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
+  public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+    AnalysisReport analysisReport = new ExhortApi()
+    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
+    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+  }
   /**
    * Enum for identifying token environment variables and their
    * corresponding request headers.
@@ -215,6 +216,7 @@ public final class ExhortApi implements Api {
     final Provider.Content content, final URI uri, final MediaType acceptType
   ) {
     var request = HttpRequest.newBuilder(uri)
+    .version(Version.HTTP_1_1)
       .setHeader("Accept", acceptType.toString())
       .setHeader("Content-Type", content.type)
       .POST(HttpRequest.BodyPublishers.ofString(new String(content.buffer)));

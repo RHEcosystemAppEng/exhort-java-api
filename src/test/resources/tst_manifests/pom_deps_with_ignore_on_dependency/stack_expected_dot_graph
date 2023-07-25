@@ -1,2 +1,0 @@
-digraph "pom-with-deps-and-ignore:pom-with-dependency-not-ignored-for-tests:jar:0.0.1" { 
- } 

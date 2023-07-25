@@ -15,14 +15,7 @@
  */
 package com.redhat.exhort.providers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.exhort.Provider;
-import com.redhat.exhort.tools.Operations;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,14 +24,31 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+import com.redhat.exhort.Provider;
+import com.redhat.exhort.sbom.Sbom;
+import com.redhat.exhort.sbom.SbomFactory;
+import com.redhat.exhort.tools.Ecosystem;
+import com.redhat.exhort.tools.Ecosystem.Type;
+import com.redhat.exhort.tools.Operations;
+
 /**
  * Concrete implementation of the {@link Provider} used for converting dependency trees
  * for Java Maven projects (pom.xml) into a content Dot Graphs for Stack analysis or Json for
  * Component analysis.
  **/
 public final class JavaMavenProvider extends Provider {
-  public JavaMavenProvider(final String ecosystem) {
-    super(ecosystem);
+  
+  private static final String MEDIA_TYPE_APPLICATION_JSON = "application/json";
+
+  public JavaMavenProvider() {
+    super(Type.MAVEN);
   }
 
   @Override
@@ -62,7 +72,7 @@ public final class JavaMavenProvider extends Provider {
       add(manifestPath.toString());
     }};
     // if we have dependencies marked as ignored, exclude them from the tree command
-    var ignored = this.getDependencies(manifestPath).stream()
+    var ignored = getDependencies(manifestPath).stream()
       .filter(d -> d.ignored)
       .map(DependencyAggregator::toString)
       .collect(Collectors.joining(","));
@@ -71,8 +81,47 @@ public final class JavaMavenProvider extends Provider {
     }
     // execute the tree command
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new));
+    var sbom = buildSbomFromDot(tmpFile);
     // build and return content for constructing request to the backend
-    return new Content(Files.readAllBytes(tmpFile), "text/vnd.graphviz");
+    return new Content(sbom.getAsJsonString().getBytes(), MEDIA_TYPE_APPLICATION_JSON);
+  }
+
+  private Sbom buildSbomFromDot(Path dotFile) throws IOException {
+    var sbom = SbomFactory.newInstance();
+    var reader = new BufferedReader(Files.newBufferedReader(dotFile));
+    String line = reader.readLine();
+    while (line != null) {
+      if(line.startsWith("digraph ")) {
+        var dotPkg = line.replace("digraph", "")
+          .replace("{", "");
+        sbom.addRoot(dotPkgToPurl(dotPkg));
+      } else if(line.endsWith("}") || line.trim().isBlank()) {
+        // ignore
+      } else {
+        var parts = line.replaceAll(";", "").split("->");
+        if(parts.length == 2) {
+          var src = dotPkgToPurl(parts[0]);
+          var target = dotPkgToPurl(parts[1]);
+          sbom.addDependency(src, target);
+        }
+      }
+      line = reader.readLine();
+    }
+    return sbom;
+  }
+
+  private PackageURL dotPkgToPurl(String dotPkg) {
+    var parts = dotPkg.
+    replaceAll("\"", "")
+        .trim().split(":");
+    if(parts.length >= 4) {
+      try {
+        return new PackageURL(Ecosystem.Type.MAVEN.getType(), parts[0], parts[1], parts[3], null, null);
+      } catch (MalformedPackageURLException e) {
+        throw new IllegalArgumentException("Unable to parse dot package: " + dotPkg, e);
+      }
+    }
+    throw new IllegalArgumentException("Invalid dot package format: " + dotPkg);
   }
 
   @Override
@@ -97,34 +146,70 @@ public final class JavaMavenProvider extends Provider {
     Operations.runProcess(mvnEffPomCmd);
     // if we have dependencies marked as ignored grab ignored dependencies from the original pom
     // the effective-pom goal doesn't carry comments
-    var ignored = this.getDependencies(originPom).stream()
-      .filter(i -> i.ignored)
-      .collect(Collectors.toList());
-    // get all dependencies from effective pom as packages excluding the ignored ones
-    var packages = this.getDependencies(tmpEffPom).stream()
+    var ignored = getDependencies(originPom).stream().filter(d -> d.ignored).map(DependencyAggregator::toPurl).collect(Collectors.toSet());
+    var deps = getDependencies(tmpEffPom);
+    var sbom = SbomFactory.newInstance().addRoot(getRoot(tmpEffPom));
+    deps.stream()
+      .map(DependencyAggregator::toPurl)
       .dropWhile(ignored::contains)
-      .map(DependencyAggregator::toPackage)
-      .toArray(PackageAggregator[]::new);
-    // serialize packages to json array of as a byte array
-    var packagesJson = new ObjectMapper().writeValueAsBytes(packages);
+      .forEach(d -> sbom.addDependency(sbom.getRoot(), d));
+
     // build and return content for constructing request to the backend
-    return new Content(packagesJson, "application/json");
+    return new Content(sbom.getAsJsonString().getBytes(), MEDIA_TYPE_APPLICATION_JSON);
   }
 
-  /**
-   * Get a list of dependencies including a field marking if it's this dependency is ignored based
-   * on a {@literal <!--exhortignore-->} comment attached to the dependency.
-   *
-   * @param manifestPath the Path for the manifest file
-   * @return a list of DependencyAggregator, implemented toString will return format suited for the
-   *    dependency:tree goal's excludes property.
-   *    ie. group-id:artifact-id:*:version (the * marks any type, if no version specified,
-   *    * will be used.
-   * @throws IOException when failed to load or parse the manifest file
-   */
-  private List<DependencyAggregator> getDependencies(final Path manifestPath) throws IOException {
-    var dependencyAggregators = new ArrayList<DependencyAggregator>();
+  private PackageURL getRoot(final Path manifestPath) throws IOException {
+    XMLStreamReader reader = null;
+    try {
+      reader = XMLInputFactory.newInstance().createXMLStreamReader(Files.newInputStream(manifestPath));
+      DependencyAggregator dependencyAggregator = null;
+      boolean isRoot = false;
+      while (reader.hasNext()) {
+        reader.next(); // get the next event
+        if (reader.isStartElement() && "project".equals(reader.getLocalName())) {
+          isRoot = true;
+          dependencyAggregator = new DependencyAggregator();
+          continue;
+        }
+        if (!Objects.isNull(dependencyAggregator)) {
+          if (reader.isStartElement()) {
+            switch (reader.getLocalName()) {
+              case "groupId": // starting "groupId" tag, get next event and set to aggregator
+                reader.next();
+                dependencyAggregator.groupId = reader.getText();
+                break;
+              case "artifactId": // starting "artifactId" tag, get next event and set to aggregator
+                reader.next();
+                dependencyAggregator.artifactId = reader.getText();
+                break;
+              case "version": // starting "version" tag, get next event and set to aggregator
+                reader.next();
+                dependencyAggregator.version = reader.getText();
+                break;
+            }
+          }
+          if (isRoot && dependencyAggregator.isValid()) {
+            return dependencyAggregator.toPurl();
+          }
+        }
+      }
+    } catch (XMLStreamException exc) {
+      throw new IOException(exc);
+    } finally {
+      if (!Objects.isNull(reader)) {
+        try {
+          reader.close(); // close stream if open
+        } catch (XMLStreamException e) {
+          //
+        }
+      }
+    }
 
+    throw new IllegalStateException("Unable to retrieve Root dependency from effective pom");
+  }
+
+  private List<DependencyAggregator> getDependencies(final Path manifestPath) throws IOException {
+    List<DependencyAggregator> deps = new ArrayList<>();
     XMLStreamReader reader = null;
     try {
       //get a xml stream reader for the manifest file
@@ -136,9 +221,9 @@ public final class JavaMavenProvider extends Provider {
       while (reader.hasNext()) {
         reader.next(); // get the next event
         if (reader.isStartElement() && "dependency".equals(reader.getLocalName())) {
-          // starting "dependency" tag, initiate aggregator
-          dependencyAggregator = new DependencyAggregator();
-          continue;
+            // starting "dependency" tag, initiate aggregator
+            dependencyAggregator = new DependencyAggregator();
+            continue;
         }
 
         // if dependency aggregator haven't been initiated,
@@ -173,7 +258,7 @@ public final class JavaMavenProvider extends Provider {
 
           if (reader.isEndElement() && "dependency".equals(reader.getLocalName())) {
             // add object to list and reset dependency aggregator
-            dependencyAggregators.add(dependencyAggregator);
+            deps.add(dependencyAggregator);
             dependencyAggregator = null;
           }
         }
@@ -190,16 +275,16 @@ public final class JavaMavenProvider extends Provider {
       }
     }
 
-    return dependencyAggregators;
+    return deps;
   }
 
   // NOTE if we want to include "scope" tags in ignore,
   // add property here and a case in the start-element-switch in the getIgnored method
   /** Aggregator class for aggregating Dependency data over stream iterations, **/
   private final static class DependencyAggregator {
-    private String groupId = "";
-    private String artifactId = "";
-    private String version = "*";
+    private String groupId;
+    private String artifactId;
+    private String version;
     boolean ignored = false;
 
     /**
@@ -212,12 +297,21 @@ public final class JavaMavenProvider extends Provider {
       return String.format("%s:%s:*:%s", groupId, artifactId, version);
     }
 
+    public boolean isValid() {
+      return Objects.nonNull(groupId) && Objects.nonNull(artifactId) && Objects.nonNull(version);
+    }
+
     /**
      * Convert the {@link DependencyAggregator} object to a {@link PackageAggregator}
      * @return a new instance of {@link PackageAggregator}
+     * @throws MalformedPackageURLException
      */
-    public PackageAggregator toPackage() {
-      return new PackageAggregator(String.format("%s:%s", groupId, artifactId), version);
+    public PackageURL toPurl() {
+      try {
+        return new PackageURL(Ecosystem.Type.MAVEN.getType(), groupId, artifactId, version, null, null);
+      } catch (MalformedPackageURLException e) {
+        throw new IllegalArgumentException("Unable to parse PackageURL", e);
+      }
     }
 
     @Override

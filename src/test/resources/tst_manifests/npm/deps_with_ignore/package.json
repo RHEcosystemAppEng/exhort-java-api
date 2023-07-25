@@ -1,0 +1,10 @@
+{
+  "name": "project-with-ignored-deps",
+  "version": "1.0.0",
+  "dependencies": {
+    "ms": "2.1.2"
+  },
+  "exhortignore": [
+    "ms"
+  ]
+}

@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.redhat.exhort.Api;
+
 class Java_Npm_Provider_Test {
   // test folder are located at src/test/resources/tst_manifests/npm
   // each folder should contain:
@@ -55,7 +57,7 @@ class Java_Npm_Provider_Test {
     // cleanup
     Files.deleteIfExists(tmpNpmFile);
     // verify expected SBOM is returned
-    assertThat(content.type).isEqualTo("application/json");
+    assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
   }
@@ -76,7 +78,7 @@ class Java_Npm_Provider_Test {
     // when providing component content for our pom
     var content = new JavaScriptNpmProvider().provideComponent(targetPom);
     // verify expected SBOM is returned
-    assertThat(content.type).isEqualTo("application/json");
+    assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
   }

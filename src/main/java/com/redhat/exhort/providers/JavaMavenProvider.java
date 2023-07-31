@@ -31,6 +31,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
+import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
@@ -44,8 +45,6 @@ import com.redhat.exhort.tools.Operations;
  * Component analysis.
  **/
 public final class JavaMavenProvider extends Provider {
-  
-  private static final String MEDIA_TYPE_APPLICATION_JSON = "application/json";
 
   public JavaMavenProvider() {
     super(Type.MAVEN);
@@ -83,7 +82,7 @@ public final class JavaMavenProvider extends Provider {
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new));
     var sbom = buildSbomFromDot(tmpFile);
     // build and return content for constructing request to the backend
-    return new Content(sbom.getAsJsonString().getBytes(), MEDIA_TYPE_APPLICATION_JSON);
+    return new Content(sbom.getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   private Sbom buildSbomFromDot(Path dotFile) throws IOException {
@@ -155,7 +154,7 @@ public final class JavaMavenProvider extends Provider {
       .forEach(d -> sbom.addDependency(sbom.getRoot(), d));
 
     // build and return content for constructing request to the backend
-    return new Content(sbom.getAsJsonString().getBytes(), MEDIA_TYPE_APPLICATION_JSON);
+    return new Content(sbom.getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   private PackageURL getRoot(final Path manifestPath) throws IOException {

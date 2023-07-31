@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
+import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
@@ -54,14 +55,14 @@ public final class JavaScriptNpmProvider extends Provider {
   public Content provideStack(final Path manifestPath) throws IOException {
     // check for custom npm executable
     Sbom sbom = getDependencySbom(manifestPath, true);
-    return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), "application/json");
+    return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   @Override
   public Content provideComponent(byte[] manifestContent) throws IOException {
     // check for custom npm executable
     return new Content(getDependencyTree(manifestContent).getAsJsonString().getBytes(StandardCharsets.UTF_8),
-        "application/json");
+      Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   private Sbom getDependencyTree(byte[] manifestContent) {

@@ -105,9 +105,9 @@ public final class JavaScriptNpmProvider extends Provider {
       }
       PackageURL purl = toPurl(name, version);
       sbom.addDependency(from, purl);
-      JsonNode transientDeps = e.getValue().findValue("dependencies");
-      if (transientDeps != null) {
-        addDependenciesOf(sbom, purl, transientDeps);
+      JsonNode transitiveDeps = e.getValue().findValue("dependencies");
+      if (transitiveDeps != null) {
+        addDependenciesOf(sbom, purl, transitiveDeps);
       }
     }
   }

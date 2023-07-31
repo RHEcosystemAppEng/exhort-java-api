@@ -26,18 +26,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.redhat.exhort.Api;
 
-class Java_Maven_Provider_Test {
-  // test folder are located at src/test/resources/tst_manifests
+class Java_Npm_Provider_Test {
+  // test folder are located at src/test/resources/tst_manifests/npm
   // each folder should contain:
-  // - pom.xml: the target manifest for testing
+  // - package.json: the target manifest for testing
   // - expected_sbom.json: the SBOM expected to be provided
   static Stream<String> testFolders() {
     return Stream.of(
-      "deps_with_ignore_on_artifact",
-      "deps_with_ignore_on_dependency",
-      "deps_with_ignore_on_group",
-      "deps_with_ignore_on_version",
-      "deps_with_ignore_on_wrong",
+      "deps_with_ignore",
       "deps_with_no_ignore"
     );
   }
@@ -45,20 +41,21 @@ class Java_Maven_Provider_Test {
   @ParameterizedTest
   @MethodSource("testFolders")
   void test_the_provideStack(String testFolder) throws IOException, InterruptedException {
-    // create temp file hosting our sut pom.xml
-    var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
-      Files.write(tmpPomFile, is.readAllBytes());
+    // create temp file hosting our sut package.json
+    var tmpNpmFolder = Files.createTempDirectory("exhort_test_");
+    var tmpNpmFile = Files.createFile(tmpNpmFolder.resolve("package.json"));
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
+      Files.write(tmpNpmFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing stack content for our pom
-    var content = new JavaMavenProvider().provideStack(tmpPomFile);
+    var content = new JavaScriptNpmProvider().provideStack(tmpNpmFile);
     // cleanup
-    Files.deleteIfExists(tmpPomFile);
+    Files.deleteIfExists(tmpNpmFile);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
@@ -70,16 +67,16 @@ class Java_Maven_Provider_Test {
   void test_the_provideComponent(String testFolder) throws IOException, InterruptedException {
     // load the pom target pom file
     byte[] targetPom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
       targetPom = is.readAllBytes();
     }
     // load expected SBOM
     String expectedSbom = "";
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom
-    var content = new JavaMavenProvider().provideComponent(targetPom);
+    var content = new JavaScriptNpmProvider().provideComponent(targetPom);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))

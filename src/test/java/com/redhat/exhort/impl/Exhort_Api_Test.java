@@ -68,7 +68,7 @@ class Exhort_Api_Test {
       throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
-    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -86,7 +86,7 @@ class Exhort_Api_Test {
 
     // load dummy html and set as the expected analysis
     byte[] expectedHtml;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.html")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.html")) {
       expectedHtml = is.readAllBytes();
     }
 
@@ -118,7 +118,7 @@ class Exhort_Api_Test {
     throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
-    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -140,7 +140,7 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedAnalysis;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.json")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
       expectedAnalysis = mapper.readValue(is, AnalysisReport.class);
     }
 
@@ -171,7 +171,7 @@ class Exhort_Api_Test {
     throws IOException, ExecutionException, InterruptedException {
     // load pom.xml
     byte[] targetPom;
-    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
       targetPom = is.readAllBytes();
     }
 
@@ -193,7 +193,7 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedReport;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.json")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
       expectedReport = mapper.readValue(is, AnalysisReport.class);
     }
 
@@ -223,19 +223,19 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedJson;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.json")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
       expectedJson = mapper.readValue(is, AnalysisReport.class);
     }
 
     // load dummy html and set as the expected analysis
     byte[] expectedHtml;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.html")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.html")) {
       expectedHtml = is.readAllBytes();
     }
 
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
-    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/pom_empty/pom.xml")) {
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -251,7 +251,7 @@ class Exhort_Api_Test {
 
     // load dummy mixed and set as the expected analysis
     byte[] mixedResponse;
-    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/analysis-report.mixed")) {
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.mixed")) {
       mixedResponse = is.readAllBytes();
     }
 

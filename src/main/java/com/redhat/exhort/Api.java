@@ -24,6 +24,9 @@ import com.redhat.exhort.api.AnalysisReport;
 
 /** The Api interface is used for contracting API implementations. **/
 public interface Api {
+
+  public static final String CYCLONEDX_MEDIA_TYPE = "application/vnd.cyclonedx+json";
+
   enum MediaType {
     APPLICATION_JSON,
     TEXT_HTML,

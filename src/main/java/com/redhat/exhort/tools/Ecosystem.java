@@ -17,11 +17,30 @@ package com.redhat.exhort.tools;
 
 import java.nio.file.Path;
 
+
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.providers.JavaMavenProvider;
+import com.redhat.exhort.providers.JavaScriptNpmProvider;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {
+
+  public enum Type {
+
+    MAVEN ("maven"),
+    NPM ("npm");
+
+    String type;
+
+    public String getType() {
+      return type;
+    }
+
+    Type(String type) {
+      this.type = type;
+    }
+
+  }
   private Ecosystem(){
     // constructor not required for a utility class
   }
@@ -45,7 +64,9 @@ public final class Ecosystem {
   public static Provider getProvider(final String manifestType) {
     switch (manifestType) {
       case "pom.xml":
-        return new JavaMavenProvider("maven");
+        return new JavaMavenProvider();
+      case "package.json":
+        return new JavaScriptNpmProvider();
       default:
         throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
         );

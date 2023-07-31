@@ -18,12 +18,14 @@ package com.redhat.exhort.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,9 +42,15 @@ import jakarta.mail.util.ByteArrayDataSource;
 
 /** Concrete implementation of the Exhort {@link Api} Service. **/
 public final class ExhortApi implements Api {
-  private static final String DEFAULT_ENDPOINT = "http://pre-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+    
+  private static final String DEFAULT_ENDPOINT = "http://dev-exhort.apps.cn-lab2-eu.lue0.p1.openshiftapps.com";
   private final String endpoint;
 
+  public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+    AnalysisReport analysisReport = new ExhortApi()
+    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
+    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+  }
   /**
    * Enum for identifying token environment variables and their
    * corresponding request headers.
@@ -72,6 +80,14 @@ public final class ExhortApi implements Api {
 
   public ExhortApi() {
     this(HttpClient.newHttpClient());
+  }
+
+  /**
+   * Get the HTTP protocol Version set by client in environment variable, if not set, the default is HTTP Protocol Version 1.1
+   * @return i.e. HttpClient.Version.HTTP_1.1
+   */
+  static HttpClient.Version getHttpVersion() {
+    return (System.getenv("HTTP_VERSION_EXHORT_CLIENT") != null && System.getenv("HTTP_VERSION_EXHORT_CLIENT").contains("2")) ? HttpClient.Version.HTTP_2 : HttpClient.Version.HTTP_1_1 ;
   }
 
   ExhortApi(final HttpClient client) {
@@ -149,7 +165,7 @@ public final class ExhortApi implements Api {
   ) throws IOException {
     var provider = Ecosystem.getProvider(manifestType);
     var uri = URI.create(
-      String.format("%s/api/v3/component-analysis/%s", this.endpoint, provider.ecosystem));
+      String.format("%s/api/v3/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
 
     return this.client
@@ -182,7 +198,7 @@ public final class ExhortApi implements Api {
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(
-      String.format("%s/api/v3/dependency-analysis/%s", this.endpoint, provider.ecosystem));
+      String.format("%s/api/v3/analysis", this.endpoint));
     var content = provider.provideStack(manifestPath);
 
     return buildRequest(content, uri, acceptType);
@@ -200,9 +216,10 @@ public final class ExhortApi implements Api {
     final Provider.Content content, final URI uri, final MediaType acceptType
   ) {
     var request = HttpRequest.newBuilder(uri)
+    .version(Version.HTTP_1_1)
       .setHeader("Accept", acceptType.toString())
       .setHeader("Content-Type", content.type)
-      .POST(HttpRequest.BodyPublishers.ofByteArray(content.buffer));
+      .POST(HttpRequest.BodyPublishers.ofString(new String(content.buffer)));
 
     // include tokens from environment variables of java properties as request headers
     Stream.of(ExhortApi.TokenProvider.values()).forEach(p -> {

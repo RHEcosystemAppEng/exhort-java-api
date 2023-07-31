@@ -15,12 +15,11 @@
  */
 package com.redhat.exhort;
 
-import jakarta.annotation.Nonnull;
-
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.exhort.tools.Ecosystem;
 
 /**
  * The Provider abstraction is used for contracting providers providing a {@link Content}
@@ -31,7 +30,7 @@ public abstract class Provider {
    * Content is used to aggregate a content buffer and a content type.
    * These will be used to construct the backend API request.
    **/
-  public static class Content{
+  public static class Content {
     public final byte[] buffer;
     public final String type;
     public Content(byte[] buffer, String type){
@@ -40,36 +39,11 @@ public abstract class Provider {
     }
   }
 
-  /** POJO class used for serializing packages for a component analysis request. */
-  static final public class PackageAggregator {
-    public String name;
-    public String version;
-
-    public PackageAggregator(@Nonnull final String name, @Nonnull final String version) {
-      Objects.requireNonNull(name);
-      Objects.requireNonNull(version);
-      this.name = name;
-      this.version = version;
-    }
-
-    /**
-     * Custom implementation will return also return true if version is *.
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof PackageAggregator)) return false;
-      var that = (PackageAggregator) o;
-      return Objects.equals(this.name, that.name) &&
-        List.of(this.version, "*").contains(that.version);
-    }
-  }
-
   /** The ecosystem of this provider, i.e. maven. */
-  final public String ecosystem;
+  public final Ecosystem.Type ecosystem;
+  protected final ObjectMapper objectMapper = new ObjectMapper();
 
-  protected Provider(String ecosystem) {
+  protected Provider(Ecosystem.Type ecosystem) {
     this.ecosystem = ecosystem;
   }
 

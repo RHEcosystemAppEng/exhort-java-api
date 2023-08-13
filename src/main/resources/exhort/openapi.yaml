@@ -7,34 +7,34 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: 3.0.0
 servers:
-- url: http://prod-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
-  description: Production server
-- url: http://pre-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
-  description: Staging server
-- url: http://dev-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
-  description: Development server
-- url: http://localhost:8080/api/v3
-  description: Local development
+  - url: http://prod-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
+    description: Production server
+  - url: http://pre-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
+    description: Staging server
+  - url: http://dev-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
+    description: Development server
+  - url: http://localhost:8080/api/v3
+    description: Local development
 paths:
   /analysis:
     post:
       operationId: analysis
-      summary:  Takes a client-resolved dependency graph to perform a full stack analysis from all the available Vulnerability sources
+      summary: Takes a client-resolved dependency graph to perform a full stack analysis from all the available Vulnerability sources
       security:
         - SnykTokenAuth: []
         - OssIndexUserAuth: []
           OssIndexTokenAuth: []
       parameters:
-      - name: providers
-        in: query
-        description: List of vulnerability providers to get the report from
-        required: false
-        schema:
-          enum:
-          - snyk
-          - oss-index
-          type: string
-        example: snyk
+        - name: providers
+          in: query
+          description: List of vulnerability providers to get the report from
+          required: false
+          schema:
+            enum:
+              - snyk
+              - oss-index
+            type: string
+          example: snyk
       requestBody:
         required: true
         description: Dependency graph in SBOM format
@@ -46,7 +46,7 @@ paths:
             schema:
               type: object
       responses:
-        '200':
+        200:
           description: Full dependency analysis from all the available providers
           content:
             application/json:
@@ -54,22 +54,22 @@ paths:
                 $ref: '#/components/schemas/AnalysisReport'
             text/html:
               schema:
-                type: object
+                type: string
             multipart/mixed:
               schema:
                 type: object
                 properties:
                   json_report:
-                    $ref: '#/components/schemas/AnalysisReport'
-                  html_report:
                     type: object
+                  html_report:
+                    type: string
         '422':
           description: Invalid request
           content:
             text/plain:
               schema:
                 type: string
-                description: Error message  
+                description: Error message
   /token:
     get:
       operationId: validateToken
@@ -114,7 +114,6 @@ paths:
               schema:
                 type: string
                 description: Missing token
-
 components:
   securitySchemes:
     SnykTokenAuth:
@@ -132,13 +131,17 @@ components:
   schemas:
     AnalysisReport:
       type: object
-      properties:
-        summary:
-          $ref: '#/components/schemas/Summary'
-        dependencies:
-          type: array
-          items:
-            $ref: '#/components/schemas/DependencyReport'
+      additionalProperties:
+        type: object
+        properties:
+          status:
+            $ref: '#/components/schemas/ProviderStatus'
+          summary:
+            $ref: '#/components/schemas/Summary'
+          dependencies:
+            type: array
+            items:
+              $ref: '#/components/schemas/DependencyReport'
     PackageRef:
       type: object
       description: PackageURL used to identify a dependency artifact
@@ -173,7 +176,6 @@ components:
         issues:
           - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
             title: Denial of Service (DoS)
-            source: snyk
             cvss:
               attackVector: Network
               attackComplexity: High
@@ -190,13 +192,12 @@ components:
             cvssScore: 5.9
             severity: MEDIUM
             cves:
-            - CVE-2022-42003
+              - CVE-2022-42003
         transitive:
           - ref: pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.1.Final
             issues:
               - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
                 title: Denial of Service (DoS)
-                source: snyk
                 cvss:
                   attackVector: Network
                   attackComplexity: High
@@ -213,7 +214,7 @@ components:
                 cvssScore: 5.9
                 severity: MEDIUM
                 cves:
-                - CVE-2022-42003
+                  - CVE-2022-42003
         remediations:
           CVE-2022-41946:
             issueRef: CVE-2022-41946
@@ -233,8 +234,6 @@ components:
           type: string
         title:
           type: string
-        source:
-          type: string
         cvss:
           $ref: '#/components/schemas/CvssVector'
         cvssScore:
@@ -252,7 +251,6 @@ components:
       example:
         id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
         title: Denial of Service (DoS)
-        source: snyk
         cvss:
           attackVector: Network
           attackComplexity: High
@@ -269,7 +267,7 @@ components:
         cvssScore: 5.9
         severity: MEDIUM
         cves:
-        - CVE-2022-42003
+          - CVE-2022-42003
     TransitiveDependencyReport:
       type: object
       properties:
@@ -291,7 +289,6 @@ components:
         issues:
           - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
             title: Denial of Service (DoS)
-            source: snyk
             cvss:
               attackVector: Network
               attackComplexity: High
@@ -308,7 +305,7 @@ components:
             cvssScore: 5.9
             severity: MEDIUM
             cves:
-            - CVE-2022-42003
+              - CVE-2022-42003
     Remediation:
       type: object
       properties:
@@ -329,10 +326,6 @@ components:
           $ref: '#/components/schemas/DependenciesSummary'
         vulnerabilities:
           $ref: '#/components/schemas/VulnerabilitiesSummary'
-        providerStatuses:
-          type: array
-          items:
-              $ref: '#/components/schemas/ProviderStatus'
     DependenciesSummary:
       type: object
       properties:
@@ -360,9 +353,9 @@ components:
       properties:
         ok:
           type: boolean
-        provider:
+        name:
           type: string
-        status:
+        code:
           type: integer
         message:
           type: string

@@ -21,6 +21,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -47,9 +49,9 @@ public final class ExhortApi implements Api {
   private final String endpoint;
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-    AnalysisReport analysisReport = new ExhortApi()
-    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
-    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+    ExhortApi exhortApi = new ExhortApi();
+    exhortApi.componentAnalysis("go.mod", Files.readAllBytes(Path.of("/tmp/tidy-test/go.mod"))).get();
+//    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
   }
   /**
    * Enum for identifying token environment variables and their

@@ -45,7 +45,7 @@ import jakarta.mail.util.ByteArrayDataSource;
 /** Concrete implementation of the Exhort {@link Api} Service. **/
 public final class ExhortApi implements Api {
 
-  private static final String DEFAULT_ENDPOINT = "http://dev-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String DEFAULT_ENDPOINT = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {

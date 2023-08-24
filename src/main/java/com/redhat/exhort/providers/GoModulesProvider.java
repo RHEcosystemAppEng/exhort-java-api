@@ -27,6 +27,9 @@ import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
+import com.redhat.exhort.vcs.GitVersionControlSystemImpl;
+import com.redhat.exhort.vcs.TagInfo;
+import com.redhat.exhort.vcs.VersionControlSystem;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +48,8 @@ import java.util.stream.Collectors;
  **/
 public final class GoModulesProvider extends Provider {
 
+  private static final String goHostArchitectureEnvName = "GOHOSTARCH";
+  private static final String goHostOperationSystemEnvName = "GOHOSTOS";
   private final TreeMap goEnvironmentVariableForPurl;
   private final TreeMap goEnvironmentVariablesForRef;
   private String mainModuleVersion;
@@ -54,11 +60,11 @@ public final class GoModulesProvider extends Provider {
     Path path = Path.of("/tmp/tidy-test/go.mod");
     Provider provider = new GoModulesProvider();
     GoModulesProvider goProvider = (GoModulesProvider) provider;
-
+//    boolean answer = goProvider.IgnoredLine("        github.com/davecgh/go-spew v1.1.1 // indirect //exhortignore");
       PackageURL purl = goProvider.toPurl("github.com/RHEcosystemAppEng/SaaSi/deployer", "@", goProvider.goEnvironmentVariableForPurl);
       System.out.println(purl.toString());
     try {
-      provider.provideStack(path);
+//      provider.provideStack(path);
       byte[] bytes = Files.readAllBytes(path);
       provider.provideComponent(bytes);
     } catch (IOException e) {
@@ -70,8 +76,10 @@ public final class GoModulesProvider extends Provider {
     super(Type.GOLANG);
     this.goEnvironmentVariableForPurl=getQualifiers(true);
     this.goEnvironmentVariablesForRef =getQualifiers(false);
-    this.mainModuleVersion="v0.0.0";
+    this.mainModuleVersion= getDefaultMainModuleVersion();
   }
+
+
 
   @Override
   public Content provideStack(final Path manifestPath) throws IOException {
@@ -112,7 +120,7 @@ public final class GoModulesProvider extends Provider {
   private PackageURL toPurl(String dependency, String delimiter, TreeMap qualifiers) {
     try {
       int lastSlashIndex = dependency.lastIndexOf("/");
-      //there is no '/' char in module/package, so there is not namespace, only name
+      //there is no '/' char in module/package, so there is no namespace, only name
       if (lastSlashIndex == -1)
       {
         String[] splitParts = dependency.split(delimiter);
@@ -125,6 +133,7 @@ public final class GoModulesProvider extends Provider {
 
         if (parts.length == 2) {
           return new PackageURL(Type.GOLANG.getType(), namespace, parts[0], parts[1], qualifiers, null);
+          // in this case, there is no version (happens with main module), thus need to take it from precalculated main module version.
         } else {
           return new PackageURL(Type.GOLANG.getType(), namespace, parts[0], this.mainModuleVersion, qualifiers, null);
         }
@@ -138,6 +147,7 @@ public final class GoModulesProvider extends Provider {
 
   private Sbom getDependenciesSbom(Path manifestPath, boolean buildTree) throws IOException {
     var goModulesResult = buildGoModulesDependencies(manifestPath);
+    calculateMainModuleVersion(manifestPath.getParent());
     Sbom sbom;
     if (!buildTree) {
       sbom = buildSbomFromList(goModulesResult);
@@ -146,8 +156,31 @@ public final class GoModulesProvider extends Provider {
     {
       sbom = buildSbomFromGraph(goModulesResult);
     }
-//    sbom.filterIgnoredDeps(getIgnoredDeps(manifestPath));
+    List<String> ignoredDeps = getIgnoredDeps(manifestPath);
+    sbom.filterIgnoredDeps(ignoredDeps);
     return sbom;
+  }
+
+  private void calculateMainModuleVersion(Path directory) {
+    VersionControlSystem vcs = new GitVersionControlSystemImpl();
+    if(vcs.isDirectoryRepo(directory)) {
+       TagInfo latestTagInfo = vcs.getLatestTag(directory);
+       if (!latestTagInfo.getTagName().trim().equals("")) {
+         if(!latestTagInfo.isCurrentCommitPointedByTag())
+         {
+           String nextTagVersion = vcs.getNextTagVersion(latestTagInfo);
+           this.mainModuleVersion = vcs.getPseudoVersion(latestTagInfo, nextTagVersion);
+         }
+         else
+         {
+           this.mainModuleVersion = latestTagInfo.getTagName();
+         }
+       }
+       else
+       {
+         this.mainModuleVersion = vcs.getPseudoVersion(latestTagInfo, getDefaultMainModuleVersion());
+       }
+    }
   }
 
   private Sbom buildSbomFromGraph(String goModulesResult) throws IOException{
@@ -194,8 +227,7 @@ public final class GoModulesProvider extends Provider {
 
   private static List<String> collectAllDirectDependencies(String[] targetLines, String edge) {
     return Arrays.stream(targetLines)
-                 .filter(line2 -> getParentVertex(line2)
-                 .equals(getParentVertex(edge)))
+                 .filter(line2 -> getParentVertex(line2).equals(getParentVertex(edge)))
                  .map(GoModulesProvider::getChildVertex)
                  .collect(Collectors.toList());
   }
@@ -206,10 +238,8 @@ public final class GoModulesProvider extends Provider {
     {
       var go = Operations.getCustomPathOrElse("go");
       String goEnvironmentVariables = Operations.runProcessGetOutput(null, new String[]{go, "env"});
-      String hostArch = getEnvironmentVariable(goEnvironmentVariables,"GOHOSTARCH");
-      int endOfLineIndex;
-      int i;
-      String hostOS = getEnvironmentVariable(goEnvironmentVariables,"GOHOSTOS");
+      String hostArch = getEnvironmentVariable(goEnvironmentVariables, goHostArchitectureEnvName);
+      String hostOS = getEnvironmentVariable(goEnvironmentVariables, goHostOperationSystemEnvName);
       return new TreeMap(Map.of("type", "module","goos",hostOS,"goarch",hostArch));
     }
 
@@ -240,6 +270,7 @@ public final class GoModulesProvider extends Provider {
     String[] allModulesFlat = golangDeps.split(System.lineSeparator());
     String parentVertex = getParentVertex(allModulesFlat[0]);
     PackageURL root = toPurl(parentVertex,"@",this.goEnvironmentVariableForPurl);
+    // Get only direct dependencies of root package/module, and that's it.
     List<String> deps = collectAllDirectDependencies(allModulesFlat, parentVertex);
 
     Sbom sbom = SbomFactory.newInstance();
@@ -252,16 +283,39 @@ public final class GoModulesProvider extends Provider {
   }
 
   private List<String> getIgnoredDeps(Path manifestPath) throws IOException {
-    var ignored = new ArrayList<String>();
-    var root = new ObjectMapper().readTree(Files.newInputStream(manifestPath));
-    var ignoredNode = root.withArray("exhortignore");
-    if (ignoredNode == null) {
-      return ignored;
-    }
-    for (JsonNode n : ignoredNode) {
-      ignored.add(n.asText());
-    }
+
+    List<String> goModlines = Files.readAllLines(manifestPath);
+    List ignored = goModlines.stream().filter(this::IgnoredLine).map(this::extractPackageName).map(dep -> toPurl(dep," ",this.goEnvironmentVariableForPurl).getName()).collect(Collectors.toList());
     return ignored;
+  }
+
+  private String extractPackageName(String line) {
+    String trimmedRow = line.trim();
+    int firstRemarkNotationOccurrence = trimmedRow.indexOf("//");
+    return trimmedRow.substring(0,firstRemarkNotationOccurrence).trim();
+
+  }
+
+  public boolean IgnoredLine(String line) {
+      boolean result = false;
+      if (line.contains("exhortignore"))
+      {
+        if(Pattern.matches(".+//\\s*exhortignore",line) || Pattern.matches(".+//\\sindirect (//)?\\s*exhortignore",line)  )
+        {
+          String trimmedRow = line.trim();
+          if(!trimmedRow.startsWith("module") && !trimmedRow.startsWith("go") && !trimmedRow.startsWith("require (") && !trimmedRow.startsWith("require(")
+             && !trimmedRow.startsWith("exclude") && !trimmedRow.startsWith("replace") && !trimmedRow.startsWith("retract") && !trimmedRow.startsWith("use")
+             && !trimmedRow.contains("=>"))
+          {
+               if( trimmedRow.startsWith("require ") || Pattern.matches("^[a-z./-]+\\s[vV][0-9]\\.[0-9](\\.[0-9])?.*",trimmedRow))
+               {
+                 result = true;
+               }
+          }
+        }
+      }
+  return result;
+
   }
 
   private static String getParentVertex(String edge)
@@ -274,6 +328,10 @@ public final class GoModulesProvider extends Provider {
 
     String[] edgeParts = edge.trim().split(" ");
     return edgeParts[1];
+  }
+
+  private static String getDefaultMainModuleVersion() {
+    return "v0.0.0";
   }
 
 }

@@ -112,7 +112,9 @@ public final class Operations {
         process = Runtime.getRuntime().exec(String.join(" ", cmdList),null,dir.toFile());
       }
 
-      inputStream = process.getInputStream();
+
+     inputStream = process.getInputStream();
+
       BufferedReader reader = new BufferedReader(
         new InputStreamReader(inputStream));
       String line;
@@ -124,8 +126,19 @@ public final class Operations {
           sb.append("\n");
         }
       }
+      if(sb.toString().trim().equals("")) {
+        inputStream = process.getErrorStream();
+        reader = new BufferedReader(
+          new InputStreamReader(inputStream));
+        while ((line = reader.readLine()) != null) {
+          sb.append(line);
+          if (!line.endsWith(System.lineSeparator())) {
+            sb.append("\n");
+          }
+        }
+      }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(String.format("Failed to execute command '%s' ",String.join(" ",cmdList)),e);
     }
     return sb.toString();
   }

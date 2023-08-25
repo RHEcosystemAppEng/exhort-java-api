@@ -17,8 +17,6 @@ package com.redhat.exhort.providers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
@@ -64,9 +62,9 @@ public final class GoModulesProvider extends Provider {
       PackageURL purl = goProvider.toPurl("github.com/RHEcosystemAppEng/SaaSi/deployer", "@", goProvider.goEnvironmentVariableForPurl);
       System.out.println(purl.toString());
     try {
-//      provider.provideStack(path);
+      provider.provideStack(path);
       byte[] bytes = Files.readAllBytes(path);
-      provider.provideComponent(bytes);
+//      provider.provideComponent(bytes);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -149,15 +147,16 @@ public final class GoModulesProvider extends Provider {
     var goModulesResult = buildGoModulesDependencies(manifestPath);
     calculateMainModuleVersion(manifestPath.getParent());
     Sbom sbom;
+    List<PackageURL> ignoredDeps = getIgnoredDeps(manifestPath);
     if (!buildTree) {
-      sbom = buildSbomFromList(goModulesResult);
+      sbom = buildSbomFromList(goModulesResult,ignoredDeps);
     }
     else
     {
-      sbom = buildSbomFromGraph(goModulesResult);
+      sbom = buildSbomFromGraph(goModulesResult,ignoredDeps);
     }
-    List<String> ignoredDeps = getIgnoredDeps(manifestPath);
-    sbom.filterIgnoredDeps(ignoredDeps);
+//    List<String> ignoredDeps = getIgnoredDeps(manifestPath);
+//    sbom.filterIgnoredDeps(ignoredDeps);
     return sbom;
   }
 
@@ -183,7 +182,7 @@ public final class GoModulesProvider extends Provider {
     }
   }
 
-  private Sbom buildSbomFromGraph(String goModulesResult) throws IOException{
+  private Sbom buildSbomFromGraph(String goModulesResult, List<PackageURL> ignoredDeps) throws IOException{
 //    Each entry contains a key of the module, and the list represents the module direct dependencies , so pairing of the key with each of the dependencies in a list is basically an edge in the graph.
     Map<String,List> edges = new HashMap<>();
     // iterate over go mod graph line by line and create map , with each entry to contain module as a key , and value of list of that module' dependencies.
@@ -216,13 +215,21 @@ public final class GoModulesProvider extends Provider {
     sbom.addRoot(root);
     edges.forEach((key,value)-> {
        PackageURL source = toPurl(key,"@",this.goEnvironmentVariableForPurl);
-       value.forEach(dep -> {
-         PackageURL targetPurl = toPurl((String) dep, "@", this.goEnvironmentVariableForPurl);
-         sbom.addDependency(source,targetPurl);
-       });
+       if(dependencyNotToBeIgnore(ignoredDeps,source)) {
+         value.forEach(dep -> {
+           PackageURL targetPurl = toPurl((String) dep, "@", this.goEnvironmentVariableForPurl);
+           if(dependencyNotToBeIgnore(ignoredDeps,targetPurl)){
+             sbom.addDependency(source, targetPurl);
+           }
+         });
+       }
     });
  return sbom;
 
+  }
+
+  private boolean dependencyNotToBeIgnore(List<PackageURL> ignoredDeps, PackageURL checkedPurl) {
+    return ignoredDeps.stream().noneMatch(dependencyPurl -> dependencyPurl.getCoordinates().equals(checkedPurl.getCoordinates()));
   }
 
   private static List<String> collectAllDirectDependencies(String[] targetLines, String edge) {
@@ -266,7 +273,7 @@ public final class GoModulesProvider extends Provider {
     return goModulesOutput;
   }
 
-  private Sbom buildSbomFromList(String golangDeps) {
+  private Sbom buildSbomFromList(String golangDeps, List<PackageURL> ignoredDeps) {
     String[] allModulesFlat = golangDeps.split(System.lineSeparator());
     String parentVertex = getParentVertex(allModulesFlat[0]);
     PackageURL root = toPurl(parentVertex,"@",this.goEnvironmentVariableForPurl);
@@ -277,15 +284,21 @@ public final class GoModulesProvider extends Provider {
     sbom.addRoot(root);
     deps.forEach(dep -> {
       PackageURL targetPurl = toPurl(dep, "@", this.goEnvironmentVariableForPurl);
-      sbom.addDependency(root,targetPurl);
+      if(dependencyNotToBeIgnore(ignoredDeps,targetPurl)) {
+        sbom.addDependency(root, targetPurl);
+      }
     });
     return sbom;
   }
 
-  private List<String> getIgnoredDeps(Path manifestPath) throws IOException {
+  private List<PackageURL> getIgnoredDeps(Path manifestPath) throws IOException {
 
     List<String> goModlines = Files.readAllLines(manifestPath);
-    List ignored = goModlines.stream().filter(this::IgnoredLine).map(this::extractPackageName).map(dep -> toPurl(dep," ",this.goEnvironmentVariableForPurl).getName()).collect(Collectors.toList());
+    List<PackageURL> ignored = goModlines.stream()
+                             .filter(this::IgnoredLine)
+                             .map(this::extractPackageName)
+                             .map(dep -> toPurl(dep," ",this.goEnvironmentVariableForPurl))
+                             .collect(Collectors.toList());
     return ignored;
   }
 
@@ -300,13 +313,16 @@ public final class GoModulesProvider extends Provider {
       boolean result = false;
       if (line.contains("exhortignore"))
       {
+        // if exhortignore is alone in a comment or is in a comment together with indirect or as a comment inside a comment ( e.g // indirect  //exhort)
+        // then this line is to be checked if it's a comment after a package name.
         if(Pattern.matches(".+//\\s*exhortignore",line) || Pattern.matches(".+//\\sindirect (//)?\\s*exhortignore",line)  )
         {
           String trimmedRow = line.trim();
+          // filter out lines where exhortignore has no meaning
           if(!trimmedRow.startsWith("module") && !trimmedRow.startsWith("go") && !trimmedRow.startsWith("require (") && !trimmedRow.startsWith("require(")
              && !trimmedRow.startsWith("exclude") && !trimmedRow.startsWith("replace") && !trimmedRow.startsWith("retract") && !trimmedRow.startsWith("use")
              && !trimmedRow.contains("=>"))
-          {
+          { //only for lines that after trimming starts with "require " or starting with package name followd by one space, and then a semver version.
                if( trimmedRow.startsWith("require ") || Pattern.matches("^[a-z./-]+\\s[vV][0-9]\\.[0-9](\\.[0-9])?.*",trimmedRow))
                {
                  result = true;

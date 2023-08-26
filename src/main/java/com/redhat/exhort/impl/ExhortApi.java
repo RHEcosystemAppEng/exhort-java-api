@@ -50,7 +50,8 @@ public final class ExhortApi implements Api {
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     ExhortApi exhortApi = new ExhortApi();
-    exhortApi.componentAnalysis("go.mod", Files.readAllBytes(Path.of("/tmp/tidy-test/go.mod"))).get();
+    exhortApi.stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_light_no_ignore/go.mod");
+//    exhortApi.componentAnalysis("go.mod", Files.readAllBytes(Path.of("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_light_no_ignore/go.mod"))).get();
 //    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
   }
   /**

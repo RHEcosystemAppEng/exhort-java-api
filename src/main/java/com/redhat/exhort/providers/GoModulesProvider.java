@@ -55,16 +55,16 @@ public final class GoModulesProvider extends Provider {
   public static void main(String[] args) {
 
     TreeMap qualifiers = GoModulesProvider.getQualifiers(true);
-    Path path = Path.of("/tmp/tidy-test/go.mod");
+    Path path = Path.of("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_light_no_ignore/go.mod");
     Provider provider = new GoModulesProvider();
     GoModulesProvider goProvider = (GoModulesProvider) provider;
 //    boolean answer = goProvider.IgnoredLine("        github.com/davecgh/go-spew v1.1.1 // indirect //exhortignore");
       PackageURL purl = goProvider.toPurl("github.com/RHEcosystemAppEng/SaaSi/deployer", "@", goProvider.goEnvironmentVariableForPurl);
       System.out.println(purl.toString());
     try {
-      provider.provideStack(path);
+//      provider.provideStack(path);
       byte[] bytes = Files.readAllBytes(path);
-//      provider.provideComponent(bytes);
+      provider.provideComponent(bytes);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -159,7 +159,10 @@ public final class GoModulesProvider extends Provider {
 //    sbom.filterIgnoredDeps(ignoredDeps);
     return sbom;
   }
-
+  public void getMainModuleVersion(Path directory)
+  {
+    this.calculateMainModuleVersion(directory);
+  }
   private void calculateMainModuleVersion(Path directory) {
     VersionControlSystem vcs = new GitVersionControlSystemImpl();
     if(vcs.isDirectoryRepo(directory)) {

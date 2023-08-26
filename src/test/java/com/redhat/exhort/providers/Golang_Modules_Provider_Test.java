@@ -32,8 +32,10 @@ class Golang_Modules_Provider_Test {
   // - expected_sbom.json: the SBOM expected to be provided
   static Stream<String> testFolders() {
     return Stream.of(
-      "deps_with_ignore",
-      "deps_with_no_ignore"
+      "go_mod_light_no_ignore",
+      "go_mod_no_ignore",
+      "go_mod_with_ignore"
+
     );
   }
 
@@ -41,20 +43,20 @@ class Golang_Modules_Provider_Test {
   @MethodSource("testFolders")
   void test_the_provideStack(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut package.json
-    var tmpNpmFolder = Files.createTempDirectory("exhort_test_");
-    var tmpNpmFile = Files.createFile(tmpNpmFolder.resolve("package.json"));
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
-      Files.write(tmpNpmFile, is.readAllBytes());
+    var tmpGoModulesDir = Files.createTempDirectory("exhort_test_");
+    var tmpGolangFile = Files.createFile(tmpGoModulesDir.resolve("go.mod"));
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "go.mod"))) {
+      Files.write(tmpGolangFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "expected_sbom_stack_analysis.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing stack content for our pom
-    var content = new JavaScriptNpmProvider().provideStack(tmpNpmFile);
+    var content = new GoModulesProvider().provideStack(tmpGolangFile);
     // cleanup
-    Files.deleteIfExists(tmpNpmFile);
+    Files.deleteIfExists(tmpGolangFile);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
@@ -66,16 +68,16 @@ class Golang_Modules_Provider_Test {
   void test_the_provideComponent(String testFolder) throws IOException, InterruptedException {
     // load the pom target pom file
     byte[] targetPom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "go.mod"))) {
       targetPom = is.readAllBytes();
     }
     // load expected SBOM
     String expectedSbom = "";
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "expected_sbom_component_analysis.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom
-    var content = new JavaScriptNpmProvider().provideComponent(targetPom);
+    var content = new GoModulesProvider().provideComponent(targetPom);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))

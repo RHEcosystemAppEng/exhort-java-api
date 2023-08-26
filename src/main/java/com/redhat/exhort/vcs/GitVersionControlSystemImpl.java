@@ -108,7 +108,7 @@ public class GitVersionControlSystemImpl implements VersionControlSystem {
 
   private static void analyzeGitDescribeResult(TagInfo tagInfo, String[] parts) {
     if(Pattern.matches("g[0-9a-f]{12}", parts[parts.length-1])
-        && Pattern.matches("[1-9]", parts[parts.length-2]))
+        && Pattern.matches("[1-9]*", parts[parts.length-2]))
     {
       String[] tagNameParts = Arrays.copyOfRange(parts, 0, parts.length - 2);
       tagInfo.setTagName(String.join("-" , tagNameParts));

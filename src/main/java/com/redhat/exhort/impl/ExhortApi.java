@@ -21,6 +21,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -43,13 +45,14 @@ import jakarta.mail.util.ByteArrayDataSource;
 /** Concrete implementation of the Exhort {@link Api} Service. **/
 public final class ExhortApi implements Api {
 
-  private static final String DEFAULT_ENDPOINT = "http://dev-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final String DEFAULT_ENDPOINT = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-    AnalysisReport analysisReport = new ExhortApi()
-    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
-    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+    ExhortApi exhortApi = new ExhortApi();
+    exhortApi.stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_light_no_ignore/go.mod");
+//    exhortApi.componentAnalysis("go.mod", Files.readAllBytes(Path.of("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_light_no_ignore/go.mod"))).get();
+//    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
   }
   /**
    * Enum for identifying token environment variables and their

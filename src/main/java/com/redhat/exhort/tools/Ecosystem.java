@@ -19,6 +19,7 @@ import java.nio.file.Path;
 
 
 import com.redhat.exhort.Provider;
+import com.redhat.exhort.providers.GoModulesProvider;
 import com.redhat.exhort.providers.JavaMavenProvider;
 import com.redhat.exhort.providers.JavaScriptNpmProvider;
 
@@ -28,7 +29,8 @@ public final class Ecosystem {
   public enum Type {
 
     MAVEN ("maven"),
-    NPM ("npm");
+    NPM ("npm"),
+    GOLANG ("golang");
 
     String type;
 
@@ -67,6 +69,8 @@ public final class Ecosystem {
         return new JavaMavenProvider();
       case "package.json":
         return new JavaScriptNpmProvider();
+      case "go.mod":
+        return new GoModulesProvider();
       default:
         throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
         );

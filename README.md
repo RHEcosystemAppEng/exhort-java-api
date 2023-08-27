@@ -168,6 +168,8 @@ public class ExhortExample {
 <h3>Supported Ecosystems</h3>
 <ul>
 <li><a href="https://www.java.com/">Java</a> - <a href="https://maven.apache.org/">Maven</a></li>
+<li><a href="https://www.javascript.com//">JavaScript</a> - <a href="https://www.npmjs.com//">Npm</a></li>
+<li><a href="https://go.dev//">Golang</a> - <a href="https://go.dev/blog/using-go-modules//">Go Modules</a></li>
 </ul>
 
 <h3>Excluding Packages</h3>
@@ -189,6 +191,61 @@ Excluding a package from any analysis can be achieved by marking the package for
 </li>
 
 </ul>
+<ul>
+<li>
+<em>Javascript NPM </em> users can add a root (key, value) pair with value of list of names (strings) to be ignored (without versions), and key called <b>exhortignore</b> in <em>package.json</em>,  example:
+
+```json
+{
+  "name": "sample",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.18"
+  },
+  "exhortignore": [
+    "jsonwebtoken"
+  ]
+}
+
+```
+
+<em>Golang</em> users can add in go.mod a comment with //exhortignore next to the package to be ignored, or to "piggyback" on existing comment ( e.g - //indirect) , for example:
+```go
+module github.com/RHEcosystemAppEng/SaaSi/deployer
+
+go 1.19
+
+require (
+        github.com/gin-gonic/gin v1.9.1
+        github.com/google/uuid v1.1.2
+        github.com/jessevdk/go-flags v1.5.0 //exhortignore
+        github.com/kr/pretty v0.3.1
+        gopkg.in/yaml.v2 v2.4.0
+        k8s.io/apimachinery v0.26.1
+        k8s.io/client-go v0.26.1
+)
+
+require (
+        github.com/davecgh/go-spew v1.1.1 // indirect exhortignore
+        github.com/emicklei/go-restful/v3 v3.9.0 // indirect
+        github.com/go-logr/logr v1.2.3 // indirect //exhortignore
+
+)
+```
+
+All of the 3 above examples are valid for marking a package to be ignored 
+
+</li>
+
+</ul>
 
 <h3>Customization</h3>
 <p>
@@ -198,6 +255,9 @@ There are 2 approaches for customizing <em>Exhort Java API</em>. Using <em>Envir
 ```java
 System.setProperty("EXHORT_SNYK_TOKEN", "my-private-snyk-token");
 System.setProperty("EXHORT_MVN_PATH", "/path/to/custom/mvn");
+System.setProperty("EXHORT_NPM_PATH", "/path/to/custom/npm");
+System.setProperty("EXHORT_GO_PATH", "/path/to/custom/go");
+
 ```
 
 > Environment variables takes precedence.
@@ -258,6 +318,16 @@ following keys for setting custom paths for the said executables.
 <td><em>mvn</em></td>
 <td>EXHORT_MVN_PATH</td>
 </tr>
+<tr>
+<td><a href="https://www.npmjs.com/">Node Package Manager (npm)</a></td>
+<td><em>npm</em></td>
+<td>EXHORT_NPM_PATH</td>
+</tr>
+<td><a href="https://go.dev/blog/using-go-modules/">Go Modules</a></td>
+<td><em>go</em></td>
+<td>EXHORT_GO_PATH</td>
+</tr>
+
 </table>
 
 <!-- Badge links -->

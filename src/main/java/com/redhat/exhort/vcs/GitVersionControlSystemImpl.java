@@ -20,37 +20,43 @@ public class GitVersionControlSystemImpl implements VersionControlSystem {
     TagInfo tagInfo = new TagInfo();
 
     //get current commit hash digest
-    String commitHash = Operations.runProcessGetOutput(repoLocation, gitBinary, "rev-parse", "HEAD");
-    tagInfo.setCurrentCommitDigest(commitHash);
-    //get current commit timestamp.
-    String timeStampFromGit = Operations.runProcessGetOutput(repoLocation, gitBinary, "show", "HEAD", "--format=%cI", "--date", "local", "--quiet");
-    LocalDateTime commitTimestamp = LocalDateTime.parse(timeStampFromGit.trim(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    tagInfo.setCommitTimestamp(commitTimestamp);
+    String commitHash = Operations.runProcessGetOutput(repoLocation, gitBinary, "rev-parse", "HEAD").trim();
+    if(Pattern.matches("^[a-f0-9]+",commitHash)) {
+      tagInfo.setCurrentCommitDigest(commitHash);
+      //get current commit timestamp.
+      String timeStampFromGit = Operations.runProcessGetOutput(repoLocation, gitBinary, "show", "HEAD", "--format=%cI", "--date", "local", "--quiet");
+      LocalDateTime commitTimestamp = LocalDateTime.parse(timeStampFromGit.trim(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      tagInfo.setCommitTimestamp(commitTimestamp);
 
 
-    // go get last annotated tag
-    String resultFromInvocation = Operations.runProcessGetOutput(repoLocation, gitBinary, "describe","--abbrev=12").trim();
+      // go get last annotated tag
+      String resultFromInvocation = Operations.runProcessGetOutput(repoLocation, gitBinary, "describe", "--abbrev=12").trim();
 
-    // if there are only unannotated tag, fetch last one.
-    if(resultFromInvocation.contains("there were unannotated tags"))
-    {
-      //fetch last unannotated tag
-      resultFromInvocation=Operations.runProcessGetOutput(repoLocation, gitBinary, "describe", "--tags", "--abbrev=12").trim();
-      fetchLatestTag(tagInfo, resultFromInvocation);
+      // if there are only unannotated tag, fetch last one.
+      if (resultFromInvocation.contains("there were unannotated tags")) {
+        //fetch last unannotated tag
+        resultFromInvocation = Operations.runProcessGetOutput(repoLocation, gitBinary, "describe", "--tags", "--abbrev=12").trim();
+        fetchLatestTag(tagInfo, resultFromInvocation);
+      } else {
+        if (resultFromInvocation.startsWith("fatal: No names found")) {
+          tagInfo.setCurrentCommitPointedByTag(false);
+          tagInfo.setTagName("");
+        }
+        //fetch last annotated tag
+        else {
+          fetchLatestTag(tagInfo, resultFromInvocation);
+
+        }
+      }
     }
+
+    // empty git repo with no commits
     else
     {
-      if(resultFromInvocation.startsWith("fatal: No names found"))
-      {
-        tagInfo.setCurrentCommitPointedByTag(false);
-        tagInfo.setTagName("");
-      }
-      //fetch last annotated tag
-      else
-      {
-        fetchLatestTag(tagInfo, resultFromInvocation);
-
-      }
+      tagInfo.setTagName("");
+      tagInfo.setCurrentCommitPointedByTag(false);
+      tagInfo.setCommitTimestamp(LocalDateTime.parse(LocalDateTime.MIN.toString(),DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+      tagInfo.setCurrentCommitDigest("");
     }
     return tagInfo;
   }

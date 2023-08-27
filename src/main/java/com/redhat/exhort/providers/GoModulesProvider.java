@@ -48,8 +48,14 @@ public final class GoModulesProvider extends Provider {
 
   private static final String goHostArchitectureEnvName = "GOHOSTARCH";
   private static final String goHostOperationSystemEnvName = "GOHOSTOS";
+  public static final String defaultMainVersion = "v0.0.0";
   private final TreeMap goEnvironmentVariableForPurl;
   private final TreeMap goEnvironmentVariablesForRef;
+
+  public String getMainModuleVersion() {
+    return mainModuleVersion;
+  }
+
   private String mainModuleVersion;
 
   public static void main(String[] args) {
@@ -159,7 +165,7 @@ public final class GoModulesProvider extends Provider {
 //    sbom.filterIgnoredDeps(ignoredDeps);
     return sbom;
   }
-  public void getMainModuleVersion(Path directory)
+  public void determineMainModuleVersion(Path directory)
   {
     this.calculateMainModuleVersion(directory);
   }
@@ -180,7 +186,9 @@ public final class GoModulesProvider extends Provider {
        }
        else
        {
-         this.mainModuleVersion = vcs.getPseudoVersion(latestTagInfo, getDefaultMainModuleVersion());
+         if(!latestTagInfo.getCurrentCommitDigest().trim().equals("")) {
+           this.mainModuleVersion = vcs.getPseudoVersion(latestTagInfo, getDefaultMainModuleVersion());
+         }
        }
     }
   }
@@ -350,7 +358,7 @@ public final class GoModulesProvider extends Provider {
   }
 
   private static String getDefaultMainModuleVersion() {
-    return "v0.0.0";
+    return defaultMainVersion;
   }
 
 }

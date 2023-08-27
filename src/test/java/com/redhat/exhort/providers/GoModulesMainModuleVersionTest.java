@@ -40,6 +40,8 @@ class GoModulesMainModuleVersionTest {
     try {
       this.goModulesProvider = new GoModulesProvider();
       this.testGitRepo = Files.createTempDirectory("exhort_tmp");
+      Operations.runProcessGetOutput(this.testGitRepo,"git" , "config","--global","user.email","tester@exhort-java-api.com");
+      Operations.runProcessGetOutput(this.testGitRepo,"git" , "config","--global","user.name","exhort-java-api-tester");
       Operations.runProcessGetOutput(this.testGitRepo,"git" , "init");
       this.noGitRepo = Files.createTempDirectory("exhort_tmp");
     } catch (IOException e) {

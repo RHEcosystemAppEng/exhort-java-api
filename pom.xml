@@ -69,6 +69,11 @@
       <id>TomerFi</id>
       <url>https://github.com/TomerFi</url>
     </developer>
+    <developer>
+      <id>zvigrinberg</id>
+      <url>https://github.com/zvigrinberg</url>
+    </developer>
+
   </developers>
 
   <issueManagement>
@@ -534,11 +539,17 @@ limitations under the License.]]>
             <phase>generate-sources</phase>
             <goals>
               <goal>add-source</goal>
+              <goal>add-resource</goal>
             </goals>
             <configuration>
               <sources>
                 <source>${project.build.directory}/generated-sources</source>
               </sources>
+              <resources>
+                <resource>
+                  <directory>src/main/resources/exhort</directory>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>

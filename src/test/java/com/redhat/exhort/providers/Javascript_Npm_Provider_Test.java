@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.redhat.exhort.Api;
 
-class Java_Npm_Provider_Test {
+class Javascript_Npm_Provider_Test {
   // test folder are located at src/test/resources/tst_manifests/npm
   // each folder should contain:
   // - package.json: the target manifest for testing

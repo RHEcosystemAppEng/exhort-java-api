@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.Objects;
 
 /** Utility class used for executing process on the operating system. **/
@@ -98,11 +99,21 @@ public final class Operations {
     }
   }
 
-  public static String runProcessGetOutput(final String... cmdList) {
+  public static String runProcessGetOutput(Path dir, final String... cmdList) {
     StringBuilder sb = new StringBuilder();
     try {
-      Process process = Runtime.getRuntime().exec(String.join(" ",cmdList));
-      InputStream inputStream = process.getInputStream();
+      Process process;
+      InputStream inputStream;
+      if(dir == null) {
+        process = Runtime.getRuntime().exec(String.join(" ", cmdList));
+      }
+      else
+      {
+        process = Runtime.getRuntime().exec(String.join(" ", cmdList),null,dir.toFile());
+      }
+
+
+     inputStream = process.getInputStream();
 
       BufferedReader reader = new BufferedReader(
         new InputStreamReader(inputStream));
@@ -110,9 +121,24 @@ public final class Operations {
       while((line = reader.readLine()) != null)
       {
         sb.append(line);
+        if (!line.endsWith(System.lineSeparator()))
+        {
+          sb.append("\n");
+        }
+      }
+      if(sb.toString().trim().equals("")) {
+        inputStream = process.getErrorStream();
+        reader = new BufferedReader(
+          new InputStreamReader(inputStream));
+        while ((line = reader.readLine()) != null) {
+          sb.append(line);
+          if (!line.endsWith(System.lineSeparator())) {
+            sb.append("\n");
+          }
+        }
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(String.format("Failed to execute command '%s' ",String.join(" ",cmdList)),e);
     }
     return sb.toString();
   }

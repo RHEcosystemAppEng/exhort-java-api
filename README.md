@@ -168,6 +168,7 @@ public class ExhortExample {
 <h3>Supported Ecosystems</h3>
 <ul>
 <li><a href="https://www.java.com/">Java</a> - <a href="https://maven.apache.org/">Maven</a></li>
+<li><a href="https://www.javascript.com//">JavaScript</a> - <a href="https://www.npmjs.com//">Npm</a></li>
 </ul>
 
 <h3>Excluding Packages</h3>
@@ -198,6 +199,7 @@ There are 2 approaches for customizing <em>Exhort Java API</em>. Using <em>Envir
 ```java
 System.setProperty("EXHORT_SNYK_TOKEN", "my-private-snyk-token");
 System.setProperty("EXHORT_MVN_PATH", "/path/to/custom/mvn");
+System.setProperty("EXHORT_NPM_PATH", "/path/to/custom/npm");
 ```
 
 > Environment variables takes precedence.
@@ -257,6 +259,11 @@ following keys for setting custom paths for the said executables.
 <td><a href="https://maven.apache.org/">Maven</a></td>
 <td><em>mvn</em></td>
 <td>EXHORT_MVN_PATH</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/">Node Package Manager (npm)</a></td>
+<td><em>npm</em></td>
+<td>EXHORT_NPM_PATH</td>
 </tr>
 </table>
 

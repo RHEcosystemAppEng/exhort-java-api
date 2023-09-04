@@ -135,7 +135,15 @@ public final class JavaScriptNpmProvider extends Provider {
     var npmAllDeps = new String[] { npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
         "--json", "--prefix", manifestPath.getParent().toString() };
     // execute the clean command
-    String npmOutput = Operations.runProcessGetOutput(npmAllDeps);
+    String npmOutput = Operations.runProcessGetOutput(null,npmAllDeps);
+    if(!includeTransitive)
+    {
+      try {
+        Files.delete(packageLockJson);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
     return objectMapper.readTree(npmOutput);
   }
 

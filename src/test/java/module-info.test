@@ -2,7 +2,7 @@
   jdk.attach,jdk.unsupported,org.assertj.core,org.junit.jupiter.params,org.mockito,net.bytebuddy,net.bytebuddy.agent
 
 --add-reads
-  com.redhat.exhort=org.assertj.core
+  com.redhat.exhort=org.assertj.core,org.junit.jupiter.api
 
 --add-opens
   com.redhat.exhort/com.redhat.exhort.impl=org.junit.platform.commons

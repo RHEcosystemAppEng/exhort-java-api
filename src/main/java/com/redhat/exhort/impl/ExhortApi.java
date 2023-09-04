@@ -16,6 +16,7 @@
 package com.redhat.exhort.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
@@ -23,9 +24,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,13 +46,21 @@ import jakarta.mail.util.ByteArrayDataSource;
 /** Concrete implementation of the Exhort {@link Api} Service. **/
 public final class ExhortApi implements Api {
 
-  private static final String DEFAULT_ENDPOINT = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
+  private static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
+  private static final String DEFAULT_ENDPOINT_DEV = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
   private final String endpoint;
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-    AnalysisReport analysisReport = new ExhortApi()
-    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
-    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+//    AnalysisReport analysisReport = new ExhortApi()
+//    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
+//    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+//    System.setProperty("EXHORT_DEV_MODE","true");
+//    System.setProperty("DEV_EXHORT_BACKEND_URL","http://exhort-dev.redhat.com");
+//    System.setProperty("EXHORT_BACKEND_URL","https://exhort-prod.redhat.com");
+    ExhortApi exhortApi = new ExhortApi();
+    System.out.print(exhortApi.getExhortUrl());
+
   }
   /**
    * Enum for identifying token environment variables and their
@@ -93,9 +104,48 @@ public final class ExhortApi implements Api {
   ExhortApi(final HttpClient client) {
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    this.endpoint = Objects.requireNonNullElse(
-      System.getenv("EXHORT_URL"), ExhortApi.DEFAULT_ENDPOINT
-    );
+    // Take default from config.properties in case client didn't override DEV MODE
+    if(System.getProperty("EXHORT_DEV_MODE") == null ) {
+      try {
+        InputStream exhortConfig = this.getClass().getClassLoader().getResourceAsStream("config.properties");
+        if (exhortConfig == null)
+        {
+          LOG.log(System.Logger.Level.INFO,"config.properties not found on the class path, fallback to default DEV MODE = false");
+          System.setProperty("EXHORT_DEV_MODE", "false");
+        }
+        else {
+          Properties properties = new Properties();
+          properties.load(exhortConfig);
+          System.setProperty("EXHORT_DEV_MODE", (String) properties.get("EXHORT_DEV_MODE"));
+        }
+      } catch (IOException e) {
+        LOG.log(System.Logger.Level.INFO,String.format("Error loading config.properties , fallback to set default property DEV MODE = false, Error message = %s",e.getMessage()));
+        System.setProperty("EXHORT_DEV_MODE", "false");
+      }
+    }
+
+    this.endpoint = getExhortUrl();
+  }
+
+  public String getExhortUrl() {
+    String endpoint;
+    if(getBooleanValueEnvironment("EXHORT_DEV_MODE")) {
+      endpoint = getStringValueEnvironment("DEV_EXHORT_BACKEND_URL", DEFAULT_ENDPOINT_DEV);
+    }
+    else
+    {
+      endpoint = DEFAULT_ENDPOINT;
+    }
+    return endpoint;
+  }
+
+  private boolean getBooleanValueEnvironment(String key) {
+    String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), "false"));
+    return Boolean.parseBoolean(result.trim().toLowerCase());
+  }
+  private String getStringValueEnvironment(String key,String defaultValue) {
+    String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), defaultValue));
+    return result;
   }
 
   @Override

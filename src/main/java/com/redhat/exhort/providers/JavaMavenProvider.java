@@ -58,7 +58,7 @@ public final class JavaMavenProvider extends Provider {
     // check for custom mvn executable
     var mvn = Operations.getCustomPathOrElse("mvn");
     // clean command used to clean build target
-    var mvnCleanCmd = new String[]{mvn, "-q", "clean", "-f", manifestPath.toString()};
+    var mvnCleanCmd = new String[]{mvn, "clean", "-f", manifestPath.toString()};
     var mvnEnvs = getMvnExecEnvs();
     // execute the clean command
     Operations.runProcess(mvnCleanCmd, mvnEnvs);
@@ -67,7 +67,6 @@ public final class JavaMavenProvider extends Provider {
     // the tree command will build the project and create the dependency tree in the temp file
     var mvnTreeCmd = new ArrayList<String>() {{
       add(mvn);
-      add("-q");
       add("dependency:tree");
       add("-DoutputType=dot");
       add("-Dscope=compile");
@@ -144,7 +143,6 @@ public final class JavaMavenProvider extends Provider {
     var tmpEffPom = Files.createTempFile("exhort_eff_pom_", ".xml");
     var mvnEffPomCmd = new String[]{
       mvn,
-      "-q",
       "clean",
       "help:effective-pom",
       String.format("-Doutput=%s", tmpEffPom.toString()),

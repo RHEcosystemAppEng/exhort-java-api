@@ -16,6 +16,7 @@
 package com.redhat.exhort.sbom;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import com.github.packageurl.PackageURL;
 
@@ -23,7 +24,7 @@ public interface Sbom {
 
     public Sbom addRoot(PackageURL root);
     public PackageURL getRoot();
-    public Sbom filterIgnoredDeps(Collection<String> ignoredDeps);
+    public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps);
     public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
     public String getAsJsonString();
 

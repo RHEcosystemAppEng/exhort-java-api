@@ -20,8 +20,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.github.packageurl.MalformedPackageURLException;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.model.Bom;
@@ -35,9 +38,15 @@ import com.github.packageurl.PackageURL;
 public class CycloneDXSbom implements Sbom {
 
     private static final Version VERSION = Version.VERSION_14;
-
-    private Bom bom;
+  private Bom bom;
     private PackageURL root;
+
+    private BiPredicate<Collection,Component> belongingCriteriaBinaryAlgorithm;
+
+    private <X,Y> Predicate<Y> genericComparator(BiPredicate<X,Y> binaryBelongingCriteriaAlgorithm, X container)
+    {
+      return dep -> binaryBelongingCriteriaAlgorithm.test(container, dep);
+    }
 
     public CycloneDXSbom() {
         bom = new Bom();
@@ -47,9 +56,36 @@ public class CycloneDXSbom implements Sbom {
         bom.setMetadata(metadata);
         bom.setComponents(new ArrayList<>());
         bom.setDependencies(new ArrayList<>());
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+
     }
 
-    public Sbom addRoot(PackageURL rootRef) {
+  private static BiPredicate<Collection, Component> getBelongingConditionByName() {
+    return (collection, component) -> collection.contains(component.getName());
+  }
+
+  public CycloneDXSbom(BelongingCondition belongingCondition) {
+      this();
+      if(belongingCondition.equals(BelongingCondition.NAME))
+      {
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+      }
+      else if (belongingCondition.equals(BelongingCondition.PURL)){
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
+      }
+      else
+      {
+        // fallback to belonging condition by name ( default) - this one in case the enum type will be extended and new BelongingType won't be implemented right away.
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+      }
+
+    }
+
+  private BiPredicate<Collection, Component> getBelongingConditionByPurl() {
+    return (collection, component) -> collection.contains(componentToPurl(component).getCoordinates());
+  }
+
+  public Sbom addRoot(PackageURL rootRef) {
         this.root = rootRef;
         Component rootComponent = newRootComponent(rootRef);
         bom.getMetadata().setComponent(rootComponent);
@@ -84,15 +120,24 @@ public class CycloneDXSbom implements Sbom {
         return c;
     }
 
+  private PackageURL componentToPurl(Component component)  {
+    try {
+      return new PackageURL(component.getPurl());
+    } catch (MalformedPackageURLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
     private Dependency newDependency(PackageURL ref) {
         return new Dependency(ref.getCoordinates());
     }
 
     @Override
-    public Sbom filterIgnoredDeps(Collection<String> ignoredDeps) {
+    public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps) {
+
         List<String> initialIgnoreRefs = bom.getComponents()
                 .stream()
-                .filter(c -> ignoredDeps.contains(c.getName()))
+                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm,ignoredDeps).test(c))
                 .map(Component::getBomRef).collect(Collectors.toList());
         List<String> refsToIgnore = createIgnoreFilter(bom.getDependencies(),
                 initialIgnoreRefs);
@@ -118,19 +163,19 @@ public class CycloneDXSbom implements Sbom {
     }
 
     private List<String> createIgnoreFilter(List<Dependency> deps, Collection<String> toIgnore) {
-        List<String> result = new ArrayList<>(toIgnore);
-        List<String> t = deps.stream()
-                .filter(d -> toIgnore.contains(d.getRef()))
-                .dropWhile(d -> d.getDependencies() == null)
-                .map(Dependency::getDependencies)
-                .flatMap(Collection::stream)
-                .map(Dependency::getRef)
-                .collect(Collectors.toList());
-        if (t.isEmpty()) {
-            return result;
+      List<String> result = new ArrayList<>(toIgnore);
+      for (Dependency dep : deps) {
+        if (toIgnore.contains(dep.getRef()) && dep.getDependencies() != null) {
+          List collected = dep.getDependencies().stream().map(p -> p.getRef()).collect(Collectors.toList());
+          result.addAll(collected);
+          if (dep.getDependencies().stream().filter(p -> p != null).count() > 0) {
+            result= createIgnoreFilter(dep.getDependencies(), result);
+          }
+
         }
-        result.addAll(t);
-        return createIgnoreFilter(deps, result);
+
+      }
+      return result;
     }
 
     @Override

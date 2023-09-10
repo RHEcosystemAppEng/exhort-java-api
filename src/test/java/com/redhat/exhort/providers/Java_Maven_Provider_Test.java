@@ -33,6 +33,7 @@ class Java_Maven_Provider_Test {
   // - expected_sbom.json: the SBOM expected to be provided
   static Stream<String> testFolders() {
     return Stream.of(
+      "deps_no_trivial_with_ignore",
       "deps_with_ignore_on_artifact",
       "deps_with_ignore_on_dependency",
       "deps_with_ignore_on_group",
@@ -52,7 +53,7 @@ class Java_Maven_Provider_Test {
     }
     // load expected SBOM
     String expectedSbom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_stack_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing stack content for our pom
@@ -75,7 +76,7 @@ class Java_Maven_Provider_Test {
     }
     // load expected SBOM
     String expectedSbom = "";
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom

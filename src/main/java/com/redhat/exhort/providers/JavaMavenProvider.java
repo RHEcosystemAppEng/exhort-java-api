@@ -45,7 +45,12 @@ import com.redhat.exhort.tools.Operations;
  * Component analysis.
  **/
 public final class JavaMavenProvider extends Provider {
-
+  public static void main(String[] args) throws IOException {
+    JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
+    Content content = javaMavenProvider.provideStack(Path.of("/tmp/bug-070923/pom.xml"));
+    String report = new String(content.buffer);
+    System.out.println(report);
+  }
   public JavaMavenProvider() {
     super(Type.MAVEN);
   }
@@ -73,20 +78,18 @@ public final class JavaMavenProvider extends Provider {
     // if we have dependencies marked as ignored, exclude them from the tree command
     var ignored = getDependencies(manifestPath).stream()
       .filter(d -> d.ignored)
-      .map(DependencyAggregator::toString)
-      .collect(Collectors.joining(","));
-    if (ignored.length() > 0) {
-      mvnTreeCmd.add(String.format("-Dexcludes=%s", ignored));
-    }
+      .map(DependencyAggregator::toPurl)
+      .map(PackageURL::getCoordinates)
+      .collect(Collectors.toList());
     // execute the tree command
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new));
     var sbom = buildSbomFromDot(tmpFile);
     // build and return content for constructing request to the backend
-    return new Content(sbom.getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
+    return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   private Sbom buildSbomFromDot(Path dotFile) throws IOException {
-    var sbom = SbomFactory.newInstance();
+    var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL);
     var reader = new BufferedReader(Files.newBufferedReader(dotFile));
     String line = reader.readLine();
     while (line != null) {
@@ -150,7 +153,7 @@ public final class JavaMavenProvider extends Provider {
     var sbom = SbomFactory.newInstance().addRoot(getRoot(tmpEffPom));
     deps.stream()
       .map(DependencyAggregator::toPurl)
-      .dropWhile(ignored::contains)
+      .filter(dep -> !ignored.contains(dep))
       .forEach(d -> sbom.addDependency(sbom.getRoot(), d));
 
     // build and return content for constructing request to the backend
@@ -324,6 +327,11 @@ public final class JavaMavenProvider extends Provider {
       return Objects.equals(this.groupId, that.groupId) &&
         Objects.equals(this.artifactId, that.artifactId) &&
         Objects.equals(this.version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(groupId, artifactId, version);
     }
   }
 }

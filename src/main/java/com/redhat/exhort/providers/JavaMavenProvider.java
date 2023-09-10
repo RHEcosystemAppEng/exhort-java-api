@@ -71,6 +71,8 @@ public final class JavaMavenProvider extends Provider {
       add("-q");
       add("dependency:tree");
       add("-DoutputType=dot");
+      add("-Dscope=compile");
+      add("-Dscope=runtime");
       add(String.format("-DoutputFile=%s", tmpFile.toString()));
       add("-f");
       add(manifestPath.toString());
@@ -148,10 +150,13 @@ public final class JavaMavenProvider extends Provider {
     Operations.runProcess(mvnEffPomCmd);
     // if we have dependencies marked as ignored grab ignored dependencies from the original pom
     // the effective-pom goal doesn't carry comments
-    var ignored = getDependencies(originPom).stream().filter(d -> d.ignored).map(DependencyAggregator::toPurl).collect(Collectors.toSet());
+    List<DependencyAggregator> dependencies = getDependencies(originPom);
+    var ignored = dependencies.stream().filter(d -> d.ignored).map(DependencyAggregator::toPurl).collect(Collectors.toSet());
+    var testsDeps = dependencies.stream().filter(DependencyAggregator::isTestDependency).collect(Collectors.toSet());
     var deps = getDependencies(tmpEffPom);
     var sbom = SbomFactory.newInstance().addRoot(getRoot(tmpEffPom));
     deps.stream()
+      .filter(dep -> !testsDeps.contains(dep))
       .map(DependencyAggregator::toPurl)
       .filter(dep -> !ignored.contains(dep))
       .forEach(d -> sbom.addDependency(sbom.getRoot(), d));
@@ -251,6 +256,11 @@ public final class JavaMavenProvider extends Provider {
                 reader.next();
                 dependencyAggregator.artifactId = reader.getText();
                 break;
+
+              case "scope":
+                reader.next();
+                dependencyAggregator.scope = reader.getText() != null ? reader.getText() : "*";
+                break;
               case "version": // starting "version" tag, get next event and set to aggregator
                 reader.next();
                 dependencyAggregator.version = reader.getText();
@@ -284,6 +294,7 @@ public final class JavaMavenProvider extends Provider {
   // add property here and a case in the start-element-switch in the getIgnored method
   /** Aggregator class for aggregating Dependency data over stream iterations, **/
   private final static class DependencyAggregator {
+    private String scope="*";
     private String groupId;
     private String artifactId;
     private String version;
@@ -296,11 +307,16 @@ public final class JavaMavenProvider extends Provider {
     @Override
     public String toString() {
       // NOTE if you add scope, don't forget to replace the * with its value
-      return String.format("%s:%s:*:%s", groupId, artifactId, version);
+      return String.format("%s:%s:%s:%s", groupId, artifactId,scope, version);
     }
 
     public boolean isValid() {
       return Objects.nonNull(groupId) && Objects.nonNull(artifactId) && Objects.nonNull(version);
+    }
+
+    public boolean isTestDependency()
+    {
+      return scope.trim().equals("test");
     }
 
     /**

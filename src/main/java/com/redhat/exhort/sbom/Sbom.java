@@ -28,4 +28,20 @@ public interface Sbom {
     public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
     public String getAsJsonString();
 
+    public enum BelongingCondition
+    {
+      NAME("name"),
+      PURL("purl");
+
+      String belongingCondition;
+
+      BelongingCondition(String belongingCondition) {
+        this.belongingCondition = belongingCondition;
+      }
+
+      public String getBelongingCondition() {
+        return belongingCondition;
+      }
+    }
+
 }

@@ -41,11 +41,11 @@ public class CycloneDXSbom implements Sbom {
   private Bom bom;
     private PackageURL root;
 
-    private BiPredicate<Collection,Component> comparisonPredicate;
+    private BiPredicate<Collection,Component> belongingCriteriaBinaryAlgorithm;
 
-    private <X,Y> Predicate<Y> genericComparator(BiPredicate<X,Y> binaryAlgorithm, X container)
+    private <X,Y> Predicate<Y> genericComparator(BiPredicate<X,Y> binaryBelongingCriteriaAlgorithm, X container)
     {
-      return dep -> binaryAlgorithm.test(container, dep);
+      return dep -> binaryBelongingCriteriaAlgorithm.test(container, dep);
     }
 
     public CycloneDXSbom() {
@@ -56,23 +56,36 @@ public class CycloneDXSbom implements Sbom {
         bom.setMetadata(metadata);
         bom.setComponents(new ArrayList<>());
         bom.setDependencies(new ArrayList<>());
-
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
 
     }
 
-    public CycloneDXSbom(String typeOfComparison) {
+  private static BiPredicate<Collection, Component> getBelongingConditionByName() {
+    return (collection, component) -> collection.contains(component.getName());
+  }
+
+  public CycloneDXSbom(BelongingCondition belongingCondition) {
       this();
-      if(typeOfComparison.equals("name"))
+      if(belongingCondition.equals(BelongingCondition.NAME))
       {
-        comparisonPredicate = (collection, component) -> collection.contains(component.getName());
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
       }
-      else {
-        comparisonPredicate = (collection, component) -> collection.contains(componentToPurl(component).getCoordinates());
+      else if (belongingCondition.equals(BelongingCondition.PURL)){
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
+      }
+      else
+      {
+        // fallback to belonging condition by name ( default) - this one in case the enum type will be extended and new BelongingType won't be implemented right away.
+        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
       }
 
     }
 
-    public Sbom addRoot(PackageURL rootRef) {
+  private BiPredicate<Collection, Component> getBelongingConditionByPurl() {
+    return (collection, component) -> collection.contains(componentToPurl(component).getCoordinates());
+  }
+
+  public Sbom addRoot(PackageURL rootRef) {
         this.root = rootRef;
         Component rootComponent = newRootComponent(rootRef);
         bom.getMetadata().setComponent(rootComponent);
@@ -124,7 +137,7 @@ public class CycloneDXSbom implements Sbom {
 
         List<String> initialIgnoreRefs = bom.getComponents()
                 .stream()
-                .filter(c -> genericComparator(this.comparisonPredicate,ignoredDeps).test(c))
+                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm,ignoredDeps).test(c))
                 .map(Component::getBomRef).collect(Collectors.toList());
         List<String> refsToIgnore = createIgnoreFilter(bom.getDependencies(),
                 initialIgnoreRefs);

@@ -79,7 +79,7 @@ public final class JavaMavenProvider extends Provider {
     var ignored = getDependencies(manifestPath).stream()
       .filter(d -> d.ignored)
       .map(DependencyAggregator::toPurl)
-      .map(PackageURL::getName)
+      .map(PackageURL::getCoordinates)
       .collect(Collectors.toList());
     // execute the tree command
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new));
@@ -89,7 +89,7 @@ public final class JavaMavenProvider extends Provider {
   }
 
   private Sbom buildSbomFromDot(Path dotFile) throws IOException {
-    var sbom = SbomFactory.newInstance();
+    var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL);
     var reader = new BufferedReader(Files.newBufferedReader(dotFile));
     String line = reader.readLine();
     while (line != null) {
@@ -153,7 +153,7 @@ public final class JavaMavenProvider extends Provider {
     var sbom = SbomFactory.newInstance().addRoot(getRoot(tmpEffPom));
     deps.stream()
       .map(DependencyAggregator::toPurl)
-      .dropWhile(ignored::contains)
+      .filter(dep -> !ignored.contains(dep))
       .forEach(d -> sbom.addDependency(sbom.getRoot(), d));
 
     // build and return content for constructing request to the backend
@@ -327,6 +327,11 @@ public final class JavaMavenProvider extends Provider {
       return Objects.equals(this.groupId, that.groupId) &&
         Objects.equals(this.artifactId, that.artifactId) &&
         Objects.equals(this.version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(groupId, artifactId, version);
     }
   }
 }

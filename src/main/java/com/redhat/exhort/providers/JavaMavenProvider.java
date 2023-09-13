@@ -130,14 +130,19 @@ public final class JavaMavenProvider extends Provider {
 
   @Override
   public Content provideComponent(byte[] manifestContent) throws IOException {
-    // check for custom mvn executable
-    var mvn = Operations.getCustomPathOrElse("mvn");
     // save content in temporary file
     var originPom = Files.createTempFile("exhort_orig_pom_", ".xml");
     Files.write(originPom, manifestContent);
-    // create a temp file for storing the effective pom in
-    var tmpEffPom = Files.createTempFile("exhort_eff_pom_", ".xml");
     // build effective pom command
+    Content content = generateSbomFromEffectivePom(originPom);
+    Files.delete(originPom);
+    return content;
+  }
+
+  private Content generateSbomFromEffectivePom(Path originPom) throws IOException {
+    // check for custom mvn executable
+    var mvn = Operations.getCustomPathOrElse("mvn");
+    var tmpEffPom = Files.createTempFile("exhort_eff_pom_", ".xml");
     var mvnEffPomCmd = new String[]{
       mvn,
       "-q",
@@ -163,6 +168,12 @@ public final class JavaMavenProvider extends Provider {
 
     // build and return content for constructing request to the backend
     return new Content(sbom.getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
+  }
+
+  @Override
+  public Content provideComponent(Path manifestPath) throws IOException {
+    Content content = generateSbomFromEffectivePom(manifestPath);
+    return content;
   }
 
   private PackageURL getRoot(final Path manifestPath) throws IOException {

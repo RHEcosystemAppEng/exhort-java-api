@@ -64,4 +64,5 @@ public abstract class Provider {
    * @throws IOException when failed to load the manifest content
    */
   public abstract Content provideComponent(byte[] manifestContent) throws IOException;
+  public abstract Content provideComponent(Path manifestPath) throws IOException;
 }

@@ -156,26 +156,33 @@ public final class ExhortApi implements Api {
         this.buildStackRequest(manifestFile, MediaType.MULTIPART_MIXED),
         HttpResponse.BodyHandlers.ofByteArray())
       .thenApply(resp -> {
-        byte[] htmlPart = null;
-        AnalysisReport jsonPart = null;
-        var ds = new ByteArrayDataSource(resp.body(), MediaType.MULTIPART_MIXED.toString());
-        try {
-          var mp = new MimeMultipart(ds);
-          for (var i=0; i < mp.getCount(); i++) {
-            if (Objects.isNull(htmlPart) &&
+        if(resp.statusCode() == 200) {
+          byte[] htmlPart = null;
+          AnalysisReport jsonPart = null;
+          var ds = new ByteArrayDataSource(resp.body(), MediaType.MULTIPART_MIXED.toString());
+          try {
+            var mp = new MimeMultipart(ds);
+            for (var i = 0; i < mp.getCount(); i++) {
+              if (Objects.isNull(htmlPart) &&
                 MediaType.TEXT_HTML.toString().equals(mp.getBodyPart(i).getContentType())) {
-              htmlPart = mp.getBodyPart(i).getInputStream().readAllBytes();
-            }
-            if (Objects.isNull(jsonPart) &&
+                htmlPart = mp.getBodyPart(i).getInputStream().readAllBytes();
+              }
+              if (Objects.isNull(jsonPart) &&
                 MediaType.APPLICATION_JSON.toString().equals(mp.getBodyPart(i).getContentType())) {
-              jsonPart = this.mapper.readValue(
-                mp.getBodyPart(i).getInputStream().readAllBytes(), AnalysisReport.class);
+                jsonPart = this.mapper.readValue(
+                  mp.getBodyPart(i).getInputStream().readAllBytes(), AnalysisReport.class);
+              }
             }
+          } catch (IOException | MessagingException e) {
+            throw new RuntimeException(e);
           }
-        } catch (IOException | MessagingException e) {
-          throw new RuntimeException(e);
+          return new MixedReport(Objects.requireNonNull(htmlPart), Objects.requireNonNull(jsonPart));
         }
-        return new MixedReport(Objects.requireNonNull(htmlPart), Objects.requireNonNull(jsonPart));
+        else
+        {
+          LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysisMixed for getting the html and json reports, Http Response Status=%s , received message from server= %s ",resp.statusCode(),new String(resp.body())));
+          return new MixedReport();
+        }
       });
   }
 
@@ -185,7 +192,22 @@ public final class ExhortApi implements Api {
       .sendAsync(
         this.buildStackRequest(manifestFile, MediaType.TEXT_HTML),
         HttpResponse.BodyHandlers.ofByteArray())
-      .thenApply(HttpResponse::body);
+      .thenApply(httpResponse -> {
+        if (httpResponse.statusCode() != 200)
+        {
+          LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysis for getting the html report, Http Response Status=%s , received message from server= %s ",httpResponse.statusCode(),new String(httpResponse.body())));
+          return httpResponse.body();
+        }
+        else
+        {
+          return httpResponse.body();
+        }
+      })
+      .exceptionally(exception -> {
+        LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysis for getting the html report, received message= %s ",exception.getMessage()));
+        LOG.log(System.Logger.Level.ERROR,"Exception Entity",exception);
+        return new byte[0];
+      });
   }
 
   @Override
@@ -196,16 +218,30 @@ public final class ExhortApi implements Api {
       .sendAsync(
         this.buildStackRequest(manifestFile, MediaType.APPLICATION_JSON),
         HttpResponse.BodyHandlers.ofString())
-      .thenApply(HttpResponse::body)
+//      .thenApply(HttpResponse::body)
       .thenApply(
-        s -> {
-          try {
-            return this.mapper.readValue(s, AnalysisReport.class);
-          } catch (JsonProcessingException e) {
-            throw new CompletionException(e);
-          }
-        }
-      );
+        response -> getAnalysisReportFromResponse(response,"StackAnalysis","json")
+      ).exceptionally(exception -> {
+        LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysis for getting the json report, received message= %s ",exception.getMessage()));
+        LOG.log(System.Logger.Level.ERROR,"Exception Entity",exception);
+        return new AnalysisReport();
+      });
+  }
+
+  private AnalysisReport getAnalysisReportFromResponse(HttpResponse<String> response,String operation,String reportName) {
+    if(response.statusCode() == 200) {
+      try {
+
+        return this.mapper.readValue(response.body(), AnalysisReport.class);
+      } catch (JsonProcessingException e) {
+        throw new CompletionException(e);
+      }
+    }
+    else
+    {
+      LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke %s for getting the %s report, Http Response Status=%s , received message from server= %s ",operation,reportName, response.statusCode(), response.body()));
+      return new AnalysisReport();
+    }
   }
 
   @Override
@@ -217,20 +253,32 @@ public final class ExhortApi implements Api {
       String.format("%s/api/v3/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
 
+    return getAnalysisReportForComponent(uri, content);
+  }
+
+  @Override
+  public CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException {
+    var manifestPath = Paths.get(manifestFile);
+    var provider = Ecosystem.getProvider(manifestPath);
+    var uri = URI.create(
+      String.format("%s/api/v3/analysis", this.endpoint));
+    var content = provider.provideComponent(manifestPath);
+    return getAnalysisReportForComponent(uri, content);
+  }
+
+  private CompletableFuture<AnalysisReport> getAnalysisReportForComponent(URI uri, Provider.Content content) {
     return this.client
       .sendAsync(
         this.buildRequest(content, uri, MediaType.APPLICATION_JSON),
         HttpResponse.BodyHandlers.ofString())
-      .thenApply(HttpResponse::body)
+//      .thenApply(HttpResponse::body)
       .thenApply(
-        s -> {
-          try {
-            return this.mapper.readValue(s, AnalysisReport.class);
-          } catch (JsonProcessingException e) {
-            throw new CompletionException(e);
-          }
-        }
-      );
+        response -> getAnalysisReportFromResponse(response,"Component Analysis","json")
+      ).exceptionally(exception -> {
+        LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke Component Analysis for getting the json report, received message= %s ",exception.getMessage()));
+        LOG.log(System.Logger.Level.ERROR,"Exception Entity",exception);
+        return new AnalysisReport();
+      });
   }
 
   /**

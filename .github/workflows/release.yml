@@ -3,10 +3,9 @@ name: Release Version
 
 on:
   pull_request_target:
-    types:
-      - closed
     branches:
-      - 'release/**'
+      - 'master'
+
 
     paths:
       - "src/main/**"
@@ -16,7 +15,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy release
-    if: github.repository_owner == 'RHEcosystemAppEng'
+#     only trigger the workflow on the base repository and if the merged branch name starts with release.
+    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
     outputs:
       project_version: ${{ steps.project.outputs.version }}
     steps:
@@ -55,6 +55,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     name: Release
+    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
     environment: staging
     needs: deploy
     steps:

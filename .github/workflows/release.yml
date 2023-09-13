@@ -53,7 +53,8 @@ jobs:
 
       - name: Deploy release to GitHub
         run: |
-          mvn release:clean release:prepare release:perform -B -ff
+          mvn release:prepare -B -ff -DskipTests
+          mvn release:perform -B -ff
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -93,6 +94,11 @@ jobs:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
           ref: ${{ github.ref}}
           fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Update readme usage section
         run: >

@@ -18,7 +18,9 @@ package com.redhat.exhort.providers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -77,6 +79,28 @@ class Javascript_Npm_Provider_Test {
     }
     // when providing component content for our pom
     var content = new JavaScriptNpmProvider().provideComponent(targetPom);
+    // verify expected SBOM is returned
+    assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
+    assertThat(dropIgnored(new String(content.buffer)))
+      .isEqualTo(dropIgnored(expectedSbom));
+  }
+@ParameterizedTest
+  @MethodSource("testFolders")
+  void test_the_provideComponent_with_Path(String testFolder) throws Exception {
+    // load the pom target pom file
+
+    // create temp file hosting our sut package.json
+    var tmpNpmFolder = Files.createTempDirectory("exhort_test_");
+    var tmpNpmFile = Files.createFile(tmpNpmFolder.resolve("package.json"));
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
+    Files.write(tmpNpmFile, is.readAllBytes());
+  }
+      String expectedSbom = "";
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+    // when providing component content for our pom
+    var content = new JavaScriptNpmProvider().provideComponent(tmpNpmFile);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))

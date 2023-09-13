@@ -16,14 +16,16 @@
 package com.redhat.exhort.providers;
 
 import com.redhat.exhort.Api;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class Golang_Modules_Provider_Test {
   // test folder are located at src/test/resources/tst_manifests/npm
@@ -82,6 +84,20 @@ class Golang_Modules_Provider_Test {
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
+
+
+  }
+
+
+  @Test
+  void Test_The_ProvideComponent_Path_Should_Throw_Exception() {
+
+    GoModulesProvider goModulesProvider = new GoModulesProvider();
+    assertThatIllegalArgumentException().isThrownBy(() -> {
+      goModulesProvider.provideComponent(Path.of("."));
+    }).withMessage("provideComponent with file system path for GoModules package manager not implemented yet");
+
+
   }
 
   private String dropIgnored(String s) {

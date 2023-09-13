@@ -96,6 +96,7 @@ class Exhort_Api_Test {
     // mock and http response object and stub it to return a fake body
     var mockHttpResponse = mock(HttpResponse.class);
     given(mockHttpResponse.body()).willReturn(expectedHtml);
+    given(mockHttpResponse.statusCode()).willReturn(200);
 
     // mock static getProvider utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
@@ -150,6 +151,7 @@ class Exhort_Api_Test {
     // mock and http response object and stub it to return the expected analysis
     var mockHttpResponse = mock(HttpResponse.class);
     given(mockHttpResponse.body()).willReturn(mapper.writeValueAsString(expectedAnalysis));
+    given(mockHttpResponse.statusCode()).willReturn(200);
 
     // mock static getProvider utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
@@ -203,6 +205,7 @@ class Exhort_Api_Test {
     // mock and http response object and stub it to return the expected analysis
     var mockHttpResponse = mock(HttpResponse.class);
     given(mockHttpResponse.body()).willReturn(mapper.writeValueAsString(expectedReport));
+    given(mockHttpResponse.statusCode()).willReturn(200);
 
     // mock static getProvider utility function
     try (var ecosystemTool = mockStatic(Ecosystem.class)) {
@@ -261,6 +264,7 @@ class Exhort_Api_Test {
     // mock and http response object and stub it to return the expected analysis
     var mockHttpResponse = mock(HttpResponse.class);
     given(mockHttpResponse.body()).willReturn(mixedResponse);
+    given(mockHttpResponse.statusCode()).willReturn(200);
 
     // mock static getProvider utility function
     try(var ecosystemTool = mockStatic(Ecosystem.class)) {
@@ -280,6 +284,61 @@ class Exhort_Api_Test {
     // cleanup
     Files.deleteIfExists(tmpFile);
   }
+
+  @Test
+  void componentAnalysis_with_pom_xml_as_path_should_return_json_object_from_the_backend()
+    throws IOException, ExecutionException, InterruptedException {
+    // load pom.xml
+    var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
+      Files.write(tmpFile, is.readAllBytes());
+    }
+
+    // stub the mocked provider with a fake content object
+    given(mockProvider.provideComponent(tmpFile))
+      .willReturn(new Provider.Content("fake-body-content".getBytes(), "fake-content-type"));
+
+    // we expect this to picked up because no env var to take precedence
+    System.setProperty("EXHORT_SNYK_TOKEN", "snyk-token-from-property");
+
+    // create an argument matcher to make sure we mock the response for the right request
+    ArgumentMatcher<HttpRequest> matchesRequest = r ->
+      r.headers().firstValue("Content-Type").get().equals("fake-content-type") &&
+        r.headers().firstValue("Accept").get().equals("application/json") &&
+        // snyk token is set using properties which is picked up because no env var specified
+        r.headers().firstValue("ex-snyk-token").get().equals("snyk-token-from-property") &&
+        r.method().equals("POST");
+
+    // load dummy json and set as the expected analysis
+    var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    AnalysisReport expectedReport;
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
+      expectedReport = mapper.readValue(is, AnalysisReport.class);
+    }
+
+    // mock and http response object and stub it to return the expected analysis
+    var mockHttpResponse = mock(HttpResponse.class);
+    given(mockHttpResponse.body()).willReturn(mapper.writeValueAsString(expectedReport));
+    given(mockHttpResponse.statusCode()).willReturn(200);
+
+    // mock static getProvider utility function
+    try (var ecosystemTool = mockStatic(Ecosystem.class)) {
+      // stub static getProvider utility function to return our mock provider
+      ecosystemTool.when(() -> Ecosystem.getProvider(tmpFile)).thenReturn(mockProvider);
+
+      // stub the http client to return our mocked response when request matches our arg matcher
+      given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
+        .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
+
+      // when invoking the api for a json stack analysis report
+      var responseAnalysis = exhortApiSut.componentAnalysis(tmpFile.toString());
+      // verify we got the correct analysis report
+      then(responseAnalysis.get()).isEqualTo(expectedReport);
+      //cleanup
+      Files.deleteIfExists(tmpFile);
+    }
+  }
+
 
   @AfterEach
   void beforeAll() {

@@ -86,6 +86,27 @@ class Java_Maven_Provider_Test {
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
   }
+  @ParameterizedTest
+  @MethodSource("testFolders")
+  void test_the_provideComponent_With_Path(String testFolder) throws IOException, InterruptedException {
+    // load the pom target pom file
+    // create temp file hosting our sut pom.xml
+    var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
+      Files.write(tmpPomFile, is.readAllBytes());
+    }
+    // load expected SBOM
+    String expectedSbom = "";
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_component_sbom.json"))) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+    // when providing component content for our pom
+    var content = new JavaMavenProvider().provideComponent(tmpPomFile);
+    // verify expected SBOM is returned
+    assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
+    assertThat(dropIgnored(new String(content.buffer)))
+      .isEqualTo(dropIgnored(expectedSbom));
+  }
 
   private String dropIgnored(String s) {
     return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\"", "");

@@ -53,7 +53,7 @@ jobs:
 
       - name: Deploy release to GitHub
         run: |
-          mvn release:prepare -B -ff -DskipTests
+          mvn -DskipTests -Darguments=-DskipTests release:prepare -B -ff
           mvn release:perform -B -ff
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,14 +100,20 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
+      - name: Get pom version of new snapshot artifact
+        id: project_snapshot
+        run: |
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+
+
       - name: Update readme usage section
         run: >
           sed -i
-          's/<version>.*<\/version>/<version>${{ steps.bumper.outputs.new_version }}<\/version>/g'
+          's/<version>.*<\/version>/<version>${{ steps.project_snapshot.outputs.version }}<\/version>/g'
           README.md
 
       - name: Push modifications
         run: |
           git add README.md
-          git commit -m "docs: updated usage section with version ${{ steps.bumper.outputs.new_version }} [skip ci]"
+          git commit -m "docs: updated usage section with version ${{ steps.project_snapshot.outputs.version }} [skip ci]"
           git push

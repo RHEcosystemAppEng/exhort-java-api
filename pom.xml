@@ -278,9 +278,8 @@
           <configuration>
             <arguments>-Pprepare-deployment,deploy-github</arguments>
             <tagNameFormat>v@{project.version}</tagNameFormat>
-            <scmCommentPrefix>build(release): [skip ci] </scmCommentPrefix>
-            <signTag>true</signTag>
-
+            <scmCommentPrefix>Build (Release): [skip ci] </scmCommentPrefix>
+<!--            <signTag>true</signTag>-->
           </configuration>
         </plugin>
         <plugin>

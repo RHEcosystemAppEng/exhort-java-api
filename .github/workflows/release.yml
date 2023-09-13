@@ -49,6 +49,7 @@ jobs:
         run: |
           git checkout HEAD@{1} pom.xml
           echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+          git restore pom.xml --staged --worktree
 
 
   release:

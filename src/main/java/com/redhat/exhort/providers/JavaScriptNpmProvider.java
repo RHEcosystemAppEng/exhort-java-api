@@ -15,14 +15,13 @@
  */
 package com.redhat.exhort.providers;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -127,19 +126,26 @@ public final class JavaScriptNpmProvider extends Provider {
   private JsonNode buildNpmDependencyTree(Path manifestPath, boolean includeTransitive)
       throws JsonMappingException, JsonProcessingException {
     var npm = Operations.getCustomPathOrElse("npm");
+    var npmEnvs = getNpmExecEnv();
     // clean command used to clean build target
     Path packageLockJson = Path.of(manifestPath.getParent().toString(), "package-lock.json");
     if (!packageLockJson.toFile().exists()) {
       var createPackageLock = new String[] { npm, "i", "--package-lock-only", "--prefix",
           manifestPath.getParent().toString() };
       // execute the clean command
-      Operations.runProcess(createPackageLock);
+      Operations.runProcess(createPackageLock, npmEnvs);
     }
 
     var npmAllDeps = new String[] { npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
         "--json", "--prefix", manifestPath.getParent().toString() };
     // execute the clean command
-    String npmOutput = Operations.runProcessGetOutput(null,npmAllDeps);
+    String npmOutput;
+    if (npmEnvs != null) {
+      npmOutput = Operations.runProcessGetOutput(null, npmAllDeps,
+        npmEnvs.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).toArray(String[]::new));
+    } else {
+      npmOutput = Operations.runProcessGetOutput(null, npmAllDeps);
+    }
     if(!includeTransitive)
     {
       try {
@@ -175,5 +181,18 @@ public final class JavaScriptNpmProvider extends Provider {
       ignored.add(n.asText());
     }
     return ignored;
+  }
+
+  private Map<String, String> getNpmExecEnv() {
+    String nodeHome = System.getProperty("NODE_HOME");
+    if (nodeHome != null && !nodeHome.isBlank()) {
+      String path = System.getenv("PATH");
+      if (path != null) {
+        return Collections.singletonMap("PATH", path + File.pathSeparator + nodeHome);
+      } else {
+        return Collections.singletonMap("PATH", nodeHome);
+      }
+    }
+    return null;
   }
 }

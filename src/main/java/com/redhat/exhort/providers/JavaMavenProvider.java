@@ -19,9 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLInputFactory;
@@ -61,8 +59,9 @@ public final class JavaMavenProvider extends Provider {
     var mvn = Operations.getCustomPathOrElse("mvn");
     // clean command used to clean build target
     var mvnCleanCmd = new String[]{mvn, "-q", "clean", "-f", manifestPath.toString()};
+    var mvnEnvs = getMvnExecEnvs();
     // execute the clean command
-    Operations.runProcess(mvnCleanCmd);
+    Operations.runProcess(mvnCleanCmd, mvnEnvs);
     // create a temp file for storing the dependency tree in
     var tmpFile = Files.createTempFile("exhort_dot_graph_", null);
     // the tree command will build the project and create the dependency tree in the temp file
@@ -84,7 +83,7 @@ public final class JavaMavenProvider extends Provider {
       .map(PackageURL::getCoordinates)
       .collect(Collectors.toList());
     // execute the tree command
-    Operations.runProcess(mvnTreeCmd.toArray(String[]::new));
+    Operations.runProcess(mvnTreeCmd.toArray(String[]::new), mvnEnvs);
     var sbom = buildSbomFromDot(tmpFile);
     // build and return content for constructing request to the backend
     return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
@@ -152,7 +151,7 @@ public final class JavaMavenProvider extends Provider {
       "-f", originPom.toString()
     };
     // execute the effective pom command
-    Operations.runProcess(mvnEffPomCmd);
+    Operations.runProcess(mvnEffPomCmd, getMvnExecEnvs());
     // if we have dependencies marked as ignored grab ignored dependencies from the original pom
     // the effective-pom goal doesn't carry comments
     List<DependencyAggregator> dependencies = getDependencies(originPom);
@@ -299,6 +298,14 @@ public final class JavaMavenProvider extends Provider {
     }
 
     return deps;
+  }
+
+  private Map<String, String> getMvnExecEnvs() {
+    var javaHome = System.getProperty("JAVA_HOME");
+    if (javaHome != null && !javaHome.isBlank()) {
+      return Collections.singletonMap("JAVA_HOME", javaHome);
+    }
+    return null;
   }
 
   // NOTE if we want to include "scope" tags in ignore,

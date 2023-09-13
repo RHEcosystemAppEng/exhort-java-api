@@ -1,0 +1,84 @@
+---
+name: Release Version
+
+on:
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - 'release/**'
+
+    paths:
+      - "src/main/**"
+      - "pom.xml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy release
+    if: github.repository_owner == 'RHEcosystemAppEng'
+    outputs:
+      project_version: ${{ steps.project.outputs.version }}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Setup Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: maven
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+
+      - name: Deploy release to GitHub
+        run: |
+          mvn release:clean release:prepare release:perform -B -ff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get pom specs
+        id: project
+        run: |
+          git checkout HEAD@{1} pom.xml
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+
+
+  release:
+    runs-on: ubuntu-latest
+    name: Release
+    environment: staging
+    needs: deploy
+    steps:
+      - name: Create new ${{ needs.deploy.outputs.project_version }} release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.STAGING_PAT }}
+          script: |
+            const repo_name = context.payload.repository.full_name
+            const response = await github.request('POST /repos/' + repo_name + '/releases', {
+              tag_name: '${{ needs.deploy.outputs.project_version }}',
+              name: '${{ needs.deploy.outputs.project_version }}',
+              draft: false,
+              prerelease: true,
+              generate_release_notes: true,
+              make_latest: 'false'
+            })
+      - name: Update readme usage section
+        run: >
+          sed -i
+          's/<version>.*<\/version>/<version>${{ steps.bumper.outputs.new_version }}<\/version>/g'
+          README.md
+
+      - name: Push modifications
+        run: |
+          git add README.md
+          git commit -m "docs: updated usage section with version ${{ steps.bumper.outputs.new_version }} [skip ci]"
+          git push

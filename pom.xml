@@ -277,8 +277,10 @@
           <version>${maven-release-plugin.version}</version>
           <configuration>
             <arguments>-Pprepare-deployment,deploy-github</arguments>
+            <tagNameFormat>v@{project.version}</tagNameFormat>
             <scmCommentPrefix>build(release): [skip ci] </scmCommentPrefix>
             <signTag>true</signTag>
+
           </configuration>
         </plugin>
         <plugin>

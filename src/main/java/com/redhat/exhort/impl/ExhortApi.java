@@ -28,7 +28,6 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,14 +46,20 @@ import jakarta.mail.util.ByteArrayDataSource;
 public final class ExhortApi implements Api {
 
   private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
-  private static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
-  private static final String DEFAULT_ENDPOINT_DEV = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  public static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
+  public static final String DEFAULT_ENDPOINT_DEV = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+
+
   private final String endpoint;
+
+  public String getEndpoint() {
+    return endpoint;
+  }
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     AnalysisReport analysisReport = new ExhortApi()
-    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
-    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+    .componentAnalysis("/home/zgrinber/git/exhort-javascript-api/package.json").get();
+    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
   }
   /**
    * Enum for identifying token environment variables and their

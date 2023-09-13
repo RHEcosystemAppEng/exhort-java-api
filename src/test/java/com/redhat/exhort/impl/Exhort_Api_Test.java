@@ -31,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.ClearEnvironmentVariable;
@@ -48,6 +49,8 @@ import com.redhat.exhort.tools.Ecosystem;
 
 @ExtendWith(MockitoExtension.class)
 @ClearEnvironmentVariable(key="EXHORT_SNYK_TOKEN")
+@ClearEnvironmentVariable(key="EXHORT_DEV_MODE")
+@ClearEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL")
 @SuppressWarnings("unchecked")
 class Exhort_Api_Test {
   @Mock
@@ -277,4 +280,107 @@ class Exhort_Api_Test {
     // cleanup
     Files.deleteIfExists(tmpFile);
   }
+
+  @AfterEach
+  void beforeAll() {
+    System.clearProperty("EXHORT_DEV_MODE");
+    System.clearProperty("DEV_EXHORT_BACKEND_URL");
+
+  }
+
+  @Test
+  @SetEnvironmentVariable(key="EXHORT_DEV_MODE", value="true")
+  @ClearEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL")
+  void check_Exhort_Url_When_DEV_Mode_true_Both() {
+      System.setProperty("EXHORT_DEV_MODE","true");
+      ExhortApi exhortApi = new ExhortApi();
+      then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+      then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+  }
+@Test
+  @SetEnvironmentVariable(key="EXHORT_DEV_MODE", value="true")
+  @ClearEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL")
+  void check_Exhort_Url_When_env_DEV_Mode_true_property_DEV_Mode_false() {
+      System.setProperty("EXHORT_DEV_MODE","false");
+      ExhortApi exhortApi = new ExhortApi();
+      then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+      then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+  }
+
+@Test
+  @SetEnvironmentVariable(key="EXHORT_DEV_MODE", value="true")
+  @ClearEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL")
+  void check_Exhort_Url_When_env_DEV_Mode_true_And_DEV_Exhort_Url_Set_Then_Default_DEV_Exhort_URL_Not_Selected() {
+      String dummyUrl = "http://dummy-url";
+      System.setProperty("DEV_EXHORT_BACKEND_URL", dummyUrl);
+      ExhortApi exhortApi = new ExhortApi();
+      then(exhortApi.getEndpoint()).isEqualTo(dummyUrl);
+      then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+  }
+
+@Test
+  @SetEnvironmentVariable(key="EXHORT_DEV_MODE", value="false")
+  @ClearEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL")
+void check_Exhort_Url_When_env_DEV_Mode_false_And_DEV_Exhort_Url_Set_Then_Default_DEV_Exhort_URL_Not_Selected() {
+    System.setProperty("EXHORT_DEV_MODE", "false");
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+    then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+  }
+
+
+  @Test
+  @SetEnvironmentVariable(key="EXHORT_DEV_MODE", value= "false")
+  void check_Exhort_Url_When_env_DEV_Mode_false_And_Property_Dev_Mode_true_Default_Exhort_URL_Selected() {
+    System.setProperty("EXHORT_DEV_MODE", "true");
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+    then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+  }
+
+  @Test
+  @SetEnvironmentVariable(key="EXHORT_DEV_MODE", value="false")
+  @SetEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL", value="http://dummy-route")
+  void check_Exhort_Url_When_env_DEV_Mode_false_And_DEV_Exhort_Url_Set_Then_Default_Exhort_URL_Selected_Anyway() {
+    System.setProperty("EXHORT_DEV_MODE", "true");
+    System.setProperty("DEV_EXHORT_BACKEND_URL","http://dummy-route2");
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+    then(exhortApi.getEndpoint()).isNotEqualTo(System.getenv("DEV_EXHORT_BACKEND_URL"));
+    then(exhortApi.getEndpoint()).isNotEqualTo(System.getProperty("DEV_EXHORT_BACKEND_URL"));
+
+  }
+  @Test
+  void check_Exhort_Url_When_env_DEV_Mode_not_set_And_Property_Exhort_Dev_Mode_false_Then_Default_Exhort_URL_Selected() {
+    System.setProperty("EXHORT_DEV_MODE", "false");
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+    then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+  }
+  @Test
+  void check_Exhort_Url_When_env_DEV_Mode_not_set_And_Property_Exhort_Dev_Mode_true_Then_Default_DEV_Exhort_URL_Selected() {
+    System.setProperty("EXHORT_DEV_MODE", "true");
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+    then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+  }
+  @Test
+  @SetEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL", value="http://dummy-route")
+  void check_Exhort_Url_When_env_DEV_Mode_not_set_And_Property_Exhort_Dev_Mode_true_and_Env_DEV_Exhort_Backend_Url_Set_Then_DEV_ENV_Exhort_URL_Selected() {
+    System.setProperty("EXHORT_DEV_MODE", "true");
+    System.setProperty("DEV_EXHORT_BACKEND_URL", "http://dummy-route2");
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+    then(exhortApi.getEndpoint()).isNotEqualTo(ExhortApi.DEFAULT_ENDPOINT_DEV);
+    then(exhortApi.getEndpoint()).isNotEqualTo("http://dummy-route2");
+    then(exhortApi.getEndpoint()).isEqualTo("http://dummy-route");
+  }
+
+  @Test
+  void check_Exhort_Url_When_Nothing_Set_Then_Default_Exhort_URL_Selected() {
+    ExhortApi exhortApi = new ExhortApi();
+    then(exhortApi.getEndpoint()).isEqualTo(ExhortApi.DEFAULT_ENDPOINT);
+
+  }
+
 }

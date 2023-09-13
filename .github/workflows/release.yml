@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy release
 #     only trigger the workflow on the base repository and if the merged branch name starts with release.
-    if: github.repository_owner == 'RHEcosystemAppEng' && (startsWith(github.head_ref, 'release/') || startsWith(github.ref, 'release/') )
+#    if: github.repository_owner == 'RHEcosystemAppEng' && (startsWith(github.head_ref, 'release/')
     outputs:
       project_version: ${{ steps.project.outputs.version }}
     steps:
@@ -61,7 +61,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     name: Release
-    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
+#    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
     environment: staging
     needs: deploy
     steps:

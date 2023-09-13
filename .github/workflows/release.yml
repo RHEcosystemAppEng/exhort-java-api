@@ -1,0 +1,119 @@
+---
+name: Release Version
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - 'main'
+
+#  push:
+#    branches:
+#      - 'release/*'
+
+    paths:
+      - "src/main/**"
+      - "pom.xml"
+      - ".github/workflows/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy release
+    environment: staging
+#     only trigger the workflow on the base repository and if the merged branch name starts with release.
+    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
+    outputs:
+      project_version: ${{ steps.project.outputs.version }}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+          ref: ${{ github.ref}}
+          fetch-depth: 0
+
+      - name: Setup Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: maven
+
+      - name: create ssh agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+
+      - name: Deploy release to GitHub
+        run: |
+          mvn -DskipTests -Darguments=-DskipTests release:prepare -B -ff
+          mvn release:perform -B -ff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get pom version of released artifact
+        id: project
+        run: |
+          git checkout HEAD^ pom.xml
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+          git restore pom.xml --staged --worktree
+
+
+  release:
+    runs-on: ubuntu-latest
+    name: Release
+    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
+    environment: staging
+    needs: deploy
+    steps:
+      - name: Create new ${{ needs.deploy.outputs.project_version }} release
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.STAGING_PAT }}
+          script: |
+            const repo_name = context.payload.repository.full_name
+            const response = await github.request('POST /repos/' + repo_name + '/releases', {
+              tag_name: '${{ needs.deploy.outputs.project_version }}',
+              name: '${{ needs.deploy.outputs.project_version }}',
+              draft: false,
+              prerelease: true,
+              generate_release_notes: true,
+              make_latest: 'false'
+            })
+
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+          ref: ${{ github.ref}}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Get pom version of new snapshot artifact
+        id: project_snapshot
+        run: |
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+
+
+      - name: Update readme usage section
+        run: >
+          sed -i
+          's/<version>.*<\/version>/<version>${{ steps.project_snapshot.outputs.version }}<\/version>/g'
+          README.md
+
+      - name: Push modifications
+        run: |
+          git add README.md
+          git commit -m "docs: updated usage section with version ${{ steps.project_snapshot.outputs.version }} [skip ci]"
+          git push

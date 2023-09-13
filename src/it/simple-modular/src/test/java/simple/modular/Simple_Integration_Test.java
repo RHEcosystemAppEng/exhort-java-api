@@ -71,6 +71,7 @@ class Simple_Integration_Test {
       // mock a http response object and stub it to return the expected html report as a body
       var mockHtmlResponse = mock(HttpResponse.class);
       when(mockHtmlResponse.body()).thenReturn(expectedHtmlAnalysis);
+      when(mockHtmlResponse.statusCode()).thenReturn(200);
       // stub the mocked http client to return the mocked http response for requests accepting text/html
       when(mockHttpClient.sendAsync(
         argThat(r -> r.headers().firstValue("Accept").get().equals("text/html")), any())
@@ -95,6 +96,7 @@ class Simple_Integration_Test {
       // mock a http response object and stub it to return the expected html report as a body
       var mockMixedResponse = mock(HttpResponse.class);
       when(mockMixedResponse.body()).thenReturn(expectedMixedAnalysis);
+      when(mockMixedResponse.statusCode()).thenReturn(200);
       // stub the mocked http client to return the mocked http response for requests accepting text/html
       when(mockHttpClient.sendAsync(
         argThat(r -> r.headers().firstValue("Accept").get().equals("multipart/mixed")), any())
@@ -117,6 +119,7 @@ class Simple_Integration_Test {
       // mock a http response object and stub it to return the expected json report as a body
       var mockJsonResponse = mock(HttpResponse.class);
       when(mockJsonResponse.body()).thenReturn(expectedAnalysisJson);
+      when(mockJsonResponse.statusCode()).thenReturn(200);
       // stub the mocked http client to return the mocked http response for requests accepting json application
       when(mockHttpClient.sendAsync(
         argThat(r -> r.headers().firstValue("Accept").get().equals("application/json")), any())
@@ -138,6 +141,7 @@ class Simple_Integration_Test {
       // mock a http response object and stub it to return the expected json report as a body
       var mockJsonResponse = mock(HttpResponse.class);
       when(mockJsonResponse.body()).thenReturn(expectedAnalysisJson);
+      when(mockJsonResponse.statusCode()).thenReturn(200);
       // stub the mocked http client to return the mocked http response for requests accepting json application
       when(mockHttpClient.sendAsync(
         argThat(r -> r.headers().firstValue("Accept").get().equals("application/json")), any())

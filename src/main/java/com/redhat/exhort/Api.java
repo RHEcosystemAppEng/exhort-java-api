@@ -47,7 +47,11 @@ public interface Api {
       this.html = html;
       this.json = json;
     }
-
+    public MixedReport()
+    {
+      this.html = new byte[0];
+      this.json = new AnalysisReport();
+    }
     @Override
     public boolean equals(final Object o) {
       if (this == o) return true;
@@ -98,4 +102,6 @@ public interface Api {
    * @throws IOException when failed to load the manifest content
    */
   CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent) throws IOException;
+
+  CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException;
 }

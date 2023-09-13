@@ -99,6 +99,11 @@ public final class GoModulesProvider extends Provider {
       Api.CYCLONEDX_MEDIA_TYPE);
   }
 
+  @Override
+  public Content provideComponent(Path manifestPath) throws IOException {
+    throw new IllegalArgumentException("provideComponent with file system path for GoModules package manager not implemented yet");
+  }
+
   private Sbom getDependenciesSbomCa(byte[] manifestContent) {
     Sbom sbom;
     try {

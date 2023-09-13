@@ -65,16 +65,20 @@ public final class JavaScriptNpmProvider extends Provider {
       Api.CYCLONEDX_MEDIA_TYPE);
   }
 
+  @Override
+  public Content provideComponent(Path manifestPath) throws IOException {
+    return new Content(getDependencySbom(manifestPath, false).getAsJsonString().getBytes(StandardCharsets.UTF_8),
+      Api.CYCLONEDX_MEDIA_TYPE);
+  }
+
   private Sbom getDependencyTree(byte[] manifestContent) {
     Sbom sbom;
     try {
-      Path path = Paths.get(Paths.get(".").toAbsolutePath().normalize().toString(), "package.json");
-      Files.deleteIfExists(path);
-      Path manifestPath = Files.createFile(path);
-      Files.write(manifestPath, manifestContent);
-      sbom = getDependencySbom(manifestPath, false);
-
-      Files.delete(manifestPath);
+      Path tempDir = Files.createTempDirectory("exhort_npm");
+      Path path = Files.createFile(Path.of(tempDir.toString(),"package.json"));
+      Files.write(path, manifestContent);
+      sbom = getDependencySbom(path, false);
+      Files.delete(path);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

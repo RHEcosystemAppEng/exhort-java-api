@@ -57,10 +57,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get pom specs
+      - name: Get pom version of released artifact
         id: project
         run: |
-          git checkout HEAD@{1} pom.xml
+          git checkout HEAD^ pom.xml
           echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
           git restore pom.xml --staged --worktree
 

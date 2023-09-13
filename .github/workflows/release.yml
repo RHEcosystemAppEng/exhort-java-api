@@ -2,7 +2,7 @@
 name: Release Version
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - 'main'
 
@@ -10,6 +10,7 @@ on:
     paths:
       - "src/main/**"
       - "pom.xml"
+      - ".github/workflows/**"
 
 jobs:
   deploy:

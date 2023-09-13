@@ -6,6 +6,10 @@ on:
     branches:
       - 'main'
 
+  push:
+    branches:
+      - 'release/*'
+
 
     paths:
       - "src/main/**"
@@ -37,6 +41,7 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git checkout "${{ github.head_ref}}"
 
 
       - name: Deploy release to GitHub

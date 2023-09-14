@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /** Utility class used for executing process on the operating system. **/
 public final class Operations {
@@ -97,13 +98,32 @@ public final class Operations {
 
     // verify the command was executed successfully or throw a runtime exception
     if (exitCode != 0) {
-      throw new RuntimeException(
-        String.format(
-          "failed to execute '%s', exit-code %d",
-          String.join(" ", cmdList),
-          exitCode
-        )
-      );
+      String errMsg = new BufferedReader(new InputStreamReader(process.getErrorStream()))
+        .lines().collect(Collectors.joining(System.lineSeparator()));
+      if (errMsg.isEmpty()) {
+        errMsg = new BufferedReader(new InputStreamReader(process.getInputStream()))
+          .lines().collect(Collectors.joining(System.lineSeparator()));
+      }
+      if (errMsg.isEmpty()) {
+        throw new RuntimeException(
+          String.format(
+            "failed to execute '%s', exit-code %d",
+            String.join(" ", cmdList),
+            exitCode
+          )
+        );
+      } else {
+        throw new RuntimeException(
+          String.format(
+            "failed to execute '%s', exit-code %d, message:%s%s%s",
+            String.join(" ", cmdList),
+            exitCode,
+            System.lineSeparator(),
+            errMsg,
+            System.lineSeparator()
+          )
+        );
+      }
     }
   }
 

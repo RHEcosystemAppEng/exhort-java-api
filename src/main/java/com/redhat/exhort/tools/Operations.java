@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Objects;
 
 /** Utility class used for executing process on the operating system. **/
@@ -55,8 +56,15 @@ public final class Operations {
    * @param cmdList list of command parts
    */
   public static void runProcess(final String... cmdList) {
+    runProcess(cmdList, null);
+  }
+
+  public static void runProcess(final String[] cmdList, final Map<String, String> envMap) {
     var processBuilder = new ProcessBuilder();
     processBuilder.command(cmdList);
+    if (envMap != null) {
+      processBuilder.environment().putAll(envMap);
+    }
 
     // create a process builder or throw a runtime exception
     Process process = null;
@@ -100,16 +108,28 @@ public final class Operations {
   }
 
   public static String runProcessGetOutput(Path dir, final String... cmdList) {
+    return runProcessGetOutput(dir, cmdList, null);
+  }
+
+  public static String runProcessGetOutput(Path dir, final String[] cmdList, String[] envList) {
     StringBuilder sb = new StringBuilder();
     try {
       Process process;
       InputStream inputStream;
       if(dir == null) {
-        process = Runtime.getRuntime().exec(String.join(" ", cmdList));
+        if (envList != null) {
+          process = Runtime.getRuntime().exec(String.join(" ", cmdList), envList);
+        } else {
+          process = Runtime.getRuntime().exec(String.join(" ", cmdList));
+        }
       }
       else
       {
-        process = Runtime.getRuntime().exec(String.join(" ", cmdList),null,dir.toFile());
+        if (envList != null) {
+          process = Runtime.getRuntime().exec(String.join(" ", cmdList), envList, dir.toFile());
+        } else {
+          process = Runtime.getRuntime().exec(String.join(" ", cmdList), null, dir.toFile());
+        }
       }
 
 

@@ -336,7 +336,7 @@ public final class ExhortApi implements Api {
     String rhdaToken = calculateRhdaToken("rhda-token");
 
 
-    if (Optional.of(rhdaToken).isPresent())
+    if (rhdaToken != null && Optional.of(rhdaToken).isPresent())
     {
       request.setHeader("rhda-token",rhdaToken);
     }

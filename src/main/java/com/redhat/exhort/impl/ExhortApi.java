@@ -24,10 +24,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -58,8 +60,8 @@ public final class ExhortApi implements Api {
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     AnalysisReport analysisReport = new ExhortApi()
-    .componentAnalysis("/home/zgrinber/git/exhort-javascript-api/package.json").get();
-    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
+    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
+    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
   }
   /**
    * Enum for identifying token environment variables and their
@@ -330,7 +332,34 @@ public final class ExhortApi implements Api {
         }
       }
     });
+    //set rhda-token
+    String rhdaToken = calculateRhdaToken("rhda-token");
 
+
+    if (Optional.of(rhdaToken).isPresent())
+    {
+      request.setHeader("rhda-token",rhdaToken);
+    }
     return request.build();
+  }
+
+  public String calculateRhdaToken(String tokenKeyName) {
+    String result;
+    result = calculateRhdaTokenActual(tokenKeyName);
+    if(result== null)
+    {
+      result = calculateRhdaTokenActual(tokenKeyName.toUpperCase());
+    }
+    return result;
+  }
+
+  private String calculateRhdaTokenActual(String tokenKeyName) {
+    String result = null;
+    result = System.getenv(tokenKeyName);
+    if(result == null)
+    {
+      result = System.getProperty(tokenKeyName);
+    }
+    return result;
   }
 }

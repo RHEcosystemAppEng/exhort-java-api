@@ -1,0 +1,149 @@
+package com.redhat.exhort.providers;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+import com.redhat.exhort.Api;
+import com.redhat.exhort.Provider;
+import com.redhat.exhort.sbom.Sbom;
+import com.redhat.exhort.sbom.SbomFactory;
+import com.redhat.exhort.tools.Ecosystem;
+import com.redhat.exhort.tools.Operations;
+import com.redhat.exhort.utils.PythonControllerBase;
+import com.redhat.exhort.utils.PythonControllerRealEnv;
+import com.redhat.exhort.utils.PythonControllerVirtualEnv;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+public class PythonPipProvider extends Provider {
+  public static void main(String[] args) {
+    try {
+      PythonPipProvider pythonPipProvider = new PythonPipProvider();
+//      byte[] bytes = Files.readAllBytes(Path.of("/tmp/exhort_env/requirements.txt"));
+//      Content content = pythonPipProvider.provideComponent(bytes);
+      Content content = pythonPipProvider.provideStack(Path.of("/tmp/exhort_env/requirements.txt"));
+      String s = new String(content.buffer);
+      System.out.print(s);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  public PythonPipProvider() {
+    super(Ecosystem.Type.PYTHON);
+  }
+
+  @Override
+  public Content provideStack(Path manifestPath) throws IOException {
+    PythonControllerBase pythonController = getPythonController();
+    List<Map<String, Object>> dependencies = pythonController.getDependencies(manifestPath.toString(), true);
+    Sbom sbom = SbomFactory.newInstance();
+    try {
+      sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(),"root"));
+    } catch (MalformedPackageURLException e) {
+      throw new RuntimeException(e);
+    }
+    dependencies.stream().forEach( (component) ->
+    {
+      addAllDependencies(sbom.getRoot(),component,sbom);
+
+    });
+    return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
+  }
+
+  private void addAllDependencies(PackageURL source, Map<String, Object> component, Sbom sbom) {
+
+    sbom.addDependency(source,toPurl((String)component.get("name"),(String)component.get("version")));
+    List<Map> directDeps = (List<Map>)component.get("dependencies");
+    if(directDeps != null)
+//    {
+         directDeps.stream().forEach( dep -> {
+           String name = (String)dep.get("name");
+           String version = (String)dep.get("version");
+
+           addAllDependencies(toPurl((String)component.get("name"),(String)component.get("version")),dep,sbom);
+           });
+//
+//    }
+
+  }
+
+  @Override
+  public Content provideComponent(byte[] manifestContent) throws IOException {
+    PythonControllerBase pythonController = getPythonController();
+    Path tempRepository = Files.createTempDirectory("exhort-pip");
+    Path path = Paths.get(tempRepository.toAbsolutePath().normalize().toString(), "requirements.txt");
+    Files.deleteIfExists(path);
+    Path manifestPath = Files.createFile(path);
+    Files.write(manifestPath,manifestContent);
+    List<Map<String, Object>> dependencies = pythonController.getDependencies(manifestPath.toString(), false);
+    Sbom sbom = SbomFactory.newInstance();
+    try {
+      sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(),"root"));
+    } catch (MalformedPackageURLException e) {
+      throw new RuntimeException(e);
+    }
+    dependencies.stream().forEach( (component) ->
+    {
+
+      sbom.addDependency(sbom.getRoot(),toPurl((String)component.get("name"),(String)component.get("version")));
+
+    });
+    Files.delete(manifestPath);
+    Files.delete(tempRepository);
+   return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
+
+  }
+
+  private PackageURL toPurl(String name, String version) {
+
+    try {
+      return new PackageURL(Ecosystem.Type.PYTHON.getType(),null,name,version,null,null);
+    } catch (MalformedPackageURLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static PythonControllerBase getPythonController() {
+    String pythonPipBinaries = getPythonPipBinaries();
+    String[] parts = pythonPipBinaries.split(";;");
+    var python = parts[0];
+    var pip = parts[1];
+    String useVirtualPythonEnv = Objects.requireNonNullElse(System.getenv("EXHORT_PYTHON_VIRTUAL_ENV"), "false");
+    PythonControllerBase pythonController;
+    if(Boolean.parseBoolean(useVirtualPythonEnv))
+    {
+      pythonController = new PythonControllerVirtualEnv(python);
+    }
+    else
+    {
+      pythonController = new PythonControllerRealEnv(python,pip);
+    }
+    return pythonController;
+  }
+
+  private static String getPythonPipBinaries() {
+    var python = Operations.getCustomPathOrElse("python3");
+    var pip = Operations.getCustomPathOrElse("pip3");
+    try {
+      Operations.runProcess(python,"--version");
+      Operations.runProcess(pip,"--version");
+    } catch (Exception e) {
+        python = Operations.getCustomPathOrElse("python");
+        pip = Operations.getCustomPathOrElse("pip");
+        Operations.runProcess(python,"--version");
+        Operations.runProcess(pip,"--version");
+    }
+    return String.format("%s;;%s",python,pip);
+  }
+
+  @Override
+  public Content provideComponent(Path manifestPath) throws IOException {
+    throw new IllegalArgumentException("provideComponent with file system path for Python pip package manager is not supported");
+  }
+}

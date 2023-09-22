@@ -18,9 +18,7 @@ package com.redhat.exhort.providers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,7 +49,7 @@ class Javascript_Npm_Provider_Test {
     }
     // load expected SBOM
     String expectedSbom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_stack_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing stack content for our pom
@@ -74,7 +72,7 @@ class Javascript_Npm_Provider_Test {
     }
     // load expected SBOM
     String expectedSbom = "";
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom
@@ -96,7 +94,7 @@ class Javascript_Npm_Provider_Test {
     Files.write(tmpNpmFile, is.readAllBytes());
   }
       String expectedSbom = "";
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_sbom.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom

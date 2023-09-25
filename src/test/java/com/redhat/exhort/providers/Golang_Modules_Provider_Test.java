@@ -39,7 +39,8 @@ class Golang_Modules_Provider_Test {
       "go_mod_no_ignore",
       "go_mod_with_ignore",
       "go_mod_with_all_ignore",
-      "go_mod_with_one_ignored_prefix_go"
+      "go_mod_with_one_ignored_prefix_go",
+      "go_mod_no_path"
     );
   }
 

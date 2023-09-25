@@ -132,8 +132,11 @@ public final class GoModulesProvider extends Provider {
       if (lastSlashIndex == -1)
       {
         String[] splitParts = dependency.split(delimiter);
-        return new PackageURL(Type.GOLANG.getType(), null, splitParts[0], splitParts[1], qualifiers, null);
-
+        if (splitParts.length == 2) {
+          return new PackageURL(Type.GOLANG.getType(), null, splitParts[0], splitParts[1], qualifiers, null);
+        } else {
+          return new PackageURL(Type.GOLANG.getType(), null, splitParts[0], this.mainModuleVersion, qualifiers, null);
+        }
       }
       String namespace = dependency.substring(0, lastSlashIndex);
       String dependencyAndVersion = dependency.substring(lastSlashIndex + 1);

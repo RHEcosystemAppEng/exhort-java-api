@@ -29,7 +29,6 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,7 +49,9 @@ public final class ExhortApi implements Api {
   private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
   public static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
   public static final String DEFAULT_ENDPOINT_DEV = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
-
+  public static final String RHDA_TOKEN_HEADER = "rhda-token";
+  public static final String RHDA_SOURCE_HEADER = "rhda-source";
+  public static final String RHDA_OPERATION_TYPE_HEADER = "rhda-operation-type";
 
   private final String endpoint;
 
@@ -271,7 +272,7 @@ public final class ExhortApi implements Api {
   private CompletableFuture<AnalysisReport> getAnalysisReportForComponent(URI uri, Provider.Content content) {
     return this.client
       .sendAsync(
-        this.buildRequest(content, uri, MediaType.APPLICATION_JSON),
+        this.buildRequest(content, uri, MediaType.APPLICATION_JSON,"Component Analysis"),
         HttpResponse.BodyHandlers.ofString())
 //      .thenApply(HttpResponse::body)
       .thenApply(
@@ -300,7 +301,7 @@ public final class ExhortApi implements Api {
       String.format("%s/api/v3/analysis", this.endpoint));
     var content = provider.provideStack(manifestPath);
 
-    return buildRequest(content, uri, acceptType);
+    return buildRequest(content, uri, acceptType,"Stack Analysis");
   }
 
   /**
@@ -312,7 +313,7 @@ public final class ExhortApi implements Api {
    * @return  a HttpRequest ready to be sent to the Backend API
    */
   private HttpRequest buildRequest(
-    final Provider.Content content, final URI uri, final MediaType acceptType
+    final Provider.Content content, final URI uri, final MediaType acceptType,final String analysisType
   ) {
     var request = HttpRequest.newBuilder(uri)
     .version(Version.HTTP_1_1)
@@ -333,32 +334,40 @@ public final class ExhortApi implements Api {
       }
     });
     //set rhda-token
-    String rhdaToken = calculateRhdaToken("rhda-token");
-
-
+    // Environment variable/property name = RHDA_TOKEN
+    String rhdaToken = calculateHeaderValue(RHDA_TOKEN_HEADER);
     if (rhdaToken != null && Optional.of(rhdaToken).isPresent())
     {
-      request.setHeader("rhda-token",rhdaToken);
+      request.setHeader(RHDA_TOKEN_HEADER,rhdaToken);
     }
+    //set rhda-source ( extension/plugin id/name)
+    // Environment variable/property name = RHDA_SOURCE
+    String rhdaSource = calculateHeaderValue(RHDA_SOURCE_HEADER);
+    if (rhdaSource != null && Optional.of(rhdaSource).isPresent())
+    {
+      request.setHeader(RHDA_SOURCE_HEADER,rhdaSource);
+    }
+      request.setHeader(RHDA_OPERATION_TYPE_HEADER,analysisType);
+
     return request.build();
   }
 
-  public String calculateRhdaToken(String tokenKeyName) {
+  private String calculateHeaderValue(String headerName) {
     String result;
-    result = calculateRhdaTokenActual(tokenKeyName);
+    result = calculateHeaderValueActual(headerName);
     if(result== null)
     {
-      result = calculateRhdaTokenActual(tokenKeyName.toUpperCase());
+      result = calculateHeaderValueActual(headerName.toUpperCase().replace("-","_"));
     }
     return result;
   }
 
-  private String calculateRhdaTokenActual(String tokenKeyName) {
+  private String calculateHeaderValueActual(String headerName) {
     String result = null;
-    result = System.getenv(tokenKeyName);
+    result = System.getenv(headerName);
     if(result == null)
     {
-      result = System.getProperty(tokenKeyName);
+      result = System.getProperty(headerName);
     }
     return result;
   }

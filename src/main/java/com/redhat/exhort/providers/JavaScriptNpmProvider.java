@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -103,10 +106,10 @@ public final class JavaScriptNpmProvider extends Provider {
       Entry<String, JsonNode> e = fields.next();
       String name = e.getKey();
       JsonNode versionNode = e.getValue().get("version");
-      String version = "";
-      if (versionNode != null) {
-        version = versionNode.asText();
+      if (versionNode == null) {
+        continue; //ignore optional dependencies
       }
+      String version = versionNode.asText();
       PackageURL purl = toPurl(name, version);
       sbom.addDependency(from, purl);
       JsonNode transitiveDeps = e.getValue().findValue("dependencies");

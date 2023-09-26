@@ -181,7 +181,7 @@ public abstract class PythonControllerBase {
     List<Map<String,Object>> dependencies = new ArrayList<>();
     String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
     String[] deps = freeze.split(System.lineSeparator());
-    String depNames = Arrays.stream(deps).map(this::getDependencyName).collect(Collectors.joining(" "));
+    String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
     List<String> allPipShowLines = Arrays.stream(pipShowOutput.split("---")).collect(Collectors.toList());
     Map<StringInsensitive,String> CachedTree = new HashMap<>();
@@ -255,7 +255,7 @@ public abstract class PythonControllerBase {
     return versionToken.substring(0,endOfLine).trim();
   }
 
-  private String getDependencyName(String dep) {
+  public static String getDependencyName(String dep) {
     int rightTriangleBracket = dep.indexOf(">");
     int leftTriangleBracket = dep.indexOf("<");
     int equalsSign= dep.indexOf("=");
@@ -272,7 +272,7 @@ public abstract class PythonControllerBase {
     return depName.trim();
   }
 
-  private int getFirstSign(int rightTriangleBracket, int leftTriangleBracket, int equalsSign) {
+  private  static int getFirstSign(int rightTriangleBracket, int leftTriangleBracket, int equalsSign) {
         rightTriangleBracket = rightTriangleBracket == -1 ? 999 : rightTriangleBracket;
         leftTriangleBracket = leftTriangleBracket == -1 ? 999 : leftTriangleBracket;
         equalsSign = equalsSign == -1 ? 999 : equalsSign;

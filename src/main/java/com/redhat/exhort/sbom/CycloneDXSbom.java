@@ -15,16 +15,13 @@
  */
 package com.redhat.exhort.sbom;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.packageurl.MalformedPackageURLException;
+import com.redhat.exhort.tools.Ecosystem;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.model.Bom;
@@ -98,7 +95,30 @@ public class CycloneDXSbom implements Sbom {
         return root;
     }
 
-    private Component newRootComponent(PackageURL ref) {
+  @Override
+  public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps) {
+    String exhortIgnoreMethod = Objects.requireNonNullElse(getExhortIgnoreMethod(), "sensitive");
+    if(exhortIgnoreMethod.equals("insensitive"))
+    {
+      return filterIgnoredDepsInsensitive(ignoredDeps);
+    }
+    else {
+      return filterIgnoredDepsSensitive(ignoredDeps);
+    }
+
+
+  }
+
+  private String getExhortIgnoreMethod() {
+      boolean result;
+      return System.getenv("EXHORT_IGNORE_METHOD") != null ? System.getenv("EXHORT_IGNORE_METHOD").trim().toLowerCase() : getExhortIgnoreProperty();
+  }
+
+  private String getExhortIgnoreProperty() {
+      return System.getProperty("EXHORT_IGNORE_METHOD") != null ? System.getProperty("EXHORT_IGNORE_METHOD").trim().toLowerCase() : null ;
+  }
+
+  private Component newRootComponent(PackageURL ref) {
         Component c = new Component();
         c.setBomRef(ref.getCoordinates());
         c.setName(ref.getName());
@@ -132,8 +152,7 @@ public class CycloneDXSbom implements Sbom {
         return new Dependency(ref.getCoordinates());
     }
 
-    @Override
-    public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps) {
+    private <T> Sbom filterIgnoredDepsInsensitive(Collection<T> ignoredDeps) {
 
         List<String> initialIgnoreRefs = bom.getComponents()
                 .stream()
@@ -141,26 +160,39 @@ public class CycloneDXSbom implements Sbom {
                 .map(Component::getBomRef).collect(Collectors.toList());
         List<String> refsToIgnore = createIgnoreFilter(bom.getDependencies(),
                 initialIgnoreRefs);
-        bom.setComponents(bom.getComponents()
-                .stream()
-                .filter(c -> !refsToIgnore.contains(c.getBomRef()))
-                .collect(Collectors.toList()));
-        var newDeps = bom.getDependencies()
-                .stream()
-                .filter(d -> !refsToIgnore.contains(d.getRef()))
-                .collect(Collectors.toList());
-        bom.setDependencies(newDeps);
-        bom.getDependencies().stream().forEach(d -> {
-            if (d.getDependencies() != null) {
-                var filteredDeps = d.getDependencies()
-                        .stream()
-                        .filter(td -> !refsToIgnore.contains(td.getRef()))
-                        .collect(Collectors.toList());
-                d.setDependencies(filteredDeps);
-            }
-        });
-        return this;
+      return removeIgnoredDepsFromSbom(refsToIgnore);
     }
+
+  private Sbom removeIgnoredDepsFromSbom(List<String> refsToIgnore) {
+    bom.setComponents(bom.getComponents()
+            .stream()
+            .filter(c -> !refsToIgnore.contains(c.getBomRef()))
+            .collect(Collectors.toList()));
+    var newDeps = bom.getDependencies()
+            .stream()
+            .filter(d -> !refsToIgnore.contains(d.getRef()))
+            .collect(Collectors.toList());
+    bom.setDependencies(newDeps);
+    bom.getDependencies().stream().forEach(d -> {
+        if (d.getDependencies() != null) {
+            var filteredDeps = d.getDependencies()
+                    .stream()
+                    .filter(td -> !refsToIgnore.contains(td.getRef()))
+                    .collect(Collectors.toList());
+            d.setDependencies(filteredDeps);
+        }
+    });
+    return this;
+  }
+
+  private <T> Sbom filterIgnoredDepsSensitive(Collection<T> ignoredDeps) {
+
+        List<String> refsToIgnore = bom.getComponents()
+                .stream()
+                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm,ignoredDeps).test(c))
+                .map(Component::getBomRef).collect(Collectors.toList());
+    return removeIgnoredDepsFromSbom(refsToIgnore);
+  }
 
     private List<String> createIgnoreFilter(List<Dependency> deps, Collection<String> toIgnore) {
       List<String> result = new ArrayList<>(toIgnore);
@@ -211,5 +243,11 @@ public class CycloneDXSbom implements Sbom {
     public String getAsJsonString() {
         return BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
     }
+
+  @Override
+  public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition) {
+      this.belongingCriteriaBinaryAlgorithm = belongingCriteriaBinaryAlgorithm;
+
+  }
 
 }

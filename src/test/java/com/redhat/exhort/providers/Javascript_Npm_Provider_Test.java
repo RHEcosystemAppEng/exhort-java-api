@@ -44,8 +44,13 @@ class Javascript_Npm_Provider_Test {
     // create temp file hosting our sut package.json
     var tmpNpmFolder = Files.createTempDirectory("exhort_test_");
     var tmpNpmFile = Files.createFile(tmpNpmFolder.resolve("package.json"));
+    var tmpLockFile = Files.createFile(tmpNpmFolder.resolve("package-lock.json"));
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
       Files.write(tmpNpmFile, is.readAllBytes());
+    }
+
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package-lock.json"))) {
+      Files.write(tmpLockFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
@@ -56,6 +61,8 @@ class Javascript_Npm_Provider_Test {
     var content = new JavaScriptNpmProvider().provideStack(tmpNpmFile);
     // cleanup
     Files.deleteIfExists(tmpNpmFile);
+    Files.deleteIfExists(tmpLockFile);
+    Files.deleteIfExists(tmpNpmFolder);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))

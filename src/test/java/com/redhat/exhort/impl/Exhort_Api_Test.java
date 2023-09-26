@@ -31,7 +31,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.ClearEnvironmentVariable;
@@ -51,6 +50,8 @@ import com.redhat.exhort.tools.Ecosystem;
 @ClearEnvironmentVariable(key="EXHORT_SNYK_TOKEN")
 @ClearEnvironmentVariable(key="EXHORT_DEV_MODE")
 @ClearEnvironmentVariable(key="DEV_EXHORT_BACKEND_URL")
+@ClearEnvironmentVariable(key="RHDA_TOKEN")
+@ClearEnvironmentVariable(key="RHDA_SOURCE")
 @SuppressWarnings("unchecked")
 class Exhort_Api_Test {
   @Mock
@@ -67,6 +68,8 @@ class Exhort_Api_Test {
 
   @Test
   @SetEnvironmentVariable(key="EXHORT_SNYK_TOKEN", value="snyk-token-from-env-var")
+  @SetEnvironmentVariable(key="RHDA_TOKEN", value="rhda-token-from-env-var")
+  @SetEnvironmentVariable(key="RHDA_SOURCE", value="rhda-source-from-env-var")
   void stackAnalysisHtml_with_pom_xml_should_return_html_report_from_the_backend()
       throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
@@ -85,6 +88,10 @@ class Exhort_Api_Test {
       r.headers().firstValue("Accept").get().equals("text/html") &&
       // snyk token is set using the environment variable (annotation)
       r.headers().firstValue("ex-snyk-token").get().equals("snyk-token-from-env-var") &&
+      r.headers().firstValue("rhda-token").get().equals("rhda-token-from-env-var") &&
+        r.headers().firstValue("rhda-source").get().equals("rhda-source-from-env-var") &&
+        r.headers().firstValue("rhda-operation-type").get().equals("Stack Analysis") &&
+
       r.method().equals("POST");
 
     // load dummy html and set as the expected analysis
@@ -117,7 +124,11 @@ class Exhort_Api_Test {
   }
 
   @Test
+//    System.setProperty("RHDA_TOKEN", "rhda-token-from-property");
+//    System.setProperty("RHDA_SOURCE", "rhda-source-from-property");
   @SetEnvironmentVariable(key="EXHORT_SNYK_TOKEN", value="snyk-token-from-env-var")
+  @SetEnvironmentVariable(key="RHDA_TOKEN", value="rhda-token-from-env-var")
+  @SetEnvironmentVariable(key="RHDA_SOURCE", value="rhda-source-from-env-var")
   void stackAnalysis_with_pom_xml_should_return_json_object_from_the_backend()
     throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
@@ -139,6 +150,9 @@ class Exhort_Api_Test {
         r.headers().firstValue("Accept").get().equals("application/json") &&
         // snyk token is set using the environment variable (annotation) - ignored the one set in properties
         r.headers().firstValue("ex-snyk-token").get().equals("snyk-token-from-env-var") &&
+        r.headers().firstValue("rhda-token").get().equals("rhda-token-from-env-var") &&
+        r.headers().firstValue("rhda-source").get().equals("rhda-source-from-env-var") &&
+        r.headers().firstValue("rhda-operation-type").get().equals("Stack Analysis") &&
         r.method().equals("POST");
 
     // load dummy json and set as the expected analysis
@@ -186,6 +200,8 @@ class Exhort_Api_Test {
 
     // we expect this to picked up because no env var to take precedence
     System.setProperty("EXHORT_SNYK_TOKEN", "snyk-token-from-property");
+    System.setProperty("RHDA_TOKEN", "rhda-token-from-property");
+    System.setProperty("RHDA_SOURCE", "rhda-source-from-property");
 
     // create an argument matcher to make sure we mock the response for the right request
     ArgumentMatcher<HttpRequest> matchesRequest = r ->
@@ -193,6 +209,9 @@ class Exhort_Api_Test {
         r.headers().firstValue("Accept").get().equals("application/json") &&
         // snyk token is set using properties which is picked up because no env var specified
         r.headers().firstValue("ex-snyk-token").get().equals("snyk-token-from-property") &&
+        r.headers().firstValue("rhda-token").get().equals("rhda-token-from-property") &&
+        r.headers().firstValue("rhda-source").get().equals("rhda-source-from-property") &&
+        r.headers().firstValue("rhda-operation-type").get().equals("Component Analysis") &&
         r.method().equals("POST");
 
     // load dummy json and set as the expected analysis
@@ -341,9 +360,11 @@ class Exhort_Api_Test {
 
 
   @AfterEach
-  void beforeAll() {
+  void afterEach() {
     System.clearProperty("EXHORT_DEV_MODE");
     System.clearProperty("DEV_EXHORT_BACKEND_URL");
+    System.clearProperty("RHDA_TOKEN");
+    System.clearProperty("RHDA_SOURCE");
 
   }
 

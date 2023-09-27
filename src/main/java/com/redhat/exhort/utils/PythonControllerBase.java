@@ -218,12 +218,18 @@ public abstract class PythonControllerBase {
       CachedTree.putIfAbsent(new StringInsensitive(dependencyNameShow.replace("-","_")),record);
       CachedTree.putIfAbsent(new StringInsensitive(dependencyNameShow.replace("_","-")),record);
     });
+    ObjectMapper om = new ObjectMapper();
+    String tree;
+    try {
+      tree = om.writerWithDefaultPrettyPrinter().writeValueAsString(CachedTree);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+    log.log(System.Logger.Level.INFO,"Installed Dependencies:" + System.lineSeparator() + tree);
     linesOfRequirements.stream().forEach( dep -> {
       bringAllDependencies(dependencies, getDependencyName(dep),CachedTree, includeTransitive);
     });
-//    return dependencies.sort((Comparator<Map<String, Object>>) (o1, o2) -> {
-//           o1.
-//    });
+
     return dependencies;
   }
 

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 /** Utility class used for executing process on the operating system. **/
 public final class Operations {
+  private static System.Logger log = System.getLogger(this.getClass().getName());
   private Operations(){
     // constructor not required for a utility class
   }
@@ -61,16 +62,19 @@ public final class Operations {
   }
 
   public static void runProcess(final String[] cmdList, final Map<String, String> envMap) {
+    log.log(System.Logger.Level.INFO,"here 51");
     var processBuilder = new ProcessBuilder();
     processBuilder.command(cmdList);
+    log.log(System.Logger.Level.INFO,"here 52");
     if (envMap != null) {
       processBuilder.environment().putAll(envMap);
     }
-
+    log.log(System.Logger.Level.INFO,"here 53");
     // create a process builder or throw a runtime exception
     Process process = null;
     try {
       process = processBuilder.start();
+      log.log(System.Logger.Level.INFO,"here 54");
     } catch (final IOException e) {
       throw new RuntimeException(
         String.format(
@@ -82,9 +86,12 @@ public final class Operations {
     }
 
     // execute the command or throw runtime exception if failed
+    log.log(System.Logger.Level.INFO,"here 55");
     int exitCode = 0;
     try {
+      log.log(System.Logger.Level.INFO,"here 56");
       exitCode = process.waitFor();
+      log.log(System.Logger.Level.INFO,"here 57");
 
     } catch (final InterruptedException e) {
       throw new RuntimeException(
@@ -95,9 +102,10 @@ public final class Operations {
         )
       );
     }
-
+    log.log(System.Logger.Level.INFO,"here 58");
     // verify the command was executed successfully or throw a runtime exception
     if (exitCode != 0) {
+      log.log(System.Logger.Level.INFO,"here 59");
       String errMsg = new BufferedReader(new InputStreamReader(process.getErrorStream()))
         .lines().collect(Collectors.joining(System.lineSeparator()));
       if (errMsg.isEmpty()) {
@@ -105,6 +113,7 @@ public final class Operations {
           .lines().collect(Collectors.joining(System.lineSeparator()));
       }
       if (errMsg.isEmpty()) {
+        log.log(System.Logger.Level.INFO,"here 59");
         throw new RuntimeException(
           String.format(
             "failed to execute '%s', exit-code %d",

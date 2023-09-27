@@ -73,7 +73,7 @@ public final class JavaMavenProvider extends Provider {
     // the tree command will build the project and create the dependency tree in the temp file
     var mvnTreeCmd = new ArrayList<String>() {{
       add(mvn);
-      add("dependency:tree");
+      add("org.apache.maven.plugins:maven-dependency-plugin:3.6.0:tree");
       add("-DoutputType=dot");
       add("-Dscope=compile");
       add("-Dscope=runtime");

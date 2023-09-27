@@ -50,6 +50,7 @@ class Java_Maven_Provider_Test {
   void test_the_provideStack(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut pom.xml
     var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
+    System.out.print("the test folder is : " + testFolder);
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
       Files.write(tmpPomFile, is.readAllBytes());
     }

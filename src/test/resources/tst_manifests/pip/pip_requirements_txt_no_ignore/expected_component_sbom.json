@@ -1,0 +1,401 @@
+{
+  "bomFormat" : "CycloneDX",
+  "specVersion" : "1.4",
+  "version" : 1,
+  "metadata" : {
+    "timestamp" : "2023-09-26T13:44:18Z",
+    "component" : {
+      "name" : "root",
+      "purl" : "pkg:pypi/root",
+      "type" : "application",
+      "bom-ref" : "pkg:pypi/root"
+    }
+  },
+  "components" : [
+    {
+      "name" : "root",
+      "purl" : "pkg:pypi/root",
+      "type" : "application",
+      "bom-ref" : "pkg:pypi/root"
+    },
+    {
+      "name" : "anyio",
+      "version" : "3.6.2",
+      "purl" : "pkg:pypi/anyio@3.6.2",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/anyio@3.6.2"
+    },
+    {
+      "name" : "asgiref",
+      "version" : "3.4.1",
+      "purl" : "pkg:pypi/asgiref@3.4.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/asgiref@3.4.1"
+    },
+    {
+      "name" : "beautifulsoup4",
+      "version" : "4.12.2",
+      "purl" : "pkg:pypi/beautifulsoup4@4.12.2",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/beautifulsoup4@4.12.2"
+    },
+    {
+      "name" : "bs4",
+      "version" : "0.0.1",
+      "purl" : "pkg:pypi/bs4@0.0.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/bs4@0.0.1"
+    },
+    {
+      "name" : "certifi",
+      "version" : "2023.7.22",
+      "purl" : "pkg:pypi/certifi@2023.7.22",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/certifi@2023.7.22"
+    },
+    {
+      "name" : "chardet",
+      "version" : "4.0.0",
+      "purl" : "pkg:pypi/chardet@4.0.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/chardet@4.0.0"
+    },
+    {
+      "name" : "click",
+      "version" : "8.0.4",
+      "purl" : "pkg:pypi/click@8.0.4",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/click@8.0.4"
+    },
+    {
+      "name" : "contextlib2",
+      "version" : "21.6.0",
+      "purl" : "pkg:pypi/contextlib2@21.6.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/contextlib2@21.6.0"
+    },
+    {
+      "name" : "contextvars",
+      "version" : "2.4",
+      "purl" : "pkg:pypi/contextvars@2.4",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/contextvars@2.4"
+    },
+    {
+      "name" : "dataclasses",
+      "version" : "0.8",
+      "purl" : "pkg:pypi/dataclasses@0.8",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/dataclasses@0.8"
+    },
+    {
+      "name" : "fastapi",
+      "version" : "0.75.1",
+      "purl" : "pkg:pypi/fastapi@0.75.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/fastapi@0.75.1"
+    },
+    {
+      "name" : "flask",
+      "version" : "2.0.3",
+      "purl" : "pkg:pypi/flask@2.0.3",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/flask@2.0.3"
+    },
+    {
+      "name" : "h11",
+      "version" : "0.13.0",
+      "purl" : "pkg:pypi/h11@0.13.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/h11@0.13.0"
+    },
+    {
+      "name" : "idna",
+      "version" : "2.10",
+      "purl" : "pkg:pypi/idna@2.10",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/idna@2.10"
+    },
+    {
+      "name" : "immutables",
+      "version" : "0.19",
+      "purl" : "pkg:pypi/immutables@0.19",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/immutables@0.19"
+    },
+    {
+      "name" : "importlib-metadata",
+      "version" : "4.8.3",
+      "purl" : "pkg:pypi/importlib-metadata@4.8.3",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/importlib-metadata@4.8.3"
+    },
+    {
+      "name" : "itsdangerous",
+      "version" : "2.0.1",
+      "purl" : "pkg:pypi/itsdangerous@2.0.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/itsdangerous@2.0.1"
+    },
+    {
+      "name" : "jinja2",
+      "version" : "3.0.3",
+      "purl" : "pkg:pypi/jinja2@3.0.3",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/jinja2@3.0.3"
+    },
+    {
+      "name" : "markupsafe",
+      "version" : "2.0.1",
+      "purl" : "pkg:pypi/markupsafe@2.0.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/markupsafe@2.0.1"
+    },
+    {
+      "name" : "pydantic",
+      "version" : "1.9.2",
+      "purl" : "pkg:pypi/pydantic@1.9.2",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/pydantic@1.9.2"
+    },
+    {
+      "name" : "python-multipart",
+      "version" : "0.0.5",
+      "purl" : "pkg:pypi/python-multipart@0.0.5",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/python-multipart@0.0.5"
+    },
+    {
+      "name" : "requests",
+      "version" : "2.25.1",
+      "purl" : "pkg:pypi/requests@2.25.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/requests@2.25.1"
+    },
+    {
+      "name" : "six",
+      "version" : "1.16.0",
+      "purl" : "pkg:pypi/six@1.16.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/six@1.16.0"
+    },
+    {
+      "name" : "sniffio",
+      "version" : "1.2.0",
+      "purl" : "pkg:pypi/sniffio@1.2.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/sniffio@1.2.0"
+    },
+    {
+      "name" : "soupsieve",
+      "version" : "2.3.2.post1",
+      "purl" : "pkg:pypi/soupsieve@2.3.2.post1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/soupsieve@2.3.2.post1"
+    },
+    {
+      "name" : "starlette",
+      "version" : "0.17.1",
+      "purl" : "pkg:pypi/starlette@0.17.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/starlette@0.17.1"
+    },
+    {
+      "name" : "typing-extensions",
+      "version" : "4.1.1",
+      "purl" : "pkg:pypi/typing-extensions@4.1.1",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/typing-extensions@4.1.1"
+    },
+    {
+      "name" : "urllib3",
+      "version" : "1.26.16",
+      "purl" : "pkg:pypi/urllib3@1.26.16",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/urllib3@1.26.16"
+    },
+    {
+      "name" : "uvicorn",
+      "version" : "0.17.0",
+      "purl" : "pkg:pypi/uvicorn@0.17.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/uvicorn@0.17.0"
+    },
+    {
+      "name" : "werkzeug",
+      "version" : "2.0.3",
+      "purl" : "pkg:pypi/werkzeug@2.0.3",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/werkzeug@2.0.3"
+    },
+    {
+      "name" : "zipp",
+      "version" : "3.6.0",
+      "purl" : "pkg:pypi/zipp@3.6.0",
+      "type" : "library",
+      "bom-ref" : "pkg:pypi/zipp@3.6.0"
+    }
+  ],
+  "dependencies" : [
+    {
+      "ref" : "pkg:pypi/root",
+      "dependsOn" : [
+        "pkg:pypi/anyio@3.6.2",
+        "pkg:pypi/asgiref@3.4.1",
+        "pkg:pypi/beautifulsoup4@4.12.2",
+        "pkg:pypi/bs4@0.0.1",
+        "pkg:pypi/certifi@2023.7.22",
+        "pkg:pypi/chardet@4.0.0",
+        "pkg:pypi/click@8.0.4",
+        "pkg:pypi/contextlib2@21.6.0",
+        "pkg:pypi/contextvars@2.4",
+        "pkg:pypi/dataclasses@0.8",
+        "pkg:pypi/fastapi@0.75.1",
+        "pkg:pypi/flask@2.0.3",
+        "pkg:pypi/h11@0.13.0",
+        "pkg:pypi/idna@2.10",
+        "pkg:pypi/immutables@0.19",
+        "pkg:pypi/importlib-metadata@4.8.3",
+        "pkg:pypi/itsdangerous@2.0.1",
+        "pkg:pypi/jinja2@3.0.3",
+        "pkg:pypi/markupsafe@2.0.1",
+        "pkg:pypi/pydantic@1.9.2",
+        "pkg:pypi/python-multipart@0.0.5",
+        "pkg:pypi/requests@2.25.1",
+        "pkg:pypi/six@1.16.0",
+        "pkg:pypi/sniffio@1.2.0",
+        "pkg:pypi/soupsieve@2.3.2.post1",
+        "pkg:pypi/starlette@0.17.1",
+        "pkg:pypi/typing-extensions@4.1.1",
+        "pkg:pypi/urllib3@1.26.16",
+        "pkg:pypi/uvicorn@0.17.0",
+        "pkg:pypi/werkzeug@2.0.3",
+        "pkg:pypi/zipp@3.6.0"
+      ]
+    },
+    {
+      "ref" : "pkg:pypi/anyio@3.6.2",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/asgiref@3.4.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/beautifulsoup4@4.12.2",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/bs4@0.0.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/certifi@2023.7.22",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/chardet@4.0.0",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/click@8.0.4",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/contextlib2@21.6.0",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/contextvars@2.4",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/dataclasses@0.8",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/fastapi@0.75.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/flask@2.0.3",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/h11@0.13.0",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/idna@2.10",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/immutables@0.19",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/importlib-metadata@4.8.3",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/itsdangerous@2.0.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/jinja2@3.0.3",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/markupsafe@2.0.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/pydantic@1.9.2",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/python-multipart@0.0.5",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/requests@2.25.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/six@1.16.0",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/sniffio@1.2.0",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/soupsieve@2.3.2.post1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/starlette@0.17.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/typing-extensions@4.1.1",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/urllib3@1.26.16",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/uvicorn@0.17.0",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/werkzeug@2.0.3",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:pypi/zipp@3.6.0",
+      "dependsOn" : [ ]
+    }
+  ]
+}

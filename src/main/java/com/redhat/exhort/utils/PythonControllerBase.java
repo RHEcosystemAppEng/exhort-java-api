@@ -71,6 +71,7 @@ public abstract class PythonControllerBase {
       throw new RuntimeException(e);
     }
   }
+  private System.Logger log = System.getLogger("name");
   protected Path pythonEnvironmentDir;
   protected Path pipBinaryDir;
 
@@ -87,6 +88,7 @@ public abstract class PythonControllerBase {
   public void installPackage(String pathToRequirements)
   {
     String installedPackageSummary = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "install", "-r", pathToRequirements);
+    log.log(System.Logger.Level.INFO,installedPackageSummary);
 
   }
 

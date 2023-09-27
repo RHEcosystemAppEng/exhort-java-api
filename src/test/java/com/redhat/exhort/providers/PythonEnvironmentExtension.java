@@ -29,6 +29,7 @@ import java.util.List;
 public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver, BeforeTestExecutionCallback {
 
   private PythonControllerBase pythonController = new PythonControllerTestEnv("python3");
+  private System.Logger log = System.getLogger(this.getClass().getName());
 
 //  public PythonEnvironmentExtension(List<String> requirementsFiles) {
 //    this.requirementsFiles = requirementsFiles;
@@ -37,18 +38,23 @@ public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCa
   private List<String> requirementsFiles;
   @Override
   public void afterAll(ExtensionContext extensionContext) throws Exception {
+    log.log(System.Logger.Level.INFO,"Finished all python tests and about to clean environment");
     pythonController.cleanEnvironment(true);
+    log.log(System.Logger.Level.INFO,"Deleted Environment");
   }
 
   @Override
   public void afterEach(ExtensionContext extensionContext) throws Exception {
+    log.log(System.Logger.Level.INFO,String.format("Finished Test Method: %s", extensionContext.getRequiredTestMethod()));
   }
 
   @Override
   public void beforeAll(ExtensionContext extensionContext) throws Exception {
+    log.log(System.Logger.Level.INFO,"Creating python environment for tests");
     String python3 = Operations.getCustomPathOrElse("python3");
     this.pythonController = new PythonControllerTestEnv(python3);
     this.pythonController.prepareEnvironment(python3);
+    log.log(System.Logger.Level.INFO,"Finished creating virtual environment for testing");
     var tmpPythonModuleDir = Files.createTempDirectory("exhort_test_");
     var tmpPythonFile = Files.createFile(tmpPythonModuleDir.resolve("requirements.txt"));
     Python_Provider_Test.testFolders().forEach( test -> {
@@ -60,6 +66,7 @@ public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCa
         throw new RuntimeException(e);
       }
     });
+    log.log(System.Logger.Level.INFO,"Finished Installing all requirements.txt files");
     Files.deleteIfExists(tmpPythonFile);
     Files.deleteIfExists(tmpPythonModuleDir);
 
@@ -68,7 +75,7 @@ public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCa
 
   @Override
   public void beforeEach(ExtensionContext extensionContext) throws Exception {
-
+    log.log(System.Logger.Level.INFO,String.format("About to Start Test Method: %s", extensionContext.getRequiredTestMethod()));
   }
 
   @Override

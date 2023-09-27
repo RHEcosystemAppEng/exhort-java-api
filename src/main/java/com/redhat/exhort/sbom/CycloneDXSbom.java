@@ -35,6 +35,7 @@ import com.github.packageurl.PackageURL;
 public class CycloneDXSbom implements Sbom {
 
     private static final Version VERSION = Version.VERSION_14;
+  private String exhortIgnoreMethod;
   private Bom bom;
     private PackageURL root;
 
@@ -54,6 +55,7 @@ public class CycloneDXSbom implements Sbom {
         bom.setComponents(new ArrayList<>());
         bom.setDependencies(new ArrayList<>());
         belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+        this.exhortIgnoreMethod = "insensitive";
 
     }
 
@@ -61,7 +63,7 @@ public class CycloneDXSbom implements Sbom {
     return (collection, component) -> collection.contains(component.getName());
   }
 
-  public CycloneDXSbom(BelongingCondition belongingCondition) {
+  public CycloneDXSbom(BelongingCondition belongingCondition,String exhortIgnoreMethod) {
       this();
       if(belongingCondition.equals(BelongingCondition.NAME))
       {
@@ -75,7 +77,7 @@ public class CycloneDXSbom implements Sbom {
         // fallback to belonging condition by name ( default) - this one in case the enum type will be extended and new BelongingType won't be implemented right away.
         belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
       }
-
+      this.exhortIgnoreMethod = exhortIgnoreMethod;
     }
 
   private BiPredicate<Collection, Component> getBelongingConditionByPurl() {
@@ -97,7 +99,7 @@ public class CycloneDXSbom implements Sbom {
 
   @Override
   public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps) {
-    String exhortIgnoreMethod = Objects.requireNonNullElse(getExhortIgnoreMethod(), "sensitive");
+    String exhortIgnoreMethod = Objects.requireNonNullElse(getExhortIgnoreMethod(),this.exhortIgnoreMethod );
     if(exhortIgnoreMethod.equals("insensitive"))
     {
       return filterIgnoredDepsInsensitive(ignoredDeps);

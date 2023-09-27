@@ -45,7 +45,7 @@ import com.redhat.exhort.tools.Operations;
 public final class JavaMavenProvider extends Provider {
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
-    Content content = javaMavenProvider.provideStack(Path.of("/tmp/bug-070923/pom.xml"));
+    Content content = javaMavenProvider.provideStack(Path.of("/tmp/olga/pom.xml"));
     String report = new String(content.buffer);
     System.out.println(report);
   }
@@ -89,7 +89,7 @@ public final class JavaMavenProvider extends Provider {
   }
 
   private Sbom buildSbomFromDot(Path dotFile) throws IOException {
-    var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL);
+    var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"insensitive");
     var reader = new BufferedReader(Files.newBufferedReader(dotFile));
     String line = reader.readLine();
     while (line != null) {

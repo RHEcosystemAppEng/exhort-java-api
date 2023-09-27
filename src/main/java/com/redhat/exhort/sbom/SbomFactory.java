@@ -21,8 +21,8 @@ public class SbomFactory {
     public static Sbom newInstance() {
         return new CycloneDXSbom();
     }
-    public static Sbom newInstance(Sbom.BelongingCondition belongingCondition) {
-        return new CycloneDXSbom(belongingCondition);
+    public static Sbom newInstance(Sbom.BelongingCondition belongingCondition,String exhortIgnoreMethod) {
+        return new CycloneDXSbom(belongingCondition,exhortIgnoreMethod);
     }
 
 }

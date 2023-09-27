@@ -36,24 +36,24 @@ public class HelperExtension implements BeforeAllCallback, AfterAllCallback, Bef
   private List<String> requirementsFiles;
   @Override
   public void afterAll(ExtensionContext extensionContext) throws Exception {
-    log.log(System.Logger.Level.INFO,"Finished all tests!!");
+    log.log(System.Logger.Level.DEBUG,"Finished all tests!!");
 
   }
 
   @Override
   public void afterEach(ExtensionContext extensionContext) throws Exception {
-    log.log(System.Logger.Level.INFO,String.format("Finished Test Method: %s, at test class: %s", extensionContext.getRequiredTestMethod(),extensionContext.getRequiredTestClass().getName()));
+    log.log(System.Logger.Level.DEBUG,String.format("Finished Test Method: %s", extensionContext.getRequiredTestMethod()));
   }
 
   @Override
   public void beforeAll(ExtensionContext extensionContext) throws Exception {
 
-    log.log(System.Logger.Level.INFO,"Before all tests");
+    log.log(System.Logger.Level.DEBUG,"Before all tests");
   }
 
   @Override
   public void beforeEach(ExtensionContext extensionContext) throws Exception {
-    log.log(System.Logger.Level.INFO,String.format("Before Invoking Test Method: %s, at test class: %s", extensionContext.getRequiredTestMethod(),extensionContext.getRequiredTestClass().getName()));
+    log.log(System.Logger.Level.DEBUG,String.format("Before Invoking Test Method: %s", extensionContext.getRequiredTestMethod()));
   }
 
 

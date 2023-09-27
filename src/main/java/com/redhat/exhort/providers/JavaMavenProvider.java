@@ -44,7 +44,6 @@ import com.redhat.exhort.tools.Operations;
  **/
 public final class JavaMavenProvider extends Provider {
 
-  private System.Logger log = System.getLogger(this.getClass().getName());
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
     Content content = javaMavenProvider.provideStack(Path.of("/tmp/olga/pom.xml"));
@@ -60,16 +59,12 @@ public final class JavaMavenProvider extends Provider {
     // check for custom mvn executable
     var mvn = Operations.getCustomPathOrElse("mvn");
     // clean command used to clean build target
-    log.log(System.Logger.Level.INFO,"here 1");
     var mvnCleanCmd = new String[]{mvn, "clean", "-f", manifestPath.toString()};
     var mvnEnvs = getMvnExecEnvs();
     // execute the clean command
-    log.log(System.Logger.Level.INFO,"here 2");
     Operations.runProcess(mvnCleanCmd, mvnEnvs);
     // create a temp file for storing the dependency tree in
-    log.log(System.Logger.Level.INFO,"here 3");
     var tmpFile = Files.createTempFile("exhort_dot_graph_", null);
-    log.log(System.Logger.Level.INFO,"here 4");
     // the tree command will build the project and create the dependency tree in the temp file
     var mvnTreeCmd = new ArrayList<String>() {{
       add(mvn);
@@ -88,11 +83,8 @@ public final class JavaMavenProvider extends Provider {
       .map(PackageURL::getCoordinates)
       .collect(Collectors.toList());
     // execute the tree command
-    log.log(System.Logger.Level.INFO,"here 5");
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new), mvnEnvs);
-    log.log(System.Logger.Level.INFO,"here 6");
     var sbom = buildSbomFromDot(tmpFile);
-    log.log(System.Logger.Level.INFO,"here 7");
     // build and return content for constructing request to the backend
     return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }

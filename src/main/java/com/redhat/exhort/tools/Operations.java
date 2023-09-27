@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 /** Utility class used for executing process on the operating system. **/
 public final class Operations {
-  private static System.Logger log = System.getLogger(this.getClass().getName());
+  private static System.Logger log = System.getLogger("Operations");
   private Operations(){
     // constructor not required for a utility class
   }

@@ -246,7 +246,13 @@ public class CycloneDXSbom implements Sbom {
 
   @Override
   public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition) {
-      this.belongingCriteriaBinaryAlgorithm = belongingCriteriaBinaryAlgorithm;
+    if(belongingCondition.equals(BelongingCondition.NAME))
+    {
+      belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+    }
+    else if (belongingCondition.equals(BelongingCondition.PURL)){
+      belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
+    }
 
   }
 

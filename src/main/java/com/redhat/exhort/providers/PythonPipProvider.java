@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2023 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.redhat.exhort.providers;
 
 import com.github.packageurl.MalformedPackageURLException;
@@ -21,6 +36,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class PythonPipProvider extends Provider {
+
+
+  public void setPythonController(PythonControllerBase pythonController) {
+    this.pythonController = pythonController;
+  }
+
+  private PythonControllerBase pythonController;
   public static void main(String[] args) {
     try {
       PythonPipProvider pythonPipProvider = new PythonPipProvider();
@@ -42,7 +64,7 @@ public final class PythonPipProvider extends Provider {
   public Content provideStack(Path manifestPath) throws IOException {
     PythonControllerBase pythonController = getPythonController();
     List<Map<String, Object>> dependencies = pythonController.getDependencies(manifestPath.toString(), true);
-    Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL);
+    Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"sensitive");
     try {
       sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(), "root"));
     } catch (MalformedPackageURLException e) {
@@ -158,17 +180,22 @@ public final class PythonPipProvider extends Provider {
     }
   }
 
-  private static PythonControllerBase getPythonController() {
+  private PythonControllerBase getPythonController() {
     String pythonPipBinaries = getPythonPipBinaries();
     String[] parts = pythonPipBinaries.split(";;");
     var python = parts[0];
     var pip = parts[1];
     String useVirtualPythonEnv = Objects.requireNonNullElse(System.getenv("EXHORT_PYTHON_VIRTUAL_ENV"), "false");
     PythonControllerBase pythonController;
-    if (Boolean.parseBoolean(useVirtualPythonEnv)) {
-      pythonController = new PythonControllerVirtualEnv(python);
-    } else {
-      pythonController = new PythonControllerRealEnv(python, pip);
+    if(this.pythonController == null) {
+      if (Boolean.parseBoolean(useVirtualPythonEnv)) {
+        pythonController = new PythonControllerVirtualEnv(python);
+      } else {
+        pythonController = new PythonControllerRealEnv(python, pip);
+      }
+    }
+    else {
+      pythonController = this.pythonController;
     }
     return pythonController;
   }

@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2023 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.redhat.exhort.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,7 +45,7 @@ public abstract class PythonControllerBase {
     pythonController = new PythonControllerRealEnv("/usr/bin/python3","/usr/bin/pip3");
     start = LocalDateTime.now();
     try {
-      dependencies = pythonController.getDependencies("/tmp/exhort_env/requirements.txt",true);
+      dependencies = pythonController.getDependencies("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt",true);
     } catch (PackageNotInstalledException e) {
       System.out.println(e.getMessage());
       dependencies =null;
@@ -77,7 +92,7 @@ public abstract class PythonControllerBase {
 
   public abstract boolean isVirtualEnv();
 
-  public abstract void cleanEnvironment();
+  public abstract void cleanEnvironment(boolean deleteEnvironment);
 
 
 //  public List<Map<String,Object>> getDependenciesNaive()
@@ -163,6 +178,7 @@ public abstract class PythonControllerBase {
 //  }
 
   public final List<Map<String,Object>> getDependencies(String pathToRequirements, boolean includeTransitive) {
+    if(!isVirtualEnv() || (isVirtualEnv() ))
     prepareEnvironment(pathToPythonBin);
     if(automaticallyInstallPackageOnEnvironment())
     {
@@ -171,7 +187,7 @@ public abstract class PythonControllerBase {
     List<Map<String, Object>> dependencies = getDependenciesImpl(pathToRequirements, includeTransitive);
     if(isVirtualEnv())
     {
-      cleanEnvironment();
+      cleanEnvironment(false);
     }
 
     return dependencies;
@@ -202,6 +218,9 @@ public abstract class PythonControllerBase {
     linesOfRequirements.stream().forEach( dep -> {
       bringAllDependencies(dependencies, getDependencyName(dep),CachedTree, includeTransitive);
     });
+//    return dependencies.sort((Comparator<Map<String, Object>>) (o1, o2) -> {
+//           o1.
+//    });
     return dependencies;
   }
 
@@ -227,6 +246,11 @@ public abstract class PythonControllerBase {
       if(includeTransitive) {
         bringAllDependencies(targetDeps, dep, cachedTree, includeTransitive);
       }
+      Collections.sort(targetDeps, (o1, o2) -> {
+        String string1 = (String) (o1.get("name"));
+        String string2 = (String) (o2.get("name"));
+        return Arrays.compare(string1.toCharArray(),string2.toCharArray());
+      });
       entry.put("dependencies",targetDeps);
     });
 

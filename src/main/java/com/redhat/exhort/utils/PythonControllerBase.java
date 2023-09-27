@@ -85,11 +85,15 @@ public abstract class PythonControllerBase {
 
   public abstract boolean automaticallyInstallPackageOnEnvironment();
 
+  public abstract boolean isRealEnv();
+
   public void installPackage(String pathToRequirements)
   {
     log.log(System.Logger.Level.INFO,"installPackage -> pip Binary location=" + pipBinaryLocation + ",pythonEnvironmentDir=" + pythonEnvironmentDir);
     String installedPackageSummary = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "install", "-r", pathToRequirements);
     log.log(System.Logger.Level.INFO,installedPackageSummary);
+    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
+    log.log(System.Logger.Level.INFO,"freeze output=" + System.lineSeparator() + freeze);
 
   }
 
@@ -181,7 +185,7 @@ public abstract class PythonControllerBase {
 //  }
 
   public final List<Map<String,Object>> getDependencies(String pathToRequirements, boolean includeTransitive) {
-    if(isVirtualEnv()) {
+    if(isVirtualEnv() || isRealEnv() ) {
       prepareEnvironment(pathToPythonBin);
     }
     if(automaticallyInstallPackageOnEnvironment())

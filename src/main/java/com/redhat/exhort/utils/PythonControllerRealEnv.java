@@ -55,6 +55,12 @@ public class PythonControllerRealEnv extends PythonControllerBase{
   public boolean automaticallyInstallPackageOnEnvironment() {
     return false;
   }
+
+  @Override
+  public boolean isRealEnv() {
+    return true;
+  }
+
   @Override
   public boolean isVirtualEnv()
   {

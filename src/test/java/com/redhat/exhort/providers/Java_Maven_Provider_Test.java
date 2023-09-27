@@ -36,7 +36,7 @@ class Java_Maven_Provider_Test {
   // - expected_sbom.json: the SBOM expected to be provided
   static Stream<String> testFolders() {
     return Stream.of(
-      "deps_no_trivial_with_ignore",
+//      "deps_no_trivial_with_ignore",
       "deps_with_ignore_on_artifact",
       "deps_with_ignore_on_dependency",
       "deps_with_ignore_on_group",

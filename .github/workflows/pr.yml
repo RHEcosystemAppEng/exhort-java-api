@@ -30,7 +30,9 @@ jobs:
         cache: maven
 
     - name: Verify the project and create coverage report
-      run: mvn verify -Pits,cov -B -ff
+      run: |
+        mvn wrapper:wrapper -Dtype=script -Dversion=3.8.4
+        ./mvnw verify -Pits,cov -B -ff
 
     - name: Report test summary
       if: ${{ matrix.java == env.MAIN_JAVA_VER  && always() }}

@@ -201,6 +201,7 @@ public abstract class PythonControllerBase {
     List<Map<String,Object>> dependencies = new ArrayList<>();
     log.log(System.Logger.Level.INFO,"getDependenciesImpl -> pip Binary location=" + pipBinaryLocation + ",pythonEnvironmentDir=" + pythonEnvironmentDir);
     String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
+    log.log(System.Logger.Level.INFO,"freeze output=" + System.lineSeparator() + freeze);
     String[] deps = freeze.split(System.lineSeparator());
     log.log(System.Logger.Level.INFO,"Size of list of installed deps=" + deps.length);
     Arrays.stream(deps).forEach( s -> {

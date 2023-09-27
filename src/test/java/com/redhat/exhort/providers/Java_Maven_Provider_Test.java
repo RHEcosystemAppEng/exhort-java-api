@@ -29,6 +29,7 @@ import com.redhat.exhort.Api;
 
 @ExtendWith(HelperExtension.class)
 class Java_Maven_Provider_Test {
+  private static System.Logger log = System.getLogger("Java_Maven_Provider_Test");
   // test folder are located at src/test/resources/tst_manifests
   // each folder should contain:
   // - pom.xml: the target manifest for testing

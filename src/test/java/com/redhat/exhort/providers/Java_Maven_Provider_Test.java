@@ -21,11 +21,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.redhat.exhort.Api;
 
+@ExtendWith(HelperExtension.class)
 class Java_Maven_Provider_Test {
   // test folder are located at src/test/resources/tst_manifests
   // each folder should contain:

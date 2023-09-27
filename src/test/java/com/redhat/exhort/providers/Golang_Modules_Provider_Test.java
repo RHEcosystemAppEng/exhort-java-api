@@ -17,6 +17,7 @@ package com.redhat.exhort.providers;
 
 import com.redhat.exhort.Api;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -26,7 +27,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
-
+@ExtendWith(HelperExtension.class)
 class Golang_Modules_Provider_Test {
   // test folder are located at src/test/resources/tst_manifests/npm
   // each folder should contain:

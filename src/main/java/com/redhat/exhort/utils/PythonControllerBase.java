@@ -180,8 +180,9 @@ public abstract class PythonControllerBase {
 //  }
 
   public final List<Map<String,Object>> getDependencies(String pathToRequirements, boolean includeTransitive) {
-    if(!isVirtualEnv() || (isVirtualEnv() ))
-    prepareEnvironment(pathToPythonBin);
+    if(isVirtualEnv()) {
+      prepareEnvironment(pathToPythonBin);
+    }
     if(automaticallyInstallPackageOnEnvironment())
     {
       installPackage(pathToRequirements);

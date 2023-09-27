@@ -24,6 +24,8 @@ import java.nio.file.Path;
 import java.util.Comparator;
 
 public class PythonControllerVirtualEnv extends PythonControllerBase{
+
+  private System.Logger log = System.getLogger("name");
   public PythonControllerVirtualEnv(String pathToPythonBin) {
     this.pipBinaryDir = Path.of(FileSystems.getDefault().getSeparator(), "tmp","exhort_env","bin");
     this.pythonEnvironmentDir = Path.of(FileSystems.getDefault().getSeparator(),"tmp","exhort_env");
@@ -40,7 +42,8 @@ public class PythonControllerVirtualEnv extends PythonControllerBase{
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    Operations.runProcess(new String[]{pathToPythonBin,"-m","venv",pythonEnvironmentDir.toString()});
+    String output = Operations.runProcessGetOutput(Path.of("."), new String[]{pathToPythonBin, "-m", "venv", pythonEnvironmentDir.toString()});
+    log.log(System.Logger.Level.INFO, "Output from creating virtual environment  " + System.lineSeparator() + output);
     String envBinDir = pipBinaryDir.toString();
     if(pathToPythonBin.contains("python3"))
     {

@@ -28,7 +28,8 @@ import java.util.List;
 
 public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver, BeforeTestExecutionCallback {
 
-  private PythonControllerBase pythonController = new PythonControllerTestEnv("python","pip");
+
+  private PythonControllerBase pythonController = new PythonControllerTestEnv(Operations.getCustomPathOrElse("python3"),Operations.getCustomPathOrElse("pip3"));
   private System.Logger log = System.getLogger(this.getClass().getName());
 
 //  public PythonEnvironmentExtension(List<String> requirementsFiles) {

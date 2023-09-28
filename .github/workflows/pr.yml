@@ -38,10 +38,14 @@ jobs:
     - name: get Python location
       id: python-location
       run: |
-        echo "pythonLocation =" $pythonLocation
+        echo "python-bin-location=$(echo $pythonLocation)/bin/" >> $GITHUB_OUTPUT
         ls -ltra $pythonLocation
         ls -ltra $pythonLocation/bin
+        echo "pythonLocation ="
     - name: Verify the project and create coverage report
+      env:
+        EXHORT_PYTHON3_PATH: ${{join(steps.python-location.outputs.python-bin-location, 'python3')}}
+        EXHORT_PIP3_PATH: ${{join(steps.python-location.outputs.python-bin-location, 'pip3')}}
       run: |
         mvn verify -Pits,cov -B -ff
 

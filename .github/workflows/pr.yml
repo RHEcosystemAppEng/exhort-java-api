@@ -29,11 +29,17 @@ jobs:
         java-version: ${{ matrix.java }}
         cache: maven
 
+    - name: setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+
     - name: Verify the project and create coverage report
       run: |
-        mvn wrapper:wrapper -Dtype=script -Dversion=3.9.4
-        MAVEN_HOME=$(./mvnw --version | grep "Maven home" | awk -F ':' '{print $2}')
-        EXHORT_MVN_PATH=$MAVEN_HONE/bin/mvn ./mvnw verify -Pits,cov -B -ff
+#        mvn wrapper:wrapper -Dtype=script -Dversion=3.9.4
+#        MAVEN_HOME=$(./mvnw --version | grep "Maven home" | awk -F ':' '{print $2}')
+        mvn verify -Pits,cov -B -ff
 
     - name: Report test summary
       if: ${{ matrix.java == env.MAIN_JAVA_VER  && always() }}

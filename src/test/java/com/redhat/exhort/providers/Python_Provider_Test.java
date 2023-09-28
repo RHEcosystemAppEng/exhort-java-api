@@ -16,8 +16,10 @@
 package com.redhat.exhort.providers;
 
 import com.redhat.exhort.Api;
+import com.redhat.exhort.utils.PythonControllerBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -26,40 +28,50 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
-@ExtendWith(HelperExtension.class)
-class Golang_Modules_Provider_Test {
-  // test folder are located at src/test/resources/tst_manifests/npm
-  // each folder should contain:
-  // - package.json: the target manifest for testing
-  // - expected_sbom.json: the SBOM expected to be provided
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
+@ExtendWith(PythonEnvironmentExtension.class)
+class Python_Provider_Test {
+
   static Stream<String> testFolders() {
     return Stream.of(
-      "go_mod_light_no_ignore",
-      "go_mod_no_ignore",
-      "go_mod_with_ignore"
+"pip_requirements_txt_no_ignore",
+        "pip_requirements_txt_ignore"
 
     );
   }
 
+//  @RegisterExtension
+//  private PythonEnvironmentExtension pythonEnvironmentExtension = new PythonEnvironmentExtension();
+
+  public Python_Provider_Test(PythonControllerBase pythonController) {
+    this.pythonController = pythonController;
+    this.pythonPipProvider = new PythonPipProvider();
+    this.pythonPipProvider.setPythonController(pythonController);
+  }
+
+  private PythonControllerBase pythonController;
+  private PythonPipProvider pythonPipProvider;
   @ParameterizedTest
   @MethodSource("testFolders")
   void test_the_provideStack(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut package.json
-    var tmpGoModulesDir = Files.createTempDirectory("exhort_test_");
-    var tmpGolangFile = Files.createFile(tmpGoModulesDir.resolve("go.mod"));
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "go.mod"))) {
-      Files.write(tmpGolangFile, is.readAllBytes());
+    var tmpPythonModuleDir = Files.createTempDirectory("exhort_test_");
+    var tmpPythonFile = Files.createFile(tmpPythonModuleDir.resolve("requirements.txt"));
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "pip", testFolder, "requirements.txt"))) {
+      Files.write(tmpPythonFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "expected_sbom_stack_analysis.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "pip", testFolder, "expected_stack_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing stack content for our pom
-    var content = new GoModulesProvider().provideStack(tmpGolangFile);
+    var content = this.pythonPipProvider.provideStack(tmpPythonFile);
     // cleanup
-    Files.deleteIfExists(tmpGolangFile);
+    Files.deleteIfExists(tmpPythonFile);
+    Files.deleteIfExists(tmpPythonModuleDir);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
@@ -70,17 +82,17 @@ class Golang_Modules_Provider_Test {
   @MethodSource("testFolders")
   void test_the_provideComponent(String testFolder) throws IOException, InterruptedException {
     // load the pom target pom file
-    byte[] targetPom;
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "go.mod"))) {
-      targetPom = is.readAllBytes();
+    byte[] targetRequirementsTxt;
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "pip", testFolder, "requirements.txt"))) {
+      targetRequirementsTxt = is.readAllBytes();
     }
     // load expected SBOM
     String expectedSbom = "";
-    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "expected_sbom_component_analysis.json"))) {
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "pip", testFolder, "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom
-    var content = new GoModulesProvider().provideComponent(targetPom);
+    var content = this.pythonPipProvider.provideComponent(targetRequirementsTxt);
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
@@ -92,11 +104,9 @@ class Golang_Modules_Provider_Test {
 
   @Test
   void Test_The_ProvideComponent_Path_Should_Throw_Exception() {
-
-    GoModulesProvider goModulesProvider = new GoModulesProvider();
     assertThatIllegalArgumentException().isThrownBy(() -> {
-      goModulesProvider.provideComponent(Path.of("."));
-    }).withMessage("provideComponent with file system path for GoModules package manager not implemented yet");
+      this.pythonPipProvider.provideComponent(Path.of("."));
+    }).withMessage("provideComponent with file system path for Python pip package manager is not supported");
 
 
   }

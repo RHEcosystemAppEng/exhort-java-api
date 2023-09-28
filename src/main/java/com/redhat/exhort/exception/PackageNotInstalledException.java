@@ -13,16 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.redhat.exhort.exception;
 
-package com.redhat.exhort.sbom;
-
-public class SbomFactory {
-
-    public static Sbom newInstance() {
-        return new CycloneDXSbom();
-    }
-    public static Sbom newInstance(Sbom.BelongingCondition belongingCondition,String exhortIgnoreMethod) {
-        return new CycloneDXSbom(belongingCondition,exhortIgnoreMethod);
-    }
-
+public class PackageNotInstalledException extends RuntimeException {
+  public PackageNotInstalledException(String message) {
+    super(message);
+  }
 }

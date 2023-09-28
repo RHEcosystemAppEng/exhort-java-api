@@ -27,6 +27,7 @@ public interface Sbom {
     public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps);
     public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
     public String getAsJsonString();
+    public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition);
 
     public enum BelongingCondition
     {

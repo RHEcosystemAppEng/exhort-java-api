@@ -37,7 +37,13 @@
 
 ### Good to know
 
-* You can override the default backend url by setting another one in the _EXHORT_URL_ environment variable.
+* You can override the default backend url by setting the `EXHORT_DEV_MODE` environment variable/system property to true:
+  * In case environment variable/System Property `EXHORT_DEV_MODE=true` - You can Override the default exhort backend by setting  
+    `DEV_EXHORT_BACKEND_URL` env variable/system property to the desired exhort backend instance address ( useful for tests).
+  * In case `DEV_EXHORT_BACKEND_URL` is not set via environment variable/system property, then the default DEV exhort backend is picked.
+  * In case `EXHORT_DEV_MODE=false` or not set at all levels, then default backend url ( exhort prod) is picked, regardless of the value of `DEV_EXHORT_BACKEND_URL`.
+  * Environment variables takes precedence over System properties - for example, if System property `EXHORT_DEV_MODE=true`
+    but environment variable `EXHORT_DEV_MODE=false` , then default exhort prod will be used anyway.
 
 ### OpenAPI Specifications
 

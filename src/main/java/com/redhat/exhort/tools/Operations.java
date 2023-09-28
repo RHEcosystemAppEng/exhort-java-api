@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.lang.String.join;
+
 /** Utility class used for executing process on the operating system. **/
 public final class Operations {
   private Operations(){
@@ -66,7 +68,6 @@ public final class Operations {
     if (envMap != null) {
       processBuilder.environment().putAll(envMap);
     }
-
     // create a process builder or throw a runtime exception
     Process process = null;
     try {
@@ -75,7 +76,7 @@ public final class Operations {
       throw new RuntimeException(
         String.format(
           "failed to build process for '%s' got %s",
-          String.join(" ", cmdList),
+          join(" ", cmdList),
           e.getMessage()
         )
       );
@@ -90,12 +91,11 @@ public final class Operations {
       throw new RuntimeException(
         String.format(
           "built process for '%s' interrupted, got %s",
-          String.join(" ", cmdList),
+          join(" ", cmdList),
           e.getMessage()
         )
       );
     }
-
     // verify the command was executed successfully or throw a runtime exception
     if (exitCode != 0) {
       String errMsg = new BufferedReader(new InputStreamReader(process.getErrorStream()))
@@ -108,7 +108,7 @@ public final class Operations {
         throw new RuntimeException(
           String.format(
             "failed to execute '%s', exit-code %d",
-            String.join(" ", cmdList),
+            join(" ", cmdList),
             exitCode
           )
         );
@@ -116,7 +116,7 @@ public final class Operations {
         throw new RuntimeException(
           String.format(
             "failed to execute '%s', exit-code %d, message:%s%s%s",
-            String.join(" ", cmdList),
+            join(" ", cmdList),
             exitCode,
             System.lineSeparator(),
             errMsg,
@@ -138,17 +138,17 @@ public final class Operations {
       InputStream inputStream;
       if(dir == null) {
         if (envList != null) {
-          process = Runtime.getRuntime().exec(String.join(" ", cmdList), envList);
+          process = Runtime.getRuntime().exec(join(" ", cmdList), envList);
         } else {
-          process = Runtime.getRuntime().exec(String.join(" ", cmdList));
+          process = Runtime.getRuntime().exec(join(" ", cmdList));
         }
       }
       else
       {
         if (envList != null) {
-          process = Runtime.getRuntime().exec(String.join(" ", cmdList), envList, dir.toFile());
+          process = Runtime.getRuntime().exec(join(" ", cmdList), envList, dir.toFile());
         } else {
-          process = Runtime.getRuntime().exec(String.join(" ", cmdList), null, dir.toFile());
+          process = Runtime.getRuntime().exec(join(" ", cmdList), null, dir.toFile());
         }
       }
 
@@ -178,7 +178,7 @@ public final class Operations {
         }
       }
     } catch (IOException e) {
-      throw new RuntimeException(String.format("Failed to execute command '%s' ",String.join(" ",cmdList)),e);
+      throw new RuntimeException(String.format("Failed to execute command '%s' ", join(" ",cmdList)),e);
     }
     return sb.toString();
   }

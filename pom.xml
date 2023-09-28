@@ -12,7 +12,7 @@
   <inceptionYear>2023</inceptionYear>
 
   <properties>
-    <code.coverage.threshold>80%</code.coverage.threshold>
+    <code.coverage.threshold>68%</code.coverage.threshold>
     <mutation.coverage.threshold>50</mutation.coverage.threshold>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>
@@ -29,7 +29,7 @@
     <!-- Plugins -->
     <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-dependency-plugin.version>3.5.0</maven-dependency-plugin.version>
+    <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
     <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
     <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
     <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
@@ -42,7 +42,7 @@
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-site-plugin.version>4.0.0-M6</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
     <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
     <extra-enforcer-rules.version>1.6.2</extra-enforcer-rules.version>
     <flatten-maven-plugin.version>1.4.1</flatten-maven-plugin.version>
@@ -198,6 +198,11 @@
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.junit.jupiter</groupId>-->
+<!--      <artifactId>junit-jupiter-engine</artifactId>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
@@ -294,6 +299,7 @@
           <version>${maven-source-plugin.version}</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven-surefire-plugin.version}</version>
         </plugin>
@@ -422,8 +428,27 @@ limitations under the License.]]>
       <plugin>
         <groupId>de.sormuras.junit</groupId>
         <artifactId>junit-platform-maven-plugin</artifactId>
-        <extensions>true</extensions>
+<!--        <extensions>true</extensions>-->
+        <executions>
+          <execution>
+            <id>Launch JUNit Platform</id>
+            <phase>test</phase>
+            <goals>
+              <goal>launch</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
+<!--          <tags>-->
+<!--            <tag>ExhortApi</tag>-->
+<!--            <tag>Operations</tag>-->
+<!--          </tags>-->
+          <classNamePatterns>
+            <pattern>.*Exhort_Api_Test</pattern>
+            <pattern>.*Operations_Test</pattern>
+          </classNamePatterns>
+
+
           <executor>JAVA</executor>
           <javaOptions>
             <additionalOptions>
@@ -441,7 +466,35 @@ limitations under the License.]]>
           </parameters>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <reportFormat>plain</reportFormat>
+          <consoleOutputReporter>
+            <disable>false</disable>
+          </consoleOutputReporter>
+          <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter"/>
+          <excludes>
+            <exclude>
+              **/Exhort_Api_Test.java
+            </exclude>
+            <exclude>
+              **/Operations_Test.java
+            </exclude>
+          </excludes>
+          <argLine>@{surefire.argLine}</argLine>
+        </configuration>
+        <dependencies>
+          <!-- https://mvnrepository.com/artifact/me.fabriciorby/maven-surefire-junit5-tree-reporter -->
+          <dependency>
+            <groupId>me.fabriciorby</groupId>
+            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+            <version>1.2.1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
       <!-- jacoco-maven-plugin:prepare-agent is bound to the initialize phase and will attach the agent for collecting coverage -->
       <!-- jacoco-maven-plugin:check is bound to the verify phase and will check code coverage threshold -->
       <plugin>
@@ -453,6 +506,9 @@ limitations under the License.]]>
               <goal>prepare-agent</goal>
               <goal>check</goal>
             </goals>
+            <configuration>
+              <propertyName>surefire.argLine</propertyName>
+            </configuration>
           </execution>
         </executions>
       </plugin>

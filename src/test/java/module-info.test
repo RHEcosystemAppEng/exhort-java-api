@@ -12,6 +12,8 @@
   com.redhat.exhort/com.redhat.exhort.tools=org.junit.platform.commons
 --add-opens
   com.redhat.exhort/com.redhat.exhort=org.mockito
+  --add-opens
+  com.redhat.exhort.providers/com.redhat.exhort.providers=org.mockito
 --add-opens
   java.base/java.lang=org.junitpioneer
 --add-opens

@@ -61,7 +61,7 @@ public final class ExhortApi implements Api {
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     AnalysisReport analysisReport = new ExhortApi()
-    .stackAnalysis("/home/rromerom/workspace/github.com/RHEcosystemAppEng/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_no_ignore/pom.xml").get();
+    .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt").get();
     System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
   }
   /**

@@ -22,6 +22,7 @@ import com.redhat.exhort.Provider;
 import com.redhat.exhort.providers.GoModulesProvider;
 import com.redhat.exhort.providers.JavaMavenProvider;
 import com.redhat.exhort.providers.JavaScriptNpmProvider;
+import com.redhat.exhort.providers.PythonPipProvider;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {
@@ -30,7 +31,8 @@ public final class Ecosystem {
 
     MAVEN ("maven"),
     NPM ("npm"),
-    GOLANG ("golang");
+    GOLANG ("golang"),
+    PYTHON ("pypi");
 
     String type;
 
@@ -71,6 +73,9 @@ public final class Ecosystem {
         return new JavaScriptNpmProvider();
       case "go.mod":
         return new GoModulesProvider();
+      case "requirements.txt":
+        return new PythonPipProvider();
+
       default:
         throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
         );

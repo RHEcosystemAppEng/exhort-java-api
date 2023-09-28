@@ -104,7 +104,7 @@ repositories {
 <dependency>
     <groupId>com.redhat.exhort</groupId>
     <artifactId>exhort-java-api</artifactId>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
 </dependency>
 ```
 </li>
@@ -170,6 +170,8 @@ public class ExhortExample {
 <li><a href="https://www.java.com/">Java</a> - <a href="https://maven.apache.org/">Maven</a></li>
 <li><a href="https://www.javascript.com//">JavaScript</a> - <a href="https://www.npmjs.com//">Npm</a></li>
 <li><a href="https://go.dev//">Golang</a> - <a href="https://go.dev/blog/using-go-modules//">Go Modules</a></li>
+<li><a href="https://go.dev//">Python</a> - <a href="https://pypi.org/project/pip//">pip Installer</a></li>
+
 </ul>
 
 <h3>Excluding Packages</h3>
@@ -185,7 +187,7 @@ Excluding a package from any analysis can be achieved by marking the package for
 <dependency> <!--exhortignore-->
   <groupId>...</groupId>
   <artifactId>...</artifactId>
-  <version>0.0.7-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
 </dependency>
 ```
 </li>

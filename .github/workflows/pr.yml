@@ -37,8 +37,6 @@ jobs:
 
     - name: Verify the project and create coverage report
       run: |
-#        mvn wrapper:wrapper -Dtype=script -Dversion=3.9.4
-#        MAVEN_HOME=$(./mvnw --version | grep "Maven home" | awk -F ':' '{print $2}')
         mvn verify -Pits,cov -B -ff
 
     - name: Report test summary

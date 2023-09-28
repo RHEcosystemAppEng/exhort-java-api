@@ -30,7 +30,7 @@ public class PythonControllerTestEnv extends PythonControllerRealEnv{
   {
     super.prepareEnvironment(pathToPythonBin);
     String output = Operations.runProcessGetOutput(Path.of("."), new String[]{this.pathToPythonBin, "-m", "pip", "install", "--upgrade", "pip"});
-    log.log(System.Logger.Level.INFO,"Output from");
+    log.log(System.Logger.Level.INFO,"Output from upgrading pip = " + System.lineSeparator() + output);
   }
 
   @Override

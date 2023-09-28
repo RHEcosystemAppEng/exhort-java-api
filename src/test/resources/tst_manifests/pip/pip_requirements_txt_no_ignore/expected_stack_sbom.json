@@ -47,13 +47,6 @@
       "bom-ref" : "pkg:pypi/typing-extensions@4.1.1"
     },
     {
-      "name" : "dataclasses",
-      "version" : "0.8",
-      "purl" : "pkg:pypi/dataclasses@0.8",
-      "type" : "library",
-      "bom-ref" : "pkg:pypi/dataclasses@0.8"
-    },
-    {
       "name" : "idna",
       "version" : "2.10",
       "purl" : "pkg:pypi/idna@2.10",
@@ -297,10 +290,6 @@
     },
     {
       "ref" : "pkg:pypi/typing-extensions@4.1.1",
-      "dependsOn" : [ ]
-    },
-    {
-      "ref" : "pkg:pypi/dataclasses@0.8",
       "dependsOn" : [ ]
     },
     {

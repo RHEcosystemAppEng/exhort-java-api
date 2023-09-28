@@ -75,13 +75,6 @@
       "bom-ref" : "pkg:pypi/contextvars@2.4"
     },
     {
-      "name" : "dataclasses",
-      "version" : "0.8",
-      "purl" : "pkg:pypi/dataclasses@0.8",
-      "type" : "library",
-      "bom-ref" : "pkg:pypi/dataclasses@0.8"
-    },
-    {
       "name" : "fastapi",
       "version" : "0.75.1",
       "purl" : "pkg:pypi/fastapi@0.75.1",
@@ -234,7 +227,6 @@
         "pkg:pypi/chardet@4.0.0",
         "pkg:pypi/contextlib2@21.6.0",
         "pkg:pypi/contextvars@2.4",
-        "pkg:pypi/dataclasses@0.8",
         "pkg:pypi/fastapi@0.75.1",
         "pkg:pypi/flask@2.0.3",
         "pkg:pypi/h11@0.13.0",
@@ -287,10 +279,6 @@
     },
     {
       "ref" : "pkg:pypi/contextvars@2.4",
-      "dependsOn" : [ ]
-    },
-    {
-      "ref" : "pkg:pypi/dataclasses@0.8",
       "dependsOn" : [ ]
     },
     {

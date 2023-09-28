@@ -28,6 +28,16 @@ jobs:
           java-version: 11
           cache: maven
 
+      - name: setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - name: get Python location
+        id: python-location
+        run: |
+          echo "python-bin-location=$(echo $pythonLocation)/bin" >> $GITHUB_OUTPUT
+
       - name: Get pom specs
         id: project
         run: |
@@ -39,6 +49,8 @@ jobs:
           github.repository == 'RHEcosystemAppEng/exhort-java-api'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXHORT_PYTHON3_PATH: "${{steps.python-location.outputs.python-bin-location}}/python3"
+          EXHORT_PIP3_PATH: "${{steps.python-location.outputs.python-bin-location}}/pip3"
         run: mvn deploy -Pprepare-deployment,deploy-github -B -ff
 
   release:
@@ -61,9 +73,9 @@ jobs:
             var response = await github.request('GET /repos/' + repo_name + '/releases/tags/${{ needs.deploy.outputs.project_version }}')
             // if the request fails (ie 404) the next steps will not occur and the output will not be set
             core.setOutput('id', response.data.id)
-            
+
       - name: Checkout sources
-        uses: actions/checkout@v3            
+        uses: actions/checkout@v3
 
       - name: Delete ${{ needs.deploy.outputs.project_version }} release if exists
         if: ${{ steps.existing_release.outputs.id }}

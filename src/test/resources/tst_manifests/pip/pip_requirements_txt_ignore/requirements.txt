@@ -1,12 +1,10 @@
 anyio==3.6.2
 asgiref==3.4.1
 beautifulsoup4==4.12.2
-bs4==0.0.1
 certifi==2023.7.22
 chardet==4.0.0
 click==8.0.4 #exhortignore
 contextlib2==21.6.0
-contextvars==2.4 
 fastapi==0.75.1
 Flask==2.0.3
 h11==0.13.0
@@ -17,7 +15,6 @@ itsdangerous==2.0.1
 Jinja2==3.0.3
 MarkupSafe==2.0.1
 pydantic==1.9.2 # exhortignore
-python-multipart==0.0.5
 requests==2.25.1
 six==1.16.0 
 sniffio==1.2.0

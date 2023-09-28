@@ -3,7 +3,7 @@
   "specVersion" : "1.4",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2023-09-26T13:44:18Z",
+    "timestamp" : "2023-09-28T12:40:38Z",
     "component" : {
       "name" : "root",
       "purl" : "pkg:pypi/root",
@@ -40,13 +40,6 @@
       "bom-ref" : "pkg:pypi/beautifulsoup4@4.12.2"
     },
     {
-      "name" : "bs4",
-      "version" : "0.0.1",
-      "purl" : "pkg:pypi/bs4@0.0.1",
-      "type" : "library",
-      "bom-ref" : "pkg:pypi/bs4@0.0.1"
-    },
-    {
       "name" : "certifi",
       "version" : "2023.7.22",
       "purl" : "pkg:pypi/certifi@2023.7.22",
@@ -73,13 +66,6 @@
       "purl" : "pkg:pypi/contextlib2@21.6.0",
       "type" : "library",
       "bom-ref" : "pkg:pypi/contextlib2@21.6.0"
-    },
-    {
-      "name" : "contextvars",
-      "version" : "2.4",
-      "purl" : "pkg:pypi/contextvars@2.4",
-      "type" : "library",
-      "bom-ref" : "pkg:pypi/contextvars@2.4"
     },
     {
       "name" : "fastapi",
@@ -150,13 +136,6 @@
       "purl" : "pkg:pypi/pydantic@1.9.2",
       "type" : "library",
       "bom-ref" : "pkg:pypi/pydantic@1.9.2"
-    },
-    {
-      "name" : "python-multipart",
-      "version" : "0.0.5",
-      "purl" : "pkg:pypi/python-multipart@0.0.5",
-      "type" : "library",
-      "bom-ref" : "pkg:pypi/python-multipart@0.0.5"
     },
     {
       "name" : "requests",
@@ -236,12 +215,10 @@
         "pkg:pypi/anyio@3.6.2",
         "pkg:pypi/asgiref@3.4.1",
         "pkg:pypi/beautifulsoup4@4.12.2",
-        "pkg:pypi/bs4@0.0.1",
         "pkg:pypi/certifi@2023.7.22",
         "pkg:pypi/chardet@4.0.0",
         "pkg:pypi/click@8.0.4",
         "pkg:pypi/contextlib2@21.6.0",
-        "pkg:pypi/contextvars@2.4",
         "pkg:pypi/fastapi@0.75.1",
         "pkg:pypi/flask@2.0.3",
         "pkg:pypi/h11@0.13.0",
@@ -252,7 +229,6 @@
         "pkg:pypi/jinja2@3.0.3",
         "pkg:pypi/markupsafe@2.0.1",
         "pkg:pypi/pydantic@1.9.2",
-        "pkg:pypi/python-multipart@0.0.5",
         "pkg:pypi/requests@2.25.1",
         "pkg:pypi/six@1.16.0",
         "pkg:pypi/sniffio@1.2.0",
@@ -278,10 +254,6 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:pypi/bs4@0.0.1",
-      "dependsOn" : [ ]
-    },
-    {
       "ref" : "pkg:pypi/certifi@2023.7.22",
       "dependsOn" : [ ]
     },
@@ -295,10 +267,6 @@
     },
     {
       "ref" : "pkg:pypi/contextlib2@21.6.0",
-      "dependsOn" : [ ]
-    },
-    {
-      "ref" : "pkg:pypi/contextvars@2.4",
       "dependsOn" : [ ]
     },
     {
@@ -339,10 +307,6 @@
     },
     {
       "ref" : "pkg:pypi/pydantic@1.9.2",
-      "dependsOn" : [ ]
-    },
-    {
-      "ref" : "pkg:pypi/python-multipart@0.0.5",
       "dependsOn" : [ ]
     },
     {

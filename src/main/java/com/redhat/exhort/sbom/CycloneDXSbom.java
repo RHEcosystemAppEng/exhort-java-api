@@ -34,7 +34,8 @@ import com.github.packageurl.PackageURL;
 
 public class CycloneDXSbom implements Sbom {
 
-    private static final Version VERSION = Version.VERSION_14;
+  private System.Logger log = System.getLogger(this.getClass().getName());
+  private static final Version VERSION = Version.VERSION_14;
   private String exhortIgnoreMethod;
   private Bom bom;
     private PackageURL root;
@@ -243,7 +244,12 @@ public class CycloneDXSbom implements Sbom {
 
     @Override
     public String getAsJsonString() {
-        return BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
+      String jsonString = BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
+      if(Boolean.parseBoolean(Objects.requireNonNullElse(System.getenv("EXHORT_DEBUG"),"false")))
+      {
+        log.log(System.Logger.Level.INFO,jsonString);
+      }
+      return jsonString;
     }
 
   @Override

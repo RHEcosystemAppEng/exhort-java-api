@@ -36,6 +36,7 @@ jobs:
         cache: 'pip'
     - name: test python
       run: |
+         pip3 install --upgrade pip
          pip3 install -r /home/runner/work/exhort-java-api/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt
          pip3 freeze
          pip3 list

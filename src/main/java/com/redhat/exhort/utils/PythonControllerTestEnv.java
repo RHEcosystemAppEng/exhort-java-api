@@ -15,9 +15,9 @@
  */
 package com.redhat.exhort.utils;
 
-public class PythonControllerTestEnv extends PythonControllerVirtualEnv{
-  public PythonControllerTestEnv(String pathToPythonBin) {
-    super(pathToPythonBin);
+public class PythonControllerTestEnv extends PythonControllerRealEnv{
+  public PythonControllerTestEnv(String pathToPythonBin,String pathToPip) {
+    super(pathToPythonBin,pathToPip);
   }
 
   @Override
@@ -28,7 +28,7 @@ public class PythonControllerTestEnv extends PythonControllerVirtualEnv{
 
   @Override
   public boolean automaticallyInstallPackageOnEnvironment() {
-    return false;
+    return true;
   }
   @Override
   public boolean isVirtualEnv()

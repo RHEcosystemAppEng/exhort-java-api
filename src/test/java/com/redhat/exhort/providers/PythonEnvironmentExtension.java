@@ -40,7 +40,6 @@ public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCa
   public void afterAll(ExtensionContext extensionContext) throws Exception {
     log.log(System.Logger.Level.INFO,"Finished all python tests and about to clean environment");
     pythonController.cleanEnvironment(true);
-    log.log(System.Logger.Level.INFO,"Deleted Environment");
   }
 
   @Override

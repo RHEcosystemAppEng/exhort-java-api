@@ -37,7 +37,7 @@
 
 ### Good to know
 
-* You can override the default backend url by setting another one in the `EXHORT_DEV_MODE` environment variable to true :
+* You can override the default backend url by setting the `EXHORT_DEV_MODE` environment variable/system property to true:
   * In case environment variable/System Property `EXHORT_DEV_MODE=true` - You can Override the default exhort backend by setting  
     `DEV_EXHORT_BACKEND_URL` env variable/system property to the desired exhort backend instance address ( useful for tests).
   * In case `DEV_EXHORT_BACKEND_URL` is not set via environment variable/system property, then the default DEV exhort backend is picked.

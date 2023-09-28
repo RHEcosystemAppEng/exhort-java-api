@@ -35,6 +35,10 @@ jobs:
         python-version: '3.9'
         cache: 'pip'
 
+    - name: see 
+      run: |
+        echo "pythonLocation =" $pythonLocation
+        ls -ltra $pythonLocation
     - name: Verify the project and create coverage report
       run: |
         mvn verify -Pits,cov -B -ff

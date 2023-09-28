@@ -38,22 +38,19 @@ jobs:
       id: python-location
       run: |
         echo "python-bin-location=$(echo $pythonLocation)/bin" >> $GITHUB_OUTPUT
-        ls -ltra $pythonLocation
-        ls -ltra $pythonLocation/bin
-        echo "pythonLocation ="
     - name: Verify the project and create coverage report
       env:
         EXHORT_PYTHON3_PATH: "${{steps.python-location.outputs.python-bin-location}}/python3"
         EXHORT_PIP3_PATH: "${{steps.python-location.outputs.python-bin-location}}/pip3"
       run: |
-        mvn verify -Pits,cov -B -ff
+        mvn verify -Pcov -B -ff
 
     - name: Report test summary
       if: ${{ matrix.java == env.MAIN_JAVA_VER  && always() }}
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
         test_changes_limit: 0
-        files: ./target/junit-platform/TEST-junit-jupiter.xml
+        files: ./target/surefire-reports/*.xml
 
     - name: Upload coverage reports
       if: ${{ matrix.java == env.MAIN_JAVA_VER }}

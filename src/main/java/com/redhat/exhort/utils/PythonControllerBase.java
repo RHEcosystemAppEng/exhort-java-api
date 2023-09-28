@@ -204,7 +204,7 @@ public abstract class PythonControllerBase {
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {
     List<Map<String,Object>> dependencies = new ArrayList<>();
     log.log(System.Logger.Level.INFO,"getDependenciesImpl -> pip Binary location=" + pipBinaryLocation + ",pythonEnvironmentDir=" + pythonEnvironmentDir);
-    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze", "--all", "--user");
+    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
     log.log(System.Logger.Level.INFO,"freeze output=" + System.lineSeparator() + freeze);
     String[] deps = freeze.split(System.lineSeparator());
     log.log(System.Logger.Level.INFO,"Size of list of installed deps=" + deps.length);

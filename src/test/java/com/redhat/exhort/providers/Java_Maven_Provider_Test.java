@@ -41,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(HelperExtension.class)
 @ExtendWith(MockitoExtension.class)
 class Java_Maven_Provider_Test {
-  private static System.Logger log = System.getLogger("Java_Maven_Provider_Test");
+//  private static System.Logger log = System.getLogger("Java_Maven_Provider_Test");
   // test folder are located at src/test/resources/tst_manifests
   // each folder should contain:
   // - pom.xml: the target manifest for testing
@@ -63,7 +63,7 @@ class Java_Maven_Provider_Test {
   void test_the_provideStack(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut pom.xml
     var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
-    log.log(System.Logger.Level.INFO,"the test folder is : " + testFolder);
+//    log.log(System.Logger.Level.INFO,"the test folder is : " + testFolder);
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
       Files.write(tmpPomFile, is.readAllBytes());
     }

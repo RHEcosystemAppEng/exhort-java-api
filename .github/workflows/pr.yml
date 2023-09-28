@@ -50,7 +50,11 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
         test_changes_limit: 0
-        files: ./target/surefire-reports/*.xml
+        files: |
+          ./target/surefire-reports/*.xml
+          ./target/junit-platform/TEST-junit-jupiter.xml
+
+
 
     - name: Upload coverage reports
       if: ${{ matrix.java == env.MAIN_JAVA_VER }}

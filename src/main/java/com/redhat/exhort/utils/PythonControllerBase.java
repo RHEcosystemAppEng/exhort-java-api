@@ -71,7 +71,7 @@ public abstract class PythonControllerBase {
       throw new RuntimeException(e);
     }
   }
-  private System.Logger log = System.getLogger("name");
+//  private System.Logger log = System.getLogger(this.getClass().getName());
   protected Path pythonEnvironmentDir;
   protected Path pipBinaryDir;
 
@@ -89,11 +89,8 @@ public abstract class PythonControllerBase {
 
   public void installPackage(String pathToRequirements)
   {
-    log.log(System.Logger.Level.INFO,"installPackage -> pip Binary location=" + pipBinaryLocation + ",pythonEnvironmentDir=" + pythonEnvironmentDir);
-    String installedPackageSummary = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "install", "-r", pathToRequirements);
-    log.log(System.Logger.Level.INFO,installedPackageSummary);
-    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
-    log.log(System.Logger.Level.INFO,"freeze output=" + System.lineSeparator() + freeze);
+    Operations.runProcess(pipBinaryLocation, "install", "-r", pathToRequirements);
+    Operations.runProcess(pipBinaryLocation, "freeze");
 
   }
 
@@ -203,14 +200,8 @@ public abstract class PythonControllerBase {
 
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {
     List<Map<String,Object>> dependencies = new ArrayList<>();
-    log.log(System.Logger.Level.INFO,"getDependenciesImpl -> pip Binary location=" + pipBinaryLocation + ",pythonEnvironmentDir=" + pythonEnvironmentDir);
     String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
-    log.log(System.Logger.Level.INFO,"freeze output=" + System.lineSeparator() + freeze);
     String[] deps = freeze.split(System.lineSeparator());
-    log.log(System.Logger.Level.INFO,"Size of list of installed deps=" + deps.length);
-    Arrays.stream(deps).forEach( s -> {
-      log.log(System.Logger.Level.INFO,"Entry -->" + s + System.lineSeparator());
-    });
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
     List<String> allPipShowLines = Arrays.stream(pipShowOutput.split("---")).collect(Collectors.toList());
@@ -236,7 +227,6 @@ public abstract class PythonControllerBase {
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
-    log.log(System.Logger.Level.INFO,"Installed Dependencies:" + System.lineSeparator() + tree);
     linesOfRequirements.stream().forEach( dep -> {
       bringAllDependencies(dependencies, getDependencyName(dep),CachedTree, includeTransitive);
     });

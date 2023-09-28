@@ -276,6 +276,13 @@ zipp==3.6.0
 ```
 All of the 4 above examples are valid for marking a package to be ignored 
 
+#### Ignore Strategies - experimental
+ You can specify the method to ignore dependencies in manifest (globally), by setting the environment variable `EXHORT_IGNORE_METHOD` to one of the following values: \
+ **_Possible values:_**
+- `insensitive` - ignoring the dependency and all of its subtree(all transitives) - default.
+- `sensitive` - ignoring the dependency but let its transitives remain if they are also transitive of another dependency in the tree or if they're direct dependency of root in the dependency tree.
+  
+
 </li>
 
 </ul>

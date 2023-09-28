@@ -241,7 +241,38 @@ require (
 )
 ```
 
-All of the 3 above examples are valid for marking a package to be ignored 
+<em>Python pip</em> users can add in requirement text a comment with #exhortignore(or # exhortignore) to the right of the same artifact to be ignored, for example:
+```properties
+anyio==3.6.2
+asgiref==3.4.1
+beautifulsoup4==4.12.2
+certifi==2023.7.22
+chardet==4.0.0
+click==8.0.4 #exhortignore
+contextlib2==21.6.0
+fastapi==0.75.1
+Flask==2.0.3
+h11==0.13.0
+idna==2.10
+immutables==0.19
+importlib-metadata==4.8.3
+itsdangerous==2.0.1
+Jinja2==3.0.3
+MarkupSafe==2.0.1
+pydantic==1.9.2 # exhortignore
+requests==2.25.1
+six==1.16.0 
+sniffio==1.2.0
+soupsieve==2.3.2.post1
+starlette==0.17.1
+typing_extensions==4.1.1
+urllib3==1.26.16
+uvicorn==0.17.0
+Werkzeug==2.0.3
+zipp==3.6.0
+
+```
+All of the 4 above examples are valid for marking a package to be ignored 
 
 </li>
 
@@ -257,7 +288,11 @@ System.setProperty("EXHORT_SNYK_TOKEN", "my-private-snyk-token");
 System.setProperty("EXHORT_MVN_PATH", "/path/to/custom/mvn");
 System.setProperty("EXHORT_NPM_PATH", "/path/to/custom/npm");
 System.setProperty("EXHORT_GO_PATH", "/path/to/custom/go");
-
+//python - python3, pip3 take precedence if python version > 3 installed
+System.setProperty("EXHORT_PYTHON3_PATH", "/path/to/python3");
+System.setProperty("EXHORT_PIP3_PATH", "/path/to/pip3");
+System.setProperty("EXHORT_PYTHON_PATH", "/path/to/python");
+System.setProperty("EXHORT_PIP_PATH", "/path/to/pip");
 ```
 
 > Environment variables takes precedence.
@@ -323,12 +358,44 @@ following keys for setting custom paths for the said executables.
 <td><em>npm</em></td>
 <td>EXHORT_NPM_PATH</td>
 </tr>
+<tr>
 <td><a href="https://go.dev/blog/using-go-modules/">Go Modules</a></td>
 <td><em>go</em></td>
 <td>EXHORT_GO_PATH</td>
 </tr>
+<tr>
+<td><a href="https://www.python.org/">Python programming language</a></td>
+<td><em>python3</em></td>
+<td>EXHORT_PYTHON3_PATH</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/pip/">Python pip Package Installer</a></td>
+<td><em>pip3</em></td>
+<td>EXHORT_PIP3_PATH</td>
+</tr>
+<tr>
+<td><a href="https://www.python.org/">Python programming language</a></td>
+<td><em>python</em></td>
+<td>EXHORT_PYTHON_PATH</td>
+</tr>
+<tr>
+<td><a href="https://pypi.org/project/pip/">Python pip Package Installer</a></td>
+<td><em>pip</em></td>
+<td>EXHORT_PIP_PATH</td>
+</tr>
 
 </table>
+
+####  Python Support
+
+By default Python support assumes that the package is installed using the pip/pip3 binary on the system PATH, of in the customized
+Binaries passed to environment variables. If the package is not installed , then an error will be thrown.
+
+There is an experimental feature of installing the requirement.txt on a virtual env(only python3 or later is supported for this feature) - in this case,
+it's important to pass in a path to python3 binary as `EXHORT_PYTHON3_PATH` or instead make sure that python3 is on the system path.
+in such case, You can use that feature by setting environment variable `EXHORT_PYTHON_VIRTUAL_ENV` to true 
+
+
 
 <!-- Badge links -->
 [0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/exhort-java-api?color=green&label=latest

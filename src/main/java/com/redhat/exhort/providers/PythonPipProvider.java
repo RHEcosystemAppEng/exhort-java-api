@@ -48,7 +48,7 @@ public final class PythonPipProvider extends Provider {
       PythonPipProvider pythonPipProvider = new PythonPipProvider();
 //      byte[] bytes = Files.readAllBytes(Path.of("/tmp/exhort_env/requirements.txt"));
 //      Content content = pythonPipProvider.provideComponent(bytes);
-      Content content = pythonPipProvider.provideStack(Path.of("/tmp/exhort_env/requirements.txt"));
+      Content content = pythonPipProvider.provideStack(Path.of("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt"));
       String s = new String(content.buffer);
       System.out.print(s);
     } catch (IOException e) {

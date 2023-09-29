@@ -115,6 +115,7 @@ jobs:
 
       - name: Push modifications
         run: |
+          git pull
           git add README.md
           git commit -m "docs: updated usage section with version ${{ steps.project_snapshot.outputs.version }} [skip ci]"
           git push

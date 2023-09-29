@@ -230,10 +230,10 @@ public final class GoModulesProvider extends Provider {
     sbom.addRoot(root);
     edges.forEach((key,value)-> {
        PackageURL source = toPurl(key,"@",this.goEnvironmentVariableForPurl);
-       if(dependencyNotToBeIgnore(ignoredDeps,source)) {
+       if(dependencyNotToBeIgnored(ignoredDeps,source)) {
          value.forEach(dep -> {
            PackageURL targetPurl = toPurl((String) dep, "@", this.goEnvironmentVariableForPurl);
-           if(dependencyNotToBeIgnore(ignoredDeps,targetPurl)){
+           if(dependencyNotToBeIgnored(ignoredDeps,targetPurl)){
              sbom.addDependency(source, targetPurl);
            }
          });
@@ -243,7 +243,7 @@ public final class GoModulesProvider extends Provider {
 
   }
 
-  private boolean dependencyNotToBeIgnore(List<PackageURL> ignoredDeps, PackageURL checkedPurl) {
+  private boolean dependencyNotToBeIgnored(List<PackageURL> ignoredDeps, PackageURL checkedPurl) {
     return ignoredDeps.stream().noneMatch(dependencyPurl -> dependencyPurl.getCoordinates().equals(checkedPurl.getCoordinates()));
   }
 
@@ -299,7 +299,7 @@ public final class GoModulesProvider extends Provider {
     sbom.addRoot(root);
     deps.forEach(dep -> {
       PackageURL targetPurl = toPurl(dep, "@", this.goEnvironmentVariableForPurl);
-      if(dependencyNotToBeIgnore(ignoredDeps,targetPurl)) {
+      if(dependencyNotToBeIgnored(ignoredDeps,targetPurl)) {
         sbom.addDependency(root, targetPurl);
       }
     });
@@ -312,7 +312,7 @@ public final class GoModulesProvider extends Provider {
     List<PackageURL> ignored = goModlines.stream()
                              .filter(this::IgnoredLine)
                              .map(this::extractPackageName)
-                             .map(dep -> toPurl(dep," ",this.goEnvironmentVariableForPurl))
+                             .map(dep -> toPurl(dep,"[[:space:]]{1,3}",this.goEnvironmentVariableForPurl))
                              .collect(Collectors.toList());
     return ignored;
   }
@@ -334,11 +334,11 @@ public final class GoModulesProvider extends Provider {
         {
           String trimmedRow = line.trim();
           // filter out lines where exhortignore has no meaning
-          if(!trimmedRow.startsWith("module") && !trimmedRow.startsWith("go") && !trimmedRow.startsWith("require (") && !trimmedRow.startsWith("require(")
-             && !trimmedRow.startsWith("exclude") && !trimmedRow.startsWith("replace") && !trimmedRow.startsWith("retract") && !trimmedRow.startsWith("use")
+          if(!trimmedRow.startsWith("module ") && !trimmedRow.startsWith("go ") && !trimmedRow.startsWith("require (") && !trimmedRow.startsWith("require(")
+             && !trimmedRow.startsWith("exclude ") && !trimmedRow.startsWith("replace ") && !trimmedRow.startsWith("retract ") && !trimmedRow.startsWith("use ")
              && !trimmedRow.contains("=>"))
           { //only for lines that after trimming starts with "require " or starting with package name followd by one space, and then a semver version.
-               if( trimmedRow.startsWith("require ") || Pattern.matches("^[a-z./-]+\\s[vV][0-9]\\.[0-9](\\.[0-9])?.*",trimmedRow))
+               if( trimmedRow.startsWith("require ") || Pattern.matches("^[a-z.0-9/-]+\\s{1,2}[vV][0-9]\\.[0-9](\\.[0-9]){0,2}.*",trimmedRow))
                {
                  result = true;
                }

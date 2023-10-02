@@ -226,19 +226,29 @@ public final class GoModulesProvider extends Provider {
     String rootPackage = getParentVertex(lines[0]);
 
     PackageURL root = toPurl(rootPackage, "@", this.goEnvironmentVariableForPurl);
-    Sbom sbom = SbomFactory.newInstance();
+    Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"sensitive");
     sbom.addRoot(root);
     edges.forEach((key,value)-> {
        PackageURL source = toPurl(key,"@",this.goEnvironmentVariableForPurl);
-       if(dependencyNotToBeIgnored(ignoredDeps,source)) {
-         value.forEach(dep -> {
-           PackageURL targetPurl = toPurl((String) dep, "@", this.goEnvironmentVariableForPurl);
-           if(dependencyNotToBeIgnored(ignoredDeps,targetPurl)){
-             sbom.addDependency(source, targetPurl);
-           }
+       value.forEach(dep -> {
+          PackageURL targetPurl = toPurl((String) dep, "@", this.goEnvironmentVariableForPurl);
+          sbom.addDependency(source, targetPurl);
          });
-       }
+
     });
+    List<String> ignoredDepsPurl = ignoredDeps.stream().map(PackageURL::getCoordinates).collect(Collectors.toList());
+    sbom.filterIgnoredDeps(ignoredDepsPurl);
+    ArrayList<String> ignoredDepsByName = new ArrayList<>();
+    ignoredDeps.forEach(purl ->
+    {
+      if(sbom.checkIfPackageInsideDependsOnList(sbom.getRoot(),purl.getName()))
+      {
+        ignoredDepsByName.add(purl.getName());
+      }
+    });
+    sbom.setBelongingCriteriaBinaryAlgorithm(Sbom.BelongingCondition.NAME);
+    sbom.filterIgnoredDeps(ignoredDepsByName);
+
  return sbom;
 
   }
@@ -295,7 +305,7 @@ public final class GoModulesProvider extends Provider {
     // Get only direct dependencies of root package/module, and that's it.
     List<String> deps = collectAllDirectDependencies(allModulesFlat, parentVertex);
 
-    Sbom sbom = SbomFactory.newInstance();
+    Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"sensitive");
     sbom.addRoot(root);
     deps.forEach(dep -> {
       PackageURL targetPurl = toPurl(dep, "@", this.goEnvironmentVariableForPurl);
@@ -303,6 +313,16 @@ public final class GoModulesProvider extends Provider {
         sbom.addDependency(root, targetPurl);
       }
     });
+    List<String> ignoredDepsByName = new ArrayList<>();
+    ignoredDeps.forEach(purl ->
+    {
+      if(sbom.checkIfPackageInsideDependsOnList(sbom.getRoot(),purl.getName()))
+      {
+        ignoredDepsByName.add(purl.getName());
+      }
+    });
+    sbom.setBelongingCriteriaBinaryAlgorithm(Sbom.BelongingCondition.NAME);
+    sbom.filterIgnoredDeps(ignoredDepsByName);
     return sbom;
   }
 
@@ -312,7 +332,7 @@ public final class GoModulesProvider extends Provider {
     List<PackageURL> ignored = goModlines.stream()
                              .filter(this::IgnoredLine)
                              .map(this::extractPackageName)
-                             .map(dep -> toPurl(dep,"[[:space:]]{1,3}",this.goEnvironmentVariableForPurl))
+                             .map(dep -> toPurl(dep,"\\s{1,3}",this.goEnvironmentVariableForPurl))
                              .collect(Collectors.toList());
     return ignored;
   }

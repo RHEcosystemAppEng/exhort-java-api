@@ -3,7 +3,7 @@
   "specVersion" : "1.4",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2023-08-26T18:00:21Z",
+    "timestamp" : "2023-10-02T07:43:34Z",
     "component" : {
       "group" : "github.com/rhecosystemappeng/saasi",
       "name" : "deployer",
@@ -2276,6 +2276,14 @@
     },
     {
       "group" : "golang.org/x",
+      "name" : "sys",
+      "version" : "v0.0.0-20210320140829-1e4c9ba3b0c4",
+      "purl" : "pkg:golang/golang.org/x/sys@v0.0.0-20210320140829-1e4c9ba3b0c4",
+      "type" : "library",
+      "bom-ref" : "pkg:golang/golang.org/x/sys@v0.0.0-20210320140829-1e4c9ba3b0c4"
+    },
+    {
+      "group" : "golang.org/x",
       "name" : "tools",
       "version" : "v0.0.0-20190816200558-6889da9d5479",
       "purl" : "pkg:golang/golang.org/x/tools@v0.0.0-20190816200558-6889da9d5479",
@@ -3170,6 +3178,30 @@
       "bom-ref" : "pkg:golang/google.golang.org/genproto@v0.0.0-20200224152610-e50cd9704f63"
     },
     {
+      "group" : "github.com/docopt",
+      "name" : "docopt-go",
+      "version" : "v0.0.0-20180111231733-ee0de3bc6815",
+      "purl" : "pkg:golang/github.com/docopt/docopt-go@v0.0.0-20180111231733-ee0de3bc6815",
+      "type" : "library",
+      "bom-ref" : "pkg:golang/github.com/docopt/docopt-go@v0.0.0-20180111231733-ee0de3bc6815"
+    },
+    {
+      "group" : "github.com/stoewer",
+      "name" : "go-strcase",
+      "version" : "v1.2.0",
+      "purl" : "pkg:golang/github.com/stoewer/go-strcase@v1.2.0",
+      "type" : "library",
+      "bom-ref" : "pkg:golang/github.com/stoewer/go-strcase@v1.2.0"
+    },
+    {
+      "group" : "gopkg.in",
+      "name" : "check.v1",
+      "version" : "v1.0.0-20190902080502-41f04d3bba15",
+      "purl" : "pkg:golang/gopkg.in/check.v1@v1.0.0-20190902080502-41f04d3bba15",
+      "type" : "library",
+      "bom-ref" : "pkg:golang/gopkg.in/check.v1@v1.0.0-20190902080502-41f04d3bba15"
+    },
+    {
       "group" : "google.golang.org",
       "name" : "protobuf",
       "version" : "v1.26.0-rc.1",
@@ -3384,14 +3416,6 @@
       "purl" : "pkg:golang/cloud.google.com/go@v0.44.2",
       "type" : "library",
       "bom-ref" : "pkg:golang/cloud.google.com/go@v0.44.2"
-    },
-    {
-      "group" : "github.com/stoewer",
-      "name" : "go-strcase",
-      "version" : "v1.2.0",
-      "purl" : "pkg:golang/github.com/stoewer/go-strcase@v1.2.0",
-      "type" : "library",
-      "bom-ref" : "pkg:golang/github.com/stoewer/go-strcase@v1.2.0"
     },
     {
       "group" : "github.com/stretchr",
@@ -6518,6 +6542,10 @@
       "dependsOn" : [ ]
     },
     {
+      "ref" : "pkg:golang/golang.org/x/sys@v0.0.0-20210320140829-1e4c9ba3b0c4",
+      "dependsOn" : [ ]
+    },
+    {
       "ref" : "pkg:golang/golang.org/x/tools@v0.0.0-20190816200558-6889da9d5479",
       "dependsOn" : [
         "pkg:golang/golang.org/x/net@v0.0.0-20190620200207-3b0461eec859",
@@ -7465,6 +7493,20 @@
       ]
     },
     {
+      "ref" : "pkg:golang/github.com/docopt/docopt-go@v0.0.0-20180111231733-ee0de3bc6815",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:golang/github.com/stoewer/go-strcase@v1.2.0",
+      "dependsOn" : [
+        "pkg:golang/github.com/stretchr/testify@v1.5.1"
+      ]
+    },
+    {
+      "ref" : "pkg:golang/gopkg.in/check.v1@v1.0.0-20190902080502-41f04d3bba15",
+      "dependsOn" : [ ]
+    },
+    {
       "ref" : "pkg:golang/google.golang.org/protobuf@v1.26.0-rc.1",
       "dependsOn" : [
         "pkg:golang/github.com/google/go-cmp@v0.5.5"
@@ -7695,12 +7737,6 @@
         "pkg:golang/google.golang.org/grpc@v1.21.1",
         "pkg:golang/honnef.co/go/tools@v0.0.0-20190418001031-e561f6794a2a",
         "pkg:golang/rsc.io/binaryregexp@v0.2.0"
-      ]
-    },
-    {
-      "ref" : "pkg:golang/github.com/stoewer/go-strcase@v1.2.0",
-      "dependsOn" : [
-        "pkg:golang/github.com/stretchr/testify@v1.5.1"
       ]
     },
     {

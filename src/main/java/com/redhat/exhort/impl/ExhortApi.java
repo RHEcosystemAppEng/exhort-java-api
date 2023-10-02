@@ -22,6 +22,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
@@ -60,9 +62,14 @@ public final class ExhortApi implements Api {
   }
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-    AnalysisReport analysisReport = new ExhortApi()
-    .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt").get();
-    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));
+//    AnalysisReport analysisReport = new ExhortApi()
+//    .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt").get();
+//    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));AnalysisReport analysisReport = new ExhortApi()
+    byte[] analysisReport = new ExhortApi().
+    stackAnalysisHtml("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_with_one_ignored_prefix_go/go.mod").get();
+    Path html = Files.createFile(Path.of("/","tmp", "golang0210.html"));
+    Files.write(html,analysisReport);
+
   }
   /**
    * Enum for identifying token environment variables and their

@@ -37,8 +37,9 @@ class Golang_Modules_Provider_Test {
     return Stream.of(
       "go_mod_light_no_ignore",
       "go_mod_no_ignore",
-      "go_mod_with_ignore"
-
+      "go_mod_with_ignore",
+      "go_mod_with_all_ignore",
+      "go_mod_with_one_ignored_prefix_go"
     );
   }
 
@@ -102,6 +103,6 @@ class Golang_Modules_Provider_Test {
   }
 
   private String dropIgnored(String s) {
-    return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\"", "");
+    return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\",", "");
   }
 }

@@ -17,7 +17,6 @@ package com.redhat.exhort.sbom;
 
 import java.util.Collection;
 import java.util.function.Predicate;
-
 import com.github.packageurl.PackageURL;
 
 public interface Sbom {
@@ -28,6 +27,8 @@ public interface Sbom {
     public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
     public String getAsJsonString();
     public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition);
+
+    public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name);
 
     public enum BelongingCondition
     {

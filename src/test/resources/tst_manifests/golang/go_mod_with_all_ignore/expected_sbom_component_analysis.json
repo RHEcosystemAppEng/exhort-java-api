@@ -1,0 +1,31 @@
+{
+	"bomFormat": "CycloneDX",
+	"specVersion": "1.4",
+	"version": 1,
+	"metadata": {
+		"component": {
+			"group": "github.com/devfile-samples",
+			"name": "devfile-sample-go-basic",
+			"version": "v0.0.0",
+			"purl": "pkg:golang/github.com/devfile-samples/devfile-sample-go-basic@v0.0.0",
+			"type": "application",
+			"bom-ref": "pkg:golang/github.com/devfile-samples/devfile-sample-go-basic@v0.0.0"
+		}
+	},
+	"components": [
+		{
+			"group": "github.com/devfile-samples",
+			"name": "devfile-sample-go-basic",
+			"version": "v0.0.0",
+			"purl": "pkg:golang/github.com/devfile-samples/devfile-sample-go-basic@v0.0.0",
+			"type": "application",
+			"bom-ref": "pkg:golang/github.com/devfile-samples/devfile-sample-go-basic@v0.0.0"
+		}
+	],
+	"dependencies": [
+		{
+			"ref": "pkg:golang/github.com/devfile-samples/devfile-sample-go-basic@v0.0.0",
+			"dependsOn": []
+		}
+	]
+}

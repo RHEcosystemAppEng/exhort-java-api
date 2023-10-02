@@ -264,4 +264,26 @@ public class CycloneDXSbom implements Sbom {
 
   }
 
+  @Override
+  public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name) {
+    boolean result = false;
+    Optional<Dependency> comp = this.bom.getDependencies().stream().filter(c -> c.getRef().equals(component.getCoordinates())).findFirst();
+    if(comp.isPresent())
+    {
+      Dependency targetComponent = comp.get();
+      List<Dependency> deps = targetComponent.getDependencies();
+      List<PackageURL> allDirectDeps = deps.stream().map(dep -> {
+        try {
+          return new PackageURL(dep.getRef());
+        } catch (MalformedPackageURLException e) {
+          throw new RuntimeException(e);
+        }
+      }).collect(Collectors.toList());
+
+      result = allDirectDeps.stream().filter(dep -> dep.getName().equals(name)).count() > 0;
+
+    }
+    return result;
+  }
+
 }

@@ -62,13 +62,14 @@ public final class ExhortApi implements Api {
   }
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+     AnalysisReport analysisReport = new ExhortApi()
+    .componentAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/maven/pom_deps_with_no_ignore_common_paths/pom.xml").get();
+    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()
-//    .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_ignore/requirements.txt").get();
-//    System.out.println(new ObjectMapper().writeValueAsString(analysisReport));AnalysisReport analysisReport = new ExhortApi()
-    byte[] analysisReport = new ExhortApi().
-    stackAnalysisHtml("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_with_one_ignored_prefix_go/go.mod").get();
-    Path html = Files.createFile(Path.of("/","tmp", "golang0210.html"));
-    Files.write(html,analysisReport);
+//    byte[] analysisReport = new ExhortApi().
+//    stackAnalysisHtml("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_with_one_ignored_prefix_go/go.mod").get();
+//    Path html = Files.createFile(Path.of("/","tmp", "golang0210.html"));
+//    Files.write(html,analysisReport);
 
   }
   /**

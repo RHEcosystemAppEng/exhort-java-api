@@ -15,12 +15,16 @@
  */
 package com.redhat.exhort.providers;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -43,12 +47,19 @@ import com.redhat.exhort.tools.Operations;
  * Component analysis.
  **/
 public final class JavaMavenProvider extends Provider {
-
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
-    Content content = javaMavenProvider.provideStack(Path.of("/tmp/olga/pom.xml"));
-    String report = new String(content.buffer);
-    System.out.println(report);
+    LocalDateTime start = LocalDateTime.now();
+    System.out.print(start);
+    Content content = javaMavenProvider.provideStack(Path.of("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/maven/pom_deps_with_no_ignore_common_paths/pom.xml"));
+
+//    PackageURL packageURL = javaMavenProvider.parseDep("pom-with-deps-no-ignore:pom-with-dependency-not-ignored-common-paths:jar:0.0.1");
+//    String report = new String(content.buffer);
+    System.out.println(new String(content.buffer));
+    LocalDateTime end = LocalDateTime.now();
+    System.out.print(end);
+    System.out.print("Total time elapsed = " + start.until(end, ChronoUnit.NANOS));
+
   }
   public JavaMavenProvider() {
     super(Type.MAVEN);
@@ -69,7 +80,8 @@ public final class JavaMavenProvider extends Provider {
     var mvnTreeCmd = new ArrayList<String>() {{
       add(mvn);
       add("org.apache.maven.plugins:maven-dependency-plugin:3.6.0:tree");
-      add("-DoutputType=dot");
+      add("-Dverbose");
+      add("-DoutputType=text");
       add("-Dscope=compile");
       add("-Dscope=runtime");
       add(String.format("-DoutputFile=%s", tmpFile.toString()));
@@ -84,36 +96,140 @@ public final class JavaMavenProvider extends Provider {
       .collect(Collectors.toList());
     // execute the tree command
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new), mvnEnvs);
-    var sbom = buildSbomFromDot(tmpFile);
+    var sbom = buildSbomFromTextFormat(tmpFile);
     // build and return content for constructing request to the backend
     return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
-  private Sbom buildSbomFromDot(Path dotFile) throws IOException {
+  private Sbom buildSbomFromTextFormat(Path textFormatFile) throws IOException {
     var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"insensitive");
-    var reader = new BufferedReader(Files.newBufferedReader(dotFile));
-    String line = reader.readLine();
-    while (line != null) {
-      if(line.startsWith("digraph ")) {
-        var dotPkg = line.replace("digraph", "")
-          .replace("{", "");
-        sbom.addRoot(dotPkgToPurl(dotPkg));
-      } else if(line.endsWith("}") || line.trim().isBlank()) {
-        // ignore
-      } else {
-        var parts = line.replaceAll(";", "").split("->");
-        if(parts.length == 2) {
-          var src = dotPkgToPurl(parts[0]);
-          var target = dotPkgToPurl(parts[1]);
-          sbom.addDependency(src, target);
-        }
-      }
-      line = reader.readLine();
-    }
+    List<String> lines = Files.readAllLines(textFormatFile);
+    var root = lines.get(0);
+    var rootPurl = parseDep(root);
+    sbom.addRoot(rootPurl);
+    lines.remove(0);
+    String[] array = new String[lines.size()];
+    lines.toArray(array);
+//    createSbomIteratively(lines,sbom);
+    parseDependencyTree(root, 0 , array, sbom);
     return sbom;
   }
 
-  private PackageURL dotPkgToPurl(String dotPkg) {
+  private void parseDependencyTree(String src, int srcDepth, String [] lines, Sbom sbom) {
+    if(lines.length == 0) {
+      return;
+    }
+    if(lines.length == 1 && lines[0].trim().equals("")){
+      return;
+    }
+    int index = 0;
+    String target = lines[index];
+    int targetDepth = getDepth(target);
+    while(targetDepth > srcDepth && index < lines.length )
+    {
+     if(targetDepth == srcDepth + 1) {
+       PackageURL from = parseDep(src);
+       PackageURL to = parseDep(target);
+       sbom.addDependency(from, to);
+     }
+     else {
+       String[] modifiedLines = Arrays.copyOfRange(lines, index, lines.length);
+       parseDependencyTree(lines[index-1],getDepth(lines[index-1]),modifiedLines,sbom);
+     }
+     if(index< lines.length - 1) {
+       target = lines[++index];
+       targetDepth = getDepth(target);
+     }
+     else
+     {
+       index++;
+     }
+    }
+  }
+//  private void createSbomIteratively(List<String> lines,Sbom sbom)
+//  {
+//    String[] rows = new String[lines.size()];
+//    lines.toArray(rows);
+//    for (String line : lines) {
+//
+//        int depth = getDepth(line);
+//        PackageURL packageURL = parseDep(line);
+//        int startSearchExcluding = lines.indexOf(line);
+//        String[] theLines = Arrays.copyOfRange(rows, startSearchExcluding + 1, lines.size());
+//        boolean notCollectedAll= true;
+//        for (int i = 0; i < theLines.length && notCollectedAll ; i++) {
+//          int targetDepth = getDepth(theLines[i]);
+//          PackageURL target;
+//          if(targetDepth == depth + 1)
+//          {
+//            target = parseDep(theLines[i]);
+//            sbom.addDependency(packageURL,target);
+//          }
+//          else if(targetDepth <= depth)
+//          {
+//            notCollectedAll = false;
+//          }
+//        }
+//      }
+//  }
+
+  private int getDepth(String line) {
+    if(line == null || line.trim().equals("")){
+      return -1;
+    }
+
+    if(line.matches("^\\w.*"))
+    {
+      return 0;
+    }
+
+    return  ( (line.indexOf('-') -1 ) / 3) + 1;
+  }
+
+  public PackageURL parseDep(String dep) {
+    //root package
+    DependencyAggregator dependencyAggregator = new DependencyAggregator();
+    if(dep.matches("^\\w.*"))
+    {
+      dependencyAggregator = new DependencyAggregator();
+      String[] parts = dep.split(":");
+      dependencyAggregator.groupId = parts[0];
+      dependencyAggregator.artifactId = parts[1];
+      dependencyAggregator.version = parts[3];
+      return dependencyAggregator.toPurl();
+
+    }
+    int firstDash = dep.indexOf("-");
+    String dependency = dep.substring(++firstDash).trim();
+    if(dependency.startsWith("("))
+    {
+      dependency = dependency.substring(1);
+    }
+     dependency = dependency.replace(":runtime", ":compile");
+     int endIndex = dependency.indexOf(":compile");
+     dependency = dependency.substring(0,endIndex + 8);
+    String[] parts = dependency.split(":");
+
+    if(parts.length == 5)
+    {
+      dependencyAggregator.groupId = parts[0];
+      dependencyAggregator.artifactId= parts[1];
+      dependencyAggregator.version = parts[3];
+      String conflictMessage = "omitted for conflict with";
+      if (dep.contains(conflictMessage))
+      {
+        dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
+      }
+      return dependencyAggregator.toPurl();
+    }
+    else
+    {
+      throw new RuntimeException(String.format("Cannot parse dependency into PackageUrl from line = \"%s\"",dep));
+    }
+
+  }
+
+  private PackageURL txtPkgToPurl(String dotPkg) {
     var parts = dotPkg.
     replaceAll("\"", "")
         .trim().split(":");

@@ -3,7 +3,6 @@
   "specVersion" : "1.4",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2023-09-28T12:40:38Z",
     "component" : {
       "name" : "root",
       "purl" : "pkg:pypi/root",

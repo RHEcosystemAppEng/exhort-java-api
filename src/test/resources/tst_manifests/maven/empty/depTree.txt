@@ -1,2 +1,1 @@
-digraph "org.dummy:empty-pom-xml-for-tests:jar:1.0.0" { 
- } 
+org.dummy:empty-pom-xml-for-tests:jar:1.0.0

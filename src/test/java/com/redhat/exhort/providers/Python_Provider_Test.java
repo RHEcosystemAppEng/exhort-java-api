@@ -112,6 +112,6 @@ class Python_Provider_Test {
   }
 
   private String dropIgnored(String s) {
-    return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\"", "");
+    return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\",", "");
   }
 }

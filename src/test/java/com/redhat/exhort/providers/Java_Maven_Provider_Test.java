@@ -54,7 +54,8 @@ class Java_Maven_Provider_Test {
       "deps_with_ignore_on_group",
       "deps_with_ignore_on_version",
       "deps_with_ignore_on_wrong",
-      "deps_with_no_ignore"
+      "deps_with_no_ignore",
+      "pom_deps_with_no_ignore_common_paths"
     );
   }
 
@@ -88,10 +89,11 @@ class Java_Maven_Provider_Test {
     // cleanup
     Files.deleteIfExists(tmpPomFile);
     // verify expected SBOM is returned
+    mockedOperations.close();
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
-    mockedOperations.close();
+
   }
 
   private static String getOutputFileAndOverwriteItWithMock(String outputFileContent, InvocationOnMock invocationOnMock,String parameterPrefix) throws IOException {
@@ -133,11 +135,12 @@ class Java_Maven_Provider_Test {
 
     // when providing component content for our pom
     var content = new JavaMavenProvider().provideComponent(targetPom);
+    mockedOperations.close();
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
-    mockedOperations.close();
+
   }
   @ParameterizedTest
   @MethodSource("testFolders")
@@ -167,13 +170,14 @@ class Java_Maven_Provider_Test {
     // when providing component content for our pom
     var content = new JavaMavenProvider().provideComponent(tmpPomFile);
     // verify expected SBOM is returned
+    mockedOperations.close();
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
-    mockedOperations.close();
+
   }
 
   private String dropIgnored(String s) {
-    return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\"", "");
+    return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\",", "");
   }
 }

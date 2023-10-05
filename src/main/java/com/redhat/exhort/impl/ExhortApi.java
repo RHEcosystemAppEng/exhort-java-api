@@ -62,8 +62,10 @@ public final class ExhortApi implements Api {
   }
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+//     System.setProperty("EXHORT_DEV_MOD","true");
      AnalysisReport analysisReport = new ExhortApi()
-    .componentAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/maven/pom_deps_with_no_ignore_common_paths/pom.xml").get();
+
+    .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_no_ignore/requirements.txt").get();
     System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()
 //    byte[] analysisReport = new ExhortApi().

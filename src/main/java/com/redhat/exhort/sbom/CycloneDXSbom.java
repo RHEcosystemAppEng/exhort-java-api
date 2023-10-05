@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.packageurl.MalformedPackageURLException;
-import com.redhat.exhort.tools.Ecosystem;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.model.Bom;
@@ -284,6 +283,14 @@ public class CycloneDXSbom implements Sbom {
 
     }
     return result;
+  }
+
+  @Override
+  public void removeRootComponent()
+  {
+    bom.getComponents().removeIf( (component) -> component.getBomRef().equals(this.root.getCoordinates()));
+    bom.getDependencies().removeIf( (dependency) -> dependency.getRef().equals(this.root.getCoordinates()));
+    bom.getMetadata().setComponent(null);
   }
 
 }

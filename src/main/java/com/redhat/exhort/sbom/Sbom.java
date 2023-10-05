@@ -16,7 +16,6 @@
 package com.redhat.exhort.sbom;
 
 import java.util.Collection;
-import java.util.function.Predicate;
 import com.github.packageurl.PackageURL;
 
 public interface Sbom {
@@ -30,7 +29,9 @@ public interface Sbom {
 
     public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name);
 
-    public enum BelongingCondition
+    void removeRootComponent();
+
+  public enum BelongingCondition
     {
       NAME("name"),
       PURL("purl");

@@ -189,7 +189,9 @@ public final class PythonPipProvider extends Provider {
     String[] parts = pythonPipBinaries.split(";;");
     var python = parts[0];
     var pip = parts[1];
-    String useVirtualPythonEnv = Objects.requireNonNullElse(System.getenv("EXHORT_PYTHON_VIRTUAL_ENV"), "false");
+    String useVirtualPythonEnv = Objects.requireNonNullElseGet(
+      System.getenv("EXHORT_PYTHON_VIRTUAL_ENV"),
+      () -> Objects.requireNonNullElse(System.getProperty("EXHORT_PYTHON_VIRTUAL_ENV"), "false"));
     PythonControllerBase pythonController;
     if(this.pythonController == null) {
       if (Boolean.parseBoolean(useVirtualPythonEnv)) {

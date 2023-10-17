@@ -102,7 +102,7 @@ public final class JavaMavenProvider extends Provider {
   }
 
   private Sbom buildSbomFromTextFormat(Path textFormatFile) throws IOException {
-    var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"insensitive");
+    var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"sensitive");
     List<String> lines = Files.readAllLines(textFormatFile);
     var root = lines.get(0);
     var rootPurl = parseDep(root);

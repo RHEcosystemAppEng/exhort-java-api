@@ -3,6 +3,7 @@
   "specVersion" : "1.4",
   "version" : 1,
   "metadata" : {
+    "timestamp" : "2023-10-17T09:00:56Z",
     "component" : {
       "group" : "pom-no-trivial-with-deps-and-ignore",
       "name" : "demo",
@@ -316,6 +317,14 @@
       "purl" : "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final",
       "type" : "library",
       "bom-ref" : "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-arc",
+      "version" : "2.13.6.Final",
+      "purl" : "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final"
     },
     {
       "group" : "io.quarkus",
@@ -1044,6 +1053,14 @@
       "purl" : "pkg:maven/io.vertx/vertx-uri-template@4.3.4",
       "type" : "library",
       "bom-ref" : "pkg:maven/io.vertx/vertx-uri-template@4.3.4"
+    },
+    {
+      "group" : "org.postgresql",
+      "name" : "postgresql",
+      "version" : "42.5.1",
+      "purl" : "pkg:maven/org.postgresql/postgresql@42.5.1",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/org.postgresql/postgresql@42.5.1"
     }
   ],
   "dependencies" : [
@@ -1297,6 +1314,7 @@
       "ref" : "pkg:maven/io.quarkus/quarkus-resteasy-server-common@2.7.7.Final",
       "dependsOn" : [
         "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final",
+        "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final",
         "pkg:maven/io.quarkus/quarkus-resteasy-common@2.7.7.Final",
         "pkg:maven/jakarta.validation/jakarta.validation-api@2.0.2"
       ]
@@ -1323,10 +1341,19 @@
       ]
     },
     {
+      "ref" : "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final",
+      "dependsOn" : [
+        "pkg:maven/io.quarkus.arc/arc@2.13.5.Final",
+        "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final",
+        "pkg:maven/org.eclipse.microprofile.context-propagation/microprofile-context-propagation-api@1.2"
+      ]
+    },
+    {
       "ref" : "pkg:maven/io.quarkus/quarkus-resteasy-common@2.7.7.Final",
       "dependsOn" : [
         "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final",
         "pkg:maven/org.jboss.resteasy/resteasy-core@4.7.5.Final",
+        "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final",
         "pkg:maven/com.sun.activation/jakarta.activation@1.2.1"
       ]
     },
@@ -1608,7 +1635,8 @@
       "dependsOn" : [
         "pkg:maven/io.smallrye/smallrye-context-propagation@1.2.2",
         "pkg:maven/jakarta.enterprise/jakarta.enterprise.cdi-api@2.0.2",
-        "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final"
+        "pkg:maven/io.quarkus/quarkus-core@2.13.5.Final",
+        "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final"
       ]
     },
     {
@@ -1799,6 +1827,7 @@
     {
       "ref" : "pkg:maven/io.quarkus/quarkus-vertx@2.13.5.Final",
       "dependsOn" : [
+        "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final",
         "pkg:maven/io.quarkus/quarkus-netty@2.13.5.Final",
         "pkg:maven/io.netty/netty-codec-haproxy@4.1.82.Final",
         "pkg:maven/io.smallrye.common/smallrye-common-annotation@1.13.1",
@@ -1815,6 +1844,7 @@
         "pkg:maven/io.netty/netty-codec@4.1.82.Final",
         "pkg:maven/io.netty/netty-codec-http@4.1.78.Final",
         "pkg:maven/io.netty/netty-codec-http2@4.1.78.Final",
+        "pkg:maven/io.quarkus/quarkus-arc@2.13.6.Final",
         "pkg:maven/io.netty/netty-handler@4.1.78.Final",
         "pkg:maven/jakarta.enterprise/jakarta.enterprise.cdi-api@2.0.2",
         "pkg:maven/com.aayushatharva.brotli4j/brotli4j@1.7.1"
@@ -1940,6 +1970,10 @@
       "dependsOn" : [
         "pkg:maven/io.vertx/vertx-core@4.3.3"
       ]
+    },
+    {
+      "ref" : "pkg:maven/org.postgresql/postgresql@42.5.1",
+      "dependsOn" : [ ]
     }
   ]
 }

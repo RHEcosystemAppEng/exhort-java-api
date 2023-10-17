@@ -397,7 +397,7 @@ following keys for setting custom paths for the said executables.
 
 ####  Python Support
 
-By default Python support assumes that the package is installed using the pip/pip3 binary on the system PATH, of in the customized
+By default, Python support assumes that the package is installed using the pip/pip3 binary on the system PATH, or of the customized
 Binaries passed to environment variables. If the package is not installed , then an error will be thrown.
 
 There is an experimental feature of installing the requirement.txt on a virtual env(only python3 or later is supported for this feature) - in this case,

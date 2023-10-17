@@ -27,6 +27,7 @@ jobs:
     if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
     outputs:
       project_version: ${{ steps.project.outputs.version }}
+      last_release_tag: ${{ steps.last-release.outputs.tag-name }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
@@ -64,6 +65,11 @@ jobs:
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
 
+      - name: get previous released annotated tag
+        id: last-release
+        run: |
+          echo "tag-name=$(git describe | awk -F '-' '{print $1}')" >> "$GITHUB_OUTPUT"
+
       - name: Deploy release to GitHub
         run: |
           mvn -DskipTests -Darguments=-DskipTests release:prepare -B -ff
@@ -88,6 +94,20 @@ jobs:
     environment: staging
     needs: deploy
     steps:
+
+      - name: Create release notes for ${{ needs.deploy.outputs.project_version }} release
+        uses: actions/github-script@v6
+        id: release-notes
+        with:
+          github-token: ${{ secrets.STAGING_PAT }}
+          script: |
+            const repo_name = context.payload.repository.full_name
+            const response = await github.request('POST /repos/' + repo_name + '/releases' + '/generate-notes', {
+              tag_name: '${{ needs.deploy.outputs.project_version }}',
+              previous_tag_name: '${{ needs.deploy.outputs.last_release_tag }}'
+            })
+            return response.body
+
       - name: Create new ${{ needs.deploy.outputs.project_version }} release
         uses: actions/github-script@v6
         with:
@@ -97,10 +117,10 @@ jobs:
             const response = await github.request('POST /repos/' + repo_name + '/releases', {
               tag_name: '${{ needs.deploy.outputs.project_version }}',
               name: '${{ needs.deploy.outputs.project_version }}',
+              body: '${{ steps.release-notes.outputs.result }}',
               draft: false,
-              prerelease: true,
-              generate_release_notes: true,
-              make_latest: 'false'
+              prerelease: false,
+              make_latest: 'true'
             })
 
       - name: Checkout sources
@@ -117,6 +137,7 @@ jobs:
       - name: Get pom version of new snapshot artifact
         id: project_snapshot
         run: |
+          git pull
           echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
 
 
@@ -128,7 +149,6 @@ jobs:
 
       - name: Push modifications
         run: |
-          git pull
           git add README.md
           git commit -m "docs: updated usage section with version ${{ steps.project_snapshot.outputs.version }} [skip ci]"
           git push

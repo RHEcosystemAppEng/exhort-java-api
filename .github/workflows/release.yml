@@ -106,7 +106,7 @@ jobs:
               tag_name: '${{ needs.deploy.outputs.project_version }}',
               previous_tag_name: '${{ needs.deploy.outputs.last_release_tag }}'
             })
-            return response.body
+            return response.data.body
 
       - name: Create new ${{ needs.deploy.outputs.project_version }} release
         uses: actions/github-script@v6
@@ -117,7 +117,7 @@ jobs:
             const response = await github.request('POST /repos/' + repo_name + '/releases', {
               tag_name: '${{ needs.deploy.outputs.project_version }}',
               name: '${{ needs.deploy.outputs.project_version }}',
-              body: '${{ steps.release-notes.outputs.result }}',
+              body: ${{ steps.release-notes.outputs.result }},
               draft: false,
               prerelease: false,
               make_latest: 'true'

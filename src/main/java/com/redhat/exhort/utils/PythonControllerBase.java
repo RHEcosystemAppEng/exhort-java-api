@@ -204,7 +204,7 @@ public abstract class PythonControllerBase {
     String[] deps = freeze.split(System.lineSeparator());
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
-    List<String> allPipShowLines = Arrays.stream(pipShowOutput.split("---")).collect(Collectors.toList());
+    List<String> allPipShowLines = splitPipShowLines(pipShowOutput);
     Map<StringInsensitive,String> CachedTree = new HashMap<>();
     List<String> linesOfRequirements;
     try {
@@ -311,5 +311,9 @@ public abstract class PythonControllerBase {
         leftTriangleBracket = leftTriangleBracket == -1 ? 999 : leftTriangleBracket;
         equalsSign = equalsSign == -1 ? 999 : equalsSign;
         return equalsSign < leftTriangleBracket && equalsSign < rightTriangleBracket ? equalsSign : (leftTriangleBracket < equalsSign && leftTriangleBracket < rightTriangleBracket ? leftTriangleBracket : rightTriangleBracket);
+  }
+
+  static List<String> splitPipShowLines(String pipShowOutput) {
+    return Arrays.stream(pipShowOutput.split(System.lineSeparator() + "---" + System.lineSeparator())).collect(Collectors.toList());
   }
 }

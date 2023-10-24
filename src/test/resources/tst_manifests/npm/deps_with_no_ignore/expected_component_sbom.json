@@ -72,10 +72,10 @@
 		},
 		{
 			"name": "mongoose",
-			"version": "5.13.20",
-			"purl": "pkg:npm/mongoose@5.13.20",
+			"version": "5.13.21",
+			"purl": "pkg:npm/mongoose@5.13.21",
 			"type": "library",
-			"bom-ref": "pkg:npm/mongoose@5.13.20"
+			"bom-ref": "pkg:npm/mongoose@5.13.21"
 		},
 		{
 			"name": "nodemon",
@@ -96,7 +96,7 @@
 				"pkg:npm/dotenv@8.6.0",
 				"pkg:npm/express@4.18.2",
 				"pkg:npm/jsonwebtoken@8.5.1",
-				"pkg:npm/mongoose@5.13.20",
+				"pkg:npm/mongoose@5.13.21",
 				"pkg:npm/nodemon@2.0.22"
 			]
 		},
@@ -129,7 +129,7 @@
 			"dependsOn": []
 		},
 		{
-			"ref": "pkg:npm/mongoose@5.13.20",
+			"ref": "pkg:npm/mongoose@5.13.21",
 			"dependsOn": []
 		},
 		{

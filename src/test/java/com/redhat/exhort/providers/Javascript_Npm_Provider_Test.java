@@ -16,16 +16,27 @@
 package com.redhat.exhort.providers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import com.redhat.exhort.tools.Operations;
+import net.bytebuddy.asm.Advice;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.redhat.exhort.Api;
+import org.mockito.*;
+
 @ExtendWith(HelperExtension.class)
 class Javascript_Npm_Provider_Test {
   // test folder are located at src/test/resources/tst_manifests/npm
@@ -38,6 +49,9 @@ class Javascript_Npm_Provider_Test {
       "deps_with_no_ignore"
     );
   }
+
+
+
 
   @ParameterizedTest
   @MethodSource("testFolders")
@@ -58,12 +72,21 @@ class Javascript_Npm_Provider_Test {
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_stack_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
+    String npmListingStack;
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "npm-ls-stack.json"))) {
+      npmListingStack = new String(is.readAllBytes());
+    }
+    MockedStatic<Operations> mockedOperations = mockStatic(Operations.class);
+      //Operations.runProcess(contains("npm i"),any())
+    ArgumentMatcher<Path> matchPath = path -> path == null;
+    mockedOperations.when(() -> Operations.runProcessGetOutput(argThat(matchPath),any(String[].class))).thenReturn(npmListingStack);
     // when providing stack content for our pom
     var content = new JavaScriptNpmProvider().provideStack(tmpNpmFile);
     // cleanup
     Files.deleteIfExists(tmpNpmFile);
     Files.deleteIfExists(tmpLockFile);
     Files.deleteIfExists(tmpNpmFolder);
+    mockedOperations.close();
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
@@ -83,8 +106,29 @@ class Javascript_Npm_Provider_Test {
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
+    String npmListingComponent;
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "npm-ls-component.json"))) {
+      npmListingComponent = new String(is.readAllBytes());
+    }
+
+//    MockedStatic<Files> javaFiles = mockStatic(Files.class);
+    //Operations.runProcess(contains("npm i"),any())
+//    mockedOperations.when(() -> Operations.runProcessGetOutput(eq(null),any())).thenReturn(npmListingComponent);
+      MockedStatic<Operations> mockedOperations = mockStatic(Operations.class);
+      mockedOperations.when(() -> Operations.runProcess(any(),any())).thenAnswer((invocationOnMock) -> {
+      String[] commandParts = (String [])invocationOnMock.getRawArguments()[0];
+      int lastElementIsDir = commandParts.length - 1;
+      String packageLockJson = commandParts[lastElementIsDir] + "/package-lock.json";
+      Files.createFile(Path.of(packageLockJson));
+      return packageLockJson ;
+    });
+    ArgumentMatcher<Path> matchPath = path -> path == null;
+
+    mockedOperations.when(() -> Operations.runProcessGetOutput(argThat(matchPath),any(String[].class))).thenReturn(npmListingComponent);
     // when providing component content for our pom
     var content = new JavaScriptNpmProvider().provideComponent(targetPom);
+    mockedOperations.close();
+//    javaFiles.close();
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
@@ -105,8 +149,23 @@ class Javascript_Npm_Provider_Test {
     try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
+  String npmListingComponent;
+  try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "npm-ls-component.json"))) {
+    npmListingComponent = new String(is.readAllBytes());
+  }
+  ArgumentMatcher<Path> matchPath = path -> path == null;
+    MockedStatic<Operations> mockedOperations = mockStatic(Operations.class);
+    mockedOperations.when(() -> Operations.runProcess(any(),any())).thenAnswer((invocationOnMock) -> {
+    String[] commandParts = (String [])invocationOnMock.getRawArguments()[0];
+    int lastElementIsDir = commandParts.length - 1;
+    String packageLockJson = commandParts[lastElementIsDir] + "/package-lock.json";
+    Files.createFile(Path.of(packageLockJson));
+    return packageLockJson ;
+  });
+    mockedOperations.when(() -> Operations.runProcessGetOutput(argThat(matchPath),any(String[].class))).thenReturn(npmListingComponent);
     // when providing component content for our pom
     var content = new JavaScriptNpmProvider().provideComponent(tmpNpmFile);
+    mockedOperations.close();
     // verify expected SBOM is returned
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))

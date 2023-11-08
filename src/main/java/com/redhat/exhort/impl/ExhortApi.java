@@ -114,8 +114,8 @@ public final class ExhortApi implements Api {
   }
 
   ExhortApi(final HttpClient client) {
-    // temp system property - as long as prod exhort url not implemented the multi-source v4 endpoint, this property needs to be true
-    System.setProperty("EXHORT_DEV_MODE","true");
+//    // temp system property - as long as prod exhort url not implemented the multi-source v4 endpoint, this property needs to be true
+//    System.setProperty("EXHORT_DEV_MODE","true");
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     // Take default from config.properties in case client didn't override DEV MODE

@@ -60,7 +60,7 @@ public final class ExhortApi implements Api {
   }
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-//     System.setProperty("EXHORT_DEV_MOD","true");
+     System.setProperty("EXHORT_DEV_MODE","true");
      AnalysisReport analysisReport = new ExhortApi()
 
     .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_no_ignore/requirements.txt").get();
@@ -114,6 +114,8 @@ public final class ExhortApi implements Api {
   }
 
   ExhortApi(final HttpClient client) {
+    // temp system property - as long as prod exhort url not implemented the multi-source v4 endpoint, this property needs to be true
+    System.setProperty("EXHORT_DEV_MODE","true");
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     // Take default from config.properties in case client didn't override DEV MODE
@@ -263,7 +265,7 @@ public final class ExhortApi implements Api {
   ) throws IOException {
     var provider = Ecosystem.getProvider(manifestType);
     var uri = URI.create(
-      String.format("%s/api/v3/analysis", this.endpoint));
+      String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
 
     return getAnalysisReportForComponent(uri, content);
@@ -274,7 +276,7 @@ public final class ExhortApi implements Api {
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(
-      String.format("%s/api/v3/analysis", this.endpoint));
+      String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestPath);
     return getAnalysisReportForComponent(uri, content);
   }
@@ -308,7 +310,7 @@ public final class ExhortApi implements Api {
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(
-      String.format("%s/api/v3/analysis", this.endpoint));
+      String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideStack(manifestPath);
 
     return buildRequest(content, uri, acceptType,"Stack Analysis");

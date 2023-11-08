@@ -22,8 +22,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
@@ -141,7 +139,7 @@ public final class ExhortApi implements Api {
 
   public String getExhortUrl() {
     String endpoint;
-    if(getBooleanValueEnvironment("EXHORT_DEV_MODE")) {
+    if(getBooleanValueEnvironment("EXHORT_DEV_MODE", "false")) {
       endpoint = getStringValueEnvironment("DEV_EXHORT_BACKEND_URL", DEFAULT_ENDPOINT_DEV);
     }
     else
@@ -151,11 +149,11 @@ public final class ExhortApi implements Api {
     return endpoint;
   }
 
-  private boolean getBooleanValueEnvironment(String key) {
-    String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), "false"));
+  public static boolean getBooleanValueEnvironment(String key, String defaultValue) {
+    String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), defaultValue));
     return Boolean.parseBoolean(result.trim().toLowerCase());
   }
-  private String getStringValueEnvironment(String key,String defaultValue) {
+  public static String getStringValueEnvironment(String key,String defaultValue) {
     String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), defaultValue));
     return result;
   }

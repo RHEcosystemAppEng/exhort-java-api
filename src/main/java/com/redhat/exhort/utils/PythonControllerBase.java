@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
 import static java.lang.String.join;
 
 public abstract class PythonControllerBase {
@@ -200,11 +202,12 @@ public abstract class PythonControllerBase {
 
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {
     List<Map<String,Object>> dependencies = new ArrayList<>();
-    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze");
+    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze","--all");
     String[] deps = freeze.split(System.lineSeparator());
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
     List<String> allPipShowLines = splitPipShowLines(pipShowOutput);
+    boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
     Map<StringInsensitive,String> CachedTree = new HashMap<>();
     List<String> linesOfRequirements;
     try {
@@ -228,13 +231,44 @@ public abstract class PythonControllerBase {
       throw new RuntimeException(e);
     }
     linesOfRequirements.stream().forEach( dep -> {
-      bringAllDependencies(dependencies, getDependencyName(dep),CachedTree, includeTransitive);
+      if(matchManifestVersions)
+      {
+        String dependencyName;
+        String manifestVersion;
+        String installedVersion = "";
+        int doubleEqualSignPosition;
+        if(dep.contains("=="))
+        {
+          doubleEqualSignPosition = dep.indexOf("==");
+          manifestVersion = dep.substring(doubleEqualSignPosition + 2).trim();
+          if(manifestVersion.contains("#"))
+          {
+            var hashCharIndex = manifestVersion.indexOf("#");
+            manifestVersion = manifestVersion.substring(0,hashCharIndex);
+          }
+          dependencyName = getDependencyName(dep);
+          String pipShowRecord = CachedTree.get(new StringInsensitive(dependencyName));
+          if(pipShowRecord != null)
+          {
+            installedVersion = getDependencyVersion(pipShowRecord);
+          }
+          if(!installedVersion.trim().equals("")) {
+             if (!manifestVersion.trim().equals(installedVersion.trim())) {
+                throw new RuntimeException(String.format("Can't continue with analysis - versions mismatch for dependency name=%s, manifest version=%s, installed Version=%s, if you want to allow version mismatch for analysis between installed and requested packages, set environment variable/setting - MATCH_MANIFEST_VERSIONS=false", dependencyName, manifestVersion, installedVersion));
+              }
+          }
+        }
+      }
+      List<String> path = new ArrayList<>();
+      String depName = getDependencyName(dep.toLowerCase());
+      path.add(depName);
+      bringAllDependencies(dependencies, depName,CachedTree, includeTransitive,path);
     });
 
     return dependencies;
   }
 
-  private void bringAllDependencies(List<Map<String, Object>> dependencies, String depName, Map<StringInsensitive, String> cachedTree, boolean includeTransitive) {
+  private void bringAllDependencies(List<Map<String, Object>> dependencies, String depName, Map<StringInsensitive, String> cachedTree, boolean includeTransitive, List<String> path) {
 
     if (dependencies == null || depName.trim().equals(""))
       return;
@@ -253,8 +287,13 @@ public abstract class PythonControllerBase {
     entry.put("version", depVersion);
     List<Map<String, Object>> targetDeps = new ArrayList<>();
     directDeps.stream().forEach( dep -> {
-      if(includeTransitive) {
-        bringAllDependencies(targetDeps, dep, cachedTree, includeTransitive);
+      if(!path.contains(dep.toLowerCase())) {
+        List<String> depList = new ArrayList();
+        depList.add(dep.toLowerCase());
+
+        if (includeTransitive) {
+          bringAllDependencies(targetDeps, dep, cachedTree, includeTransitive, Stream.concat(path.stream(),depList.stream()).collect(Collectors.toList()));
+        }
       }
       Collections.sort(targetDeps, (o1, o2) -> {
         String string1 = (String) (o1.get("name"));

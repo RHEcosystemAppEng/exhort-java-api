@@ -1,40 +1,39 @@
 openapi: 3.0.3
 info:
-  title: CodeReady Dependency Analytics API
-  description: Vulnerability analysis with Red Hat CodeReady Dependency Analytics
+  title: Exhort API
+  description: Vulnerability analysis with Red Hat Trusted Profile Analyzer
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 3.0.0
+  version: 4.0.0
 servers:
-- url: http://prod-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
-  description: Production server
-- url: http://pre-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
-  description: Staging server
-- url: http://dev-exhort.apps.sssc-cl01.appeng.rhecoeng.com/api/v3
-  description: Development server
-- url: http://localhost:8080/api/v3
-  description: Local development
+  - url: https://rhda.rhcloud.com/api/v4
+    description: Production server
+  - url: https://exhort-alpha.stage.devshift.net/api/v4
+    description: Staging server
+  - url: http://localhost:8080/api/v4
+    description: Local development
 paths:
   /analysis:
     post:
       operationId: analysis
       summary:  Takes a client-resolved dependency graph to perform a full stack analysis from all the available Vulnerability sources
       security:
+        - RhdaTokenAuth: []
         - SnykTokenAuth: []
         - OssIndexUserAuth: []
           OssIndexTokenAuth: []
       parameters:
-      - name: providers
-        in: query
-        description: List of vulnerability providers to get the report from
-        required: false
-        schema:
-          enum:
-          - snyk
-          - oss-index
-          type: string
-        example: snyk
+        - name: providers
+          in: query
+          description: List of vulnerability providers to get the report from
+          required: false
+          schema:
+            enum:
+              - snyk
+              - oss-index
+            type: string
+          example: snyk
       requestBody:
         required: true
         description: Dependency graph in SBOM format
@@ -69,12 +68,13 @@ paths:
             text/plain:
               schema:
                 type: string
-                description: Error message  
+                description: Error message
   /token:
     get:
       operationId: validateToken
       summary: Validates a vulnerability provider token
       security:
+        - RhdaTokenAuth: []
         - SnykTokenAuth: []
         - OssIndexUserAuth: []
           OssIndexTokenAuth: []
@@ -117,6 +117,10 @@ paths:
 
 components:
   securitySchemes:
+    RhdaTokenAuth:
+      type: apiKey
+      in: header
+      name: rhda-token
     SnykTokenAuth:
       type: apiKey
       in: header
@@ -133,14 +137,88 @@ components:
     AnalysisReport:
       type: object
       properties:
+        scanned:
+          $ref: '#/components/schemas/Scanned'
+        providers:
+          $ref: '#/components/schemas/Providers'
+    Scanned:
+      type: object
+      description: Number of dependencies scanned
+      properties:
+        total:
+          type: integer
+        direct:
+          type: integer
+        transitive:
+          type: integer
+    Providers:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/ProviderReport'
+    ProviderReport:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ProviderStatus'
+        sources:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Source'
+    ProviderStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        name:
+          type: string
+        code:
+          type: integer
+        message:
+          type: string
+    Source:
+      type: object
+      properties:
         summary:
-          $ref: '#/components/schemas/Summary'
+          $ref: '#/components/schemas/SourceSummary'
         dependencies:
           type: array
           items:
             $ref: '#/components/schemas/DependencyReport'
-    PackageRef:
+    SourceSummary:
       type: object
+      properties:
+        direct:
+          type: integer
+          default: 0
+        transitive:
+          type: integer
+          default: 0
+        total:
+          type: integer
+          default: 0
+        dependencies:
+          type: integer
+          default: 0
+        critical:
+          type: integer
+          default: 0
+        high:
+          type: integer
+          default: 0
+        medium:
+          type: integer
+          default: 0
+        low:
+          type: integer
+          default: 0
+        remediations:
+          type: integer
+          default: 0
+        recommendations:
+          type: integer
+          default: 0
+    PackageRef:
+      type: string
       description: PackageURL used to identify a dependency artifact
       example: pkg:maven/io.quarkus/quarkus-hibernate-orm@2.13.5.Final
     DependencyReport:
@@ -160,65 +238,9 @@ components:
           description: Trusted Content recommendation that is not related to any security vulnerability
           allOf:
             - $ref: '#/components/schemas/PackageRef'
-        remediations:
-          description: Trusted Content remediation related to identified security vulnerabilities
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Remediation'
         highestVulnerability:
           description: Highest vulnerability found for this dependency
           $ref: '#/components/schemas/Issue'
-      example:
-        ref: pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.5.Final
-        issues:
-          - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
-            title: Denial of Service (DoS)
-            source: snyk
-            cvss:
-              attackVector: Network
-              attackComplexity: High
-              privilegesRequired: None
-              userInteraction: None
-              scope: Unchanged
-              confidentialityImpact: None
-              integrityImpact: None
-              availabilityImpact: High
-              exploitCodeMaturity: Proof of concept code
-              remediationLevel:
-              reportConfidence:
-              cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
-            cvssScore: 5.9
-            severity: MEDIUM
-            cves:
-            - CVE-2022-42003
-        transitive:
-          - ref: pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.1.Final
-            issues:
-              - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
-                title: Denial of Service (DoS)
-                source: snyk
-                cvss:
-                  attackVector: Network
-                  attackComplexity: High
-                  privilegesRequired: None
-                  userInteraction: None
-                  scope: Unchanged
-                  confidentialityImpact: None
-                  integrityImpact: None
-                  availabilityImpact: High
-                  exploitCodeMaturity: Proof of concept code
-                  remediationLevel:
-                  reportConfidence:
-                  cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
-                cvssScore: 5.9
-                severity: MEDIUM
-                cves:
-                - CVE-2022-42003
-        remediations:
-          CVE-2022-41946:
-            issueRef: CVE-2022-41946
-            mavenPackage: pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.1.Final-redhat-00002
-            productStatus: known_not_affected
     Severity:
       type: string
       enum:
@@ -249,27 +271,8 @@ components:
         unique:
           type: boolean
           default: false
-      example:
-        id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
-        title: Denial of Service (DoS)
-        source: snyk
-        cvss:
-          attackVector: Network
-          attackComplexity: High
-          privilegesRequired: None
-          userInteraction: None
-          scope: Unchanged
-          confidentialityImpact: None
-          integrityImpact: None
-          availabilityImpact: High
-          exploitCodeMaturity: Proof of concept code
-          remediationLevel:
-          reportConfidence:
-          cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
-        cvssScore: 5.9
-        severity: MEDIUM
-        cves:
-        - CVE-2022-42003
+        remediation:
+          $ref: '#/components/schemas/Remediation'
     TransitiveDependencyReport:
       type: object
       properties:
@@ -279,93 +282,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Issue'
-        remediations:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Remediation'
         highestVulnerability:
           description: Highest vulnerability found for this dependency
           $ref: '#/components/schemas/Issue'
-      example:
-        ref: pkg:maven/org.postgresql/postgresql@42.5.0
-        issues:
-          - id: SNYK-JAVA-COMFASTERXMLJACKSONCORE-3038426
-            title: Denial of Service (DoS)
-            source: snyk
-            cvss:
-              attackVector: Network
-              attackComplexity: High
-              privilegesRequired: None
-              userInteraction: None
-              scope: Unchanged
-              confidentialityImpact: None
-              integrityImpact: None
-              availabilityImpact: High
-              exploitCodeMaturity: Proof of concept code
-              remediationLevel:
-              reportConfidence:
-              cvss: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P
-            cvssScore: 5.9
-            severity: MEDIUM
-            cves:
-            - CVE-2022-42003
     Remediation:
       type: object
       properties:
-        issueRef:
-          type: string
-        mavenPackage:
-          $ref: '#/components/schemas/PackageRef'
-        productStatus:
-          type: string
-      example:
-        issueRef: CVE-2022-41946
-        mavenPackage: pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.7.Final-redhat-00003
-        productStatus: fixed
-    Summary:
-      type: object
-      properties:
-        dependencies:
-          $ref: '#/components/schemas/DependenciesSummary'
-        vulnerabilities:
-          $ref: '#/components/schemas/VulnerabilitiesSummary'
-        providerStatuses:
+        fixedIn:
           type: array
           items:
-              $ref: '#/components/schemas/ProviderStatus'
-    DependenciesSummary:
-      type: object
-      properties:
-        scanned:
-          type: integer
-        transitive:
-          type: integer
-    VulnerabilitiesSummary:
-      type: object
-      properties:
-        direct:
-          type: integer
-        total:
-          type: integer
-        critical:
-          type: integer
-        high:
-          type: integer
-        medium:
-          type: integer
-        low:
-          type: integer
-    ProviderStatus:
-      type: object
-      properties:
-        ok:
-          type: boolean
-        provider:
-          type: string
-        status:
-          type: integer
-        message:
-          type: string
+            type: string
+        trustedContent:
+          type: object
+          properties:
+            mavenPackage:
+              $ref: '#/components/schemas/PackageRef'
+            productStatus:
+              type: string
     CvssVector:
       type: object
       properties:

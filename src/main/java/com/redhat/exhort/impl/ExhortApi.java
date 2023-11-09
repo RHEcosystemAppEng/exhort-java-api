@@ -48,7 +48,7 @@ public final class ExhortApi implements Api {
 
   private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
   public static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
-  public static final String DEFAULT_ENDPOINT_DEV = "http://alpha-exhort.apps.sssc-cl01.appeng.rhecoeng.com";
+  public static final String DEFAULT_ENDPOINT_DEV = "https://exhort.stage.devshift.net";
   public static final String RHDA_TOKEN_HEADER = "rhda-token";
   public static final String RHDA_SOURCE_HEADER = "rhda-source";
   public static final String RHDA_OPERATION_TYPE_HEADER = "rhda-operation-type";

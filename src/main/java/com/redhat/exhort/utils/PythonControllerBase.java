@@ -89,7 +89,7 @@ public abstract class PythonControllerBase {
 
   public abstract boolean isRealEnv();
 
-  public void installPackage(String pathToRequirements)
+  void installPackages(String pathToRequirements)
   {
     Operations.runProcess(pipBinaryLocation, "install", "-r", pathToRequirements);
     Operations.runProcess(pipBinaryLocation, "freeze");
@@ -189,7 +189,25 @@ public abstract class PythonControllerBase {
     }
     if(automaticallyInstallPackageOnEnvironment())
     {
-      installPackage(pathToRequirements);
+      boolean installBestEfforts = getBooleanValueEnvironment("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "false");
+      // make best efforts to install the requirements.txt on the virtual environment created from the python3 passed in.
+      // that means that it will install the packages without referring to the versions, but will let pip choose the version
+      // tailored for version of the python environment( and of pip package manager) for each package.
+      if(installBestEfforts)
+      {
+        boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
+        if(matchManifestVersions)
+        {
+          throw new RuntimeException("Conflicting settings, EXHORT_PYTHON_INSTALL_BEST_EFFORTS=true can only work with MATCH_MANIFEST_VERSIONS=false");
+        }
+        else {
+          installingRequirementsOneByOne(pathToRequirements);
+        }
+      }
+        //
+      else {
+        installPackages(pathToRequirements);
+      }
     }
     List<Map<String, Object>> dependencies = getDependenciesImpl(pathToRequirements, includeTransitive);
     if(isVirtualEnv())
@@ -198,6 +216,25 @@ public abstract class PythonControllerBase {
     }
 
     return dependencies;
+  }
+
+  private void installingRequirementsOneByOne(String pathToRequirements) {
+    try {
+      List<String> requirementsRows = Files.readAllLines(Path.of(pathToRequirements));
+      requirementsRows.stream().filter((line) -> !line.trim().startsWith("#")).filter((line) -> !line.trim().equals("")).forEach((dependency) ->
+      {
+        String dependencyName = getDependencyName(dependency);
+        try {
+          Operations.runProcess(this.pipBinaryLocation,"install",dependencyName);
+        } catch (RuntimeException e) {
+          throw new RuntimeException(String.format("Best efforts process - failed installing package - %s in created virtual python environment --> error message got from underlying process => %s ",dependencyName,e.getMessage()));
+        }
+      });
+
+
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot continue with analysis - error opening requirements.txt file in order to install packages one by one in a best efforts manner - related error message => "  + e.getMessage());
+    }
   }
 
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {

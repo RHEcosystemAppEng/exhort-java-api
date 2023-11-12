@@ -38,6 +38,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
+
 /**
  * Concrete implementation of the {@link Provider} used for converting
  * dependency trees
@@ -161,6 +163,12 @@ public final class GoModulesProvider extends Provider {
     calculateMainModuleVersion(manifestPath.getParent());
     Sbom sbom;
     List<PackageURL> ignoredDeps = getIgnoredDeps(manifestPath);
+    boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "false");
+    if(matchManifestVersions) {
+//      String rootName = getParentVertex()
+      String[] goModGraphLines = goModulesResult.split(System.lineSeparator());
+      performManifestVersionsCheck(goModGraphLines,manifestPath);
+    }
     if (!buildTree) {
       sbom = buildSbomFromList(goModulesResult,ignoredDeps);
     }
@@ -172,6 +180,83 @@ public final class GoModulesProvider extends Provider {
 //    sbom.filterIgnoredDeps(ignoredDeps);
     return sbom;
   }
+
+  private void performManifestVersionsCheck(String[] goModGraphLines, Path manifestPath) {
+    try {
+      String goModLines = Files.readString(manifestPath);
+      String[] lines = goModLines.split(System.lineSeparator());
+      String root = getParentVertex(goModGraphLines[0]);
+      List<String> comparisonLines = Arrays.stream(goModGraphLines).filter((line) -> line.startsWith(root)).map((line) -> getChildVertex(line)).collect(Collectors.toList());
+      List<String> goModDependencies = collectAllDepsFromManifest(lines,goModLines);
+      comparisonLines.stream().forEach((dependency) ->
+      {
+        String[] parts = dependency.split("@");
+        String version = parts[1];
+        String depName = parts[0];
+        goModDependencies.stream().forEach((dep) ->
+        {
+          String[] artifactParts = dep.trim().split(" ");
+          String currentDepName = artifactParts[0];
+          String currentVersion = artifactParts[1];
+          if(currentDepName.trim().equals(depName.trim()))
+          {
+            if(currentVersion.trim().equals(version.trim()))
+            {
+              throw new RuntimeException(String.format("Can't continue with analysis - versions mismatch for dependency name=%s, manifest version=%s, installed Version=%s, if you want to allow version mismatch for analysis between installed and requested packages, set environment variable/setting - MATCH_MANIFEST_VERSIONS=false", depName, currentVersion, version));
+            }
+          }
+        });
+      });
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to open go.mod file for manifest versions check validation!");
+    }
+  }
+
+  private List<String> collectAllDepsFromManifest(String[] lines, String goModLines) {
+    List<String> result = new ArrayList<>();
+    // collect all deps that starts with require keyword
+    result = Arrays.stream(lines).filter((line) -> line.trim().startsWith("require") && !line.contains("(")).map((dep) -> dep.substring("require".length()).trim()).collect(Collectors.toList());
+
+    // collect all deps that are inside `require` blocks
+
+    String currentSegmentOfGoMod = goModLines;
+    Map<String,Integer> requirePosObject = decideRequireBlockIndex(currentSegmentOfGoMod);
+    while(requirePosObject.get("index") > -1)
+    {
+      String depsInsideRequirementsBlock = currentSegmentOfGoMod.substring(requirePosObject.get("index") + requirePosObject.get("length")).trim();
+      int endOfBlockIndex = depsInsideRequirementsBlock.indexOf(")");
+      int currentIndex = 0;
+      while(currentIndex < endOfBlockIndex)
+      {
+        int endOfLinePosition = depsInsideRequirementsBlock.indexOf(System.lineSeparator());
+        String dependency = depsInsideRequirementsBlock.substring(currentIndex,endOfLinePosition).trim();
+        result.add(dependency);
+        currentIndex = endOfBlockIndex + 1;
+      }
+      currentSegmentOfGoMod = currentSegmentOfGoMod.substring(endOfBlockIndex + 1).trim();
+      requirePosObject = decideRequireBlockIndex(currentSegmentOfGoMod);
+    }
+
+    return result;
+  }
+
+  private Map<String, Integer> decideRequireBlockIndex(String currentSegmentOfGoMod) {
+    int index = currentSegmentOfGoMod.indexOf("require(");
+    int length =  "require(".length();
+    if(index == -1)
+    {
+      index = currentSegmentOfGoMod.indexOf("require (");
+      length = "require (".length();
+      if(index == -1 )
+      {
+        index = currentSegmentOfGoMod.indexOf("require  (");
+        length = "require  (".length();
+      }
+    }
+    return Map.of("index",index,"length",length);
+
+  }
+
   public void determineMainModuleVersion(Path directory)
   {
     this.calculateMainModuleVersion(directory);

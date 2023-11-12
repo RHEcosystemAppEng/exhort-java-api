@@ -347,7 +347,13 @@ public abstract class PythonControllerBase {
     int requiresKeyIndex = pipShowOutput.indexOf("Requires:");
     String requiresToken = pipShowOutput.substring(requiresKeyIndex + 9);
     int endOfLine = requiresToken.indexOf(System.lineSeparator());
-    String listOfDeps = requiresToken.substring(0, endOfLine).trim();
+    String listOfDeps;
+    if(endOfLine > -1) {
+      listOfDeps = requiresToken.substring(0, endOfLine).trim();
+    }
+    else {
+      listOfDeps = requiresToken;
+    }
     return Arrays.stream(listOfDeps.split(",")).map(String::trim).filter(dep -> !dep.equals("")).collect(Collectors.toList());
   }
 

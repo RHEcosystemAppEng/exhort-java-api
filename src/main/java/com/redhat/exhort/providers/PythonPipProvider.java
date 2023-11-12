@@ -35,6 +35,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
+
 public final class PythonPipProvider extends Provider {
 
 
@@ -139,11 +141,34 @@ public final class PythonPipProvider extends Provider {
                                 .filter(dep -> dep.getVersion().trim().equals("*"))
                                 .map(PackageURL::getCoordinates)
                                 .collect(Collectors.toSet());
-    // filter out by name only from sbom all exhortignore dependencies that their version will be resolved by pip.
+
+// filter out by name only from sbom all exhortignore dependencies that their version will be resolved by pip.
+    sbom.setBelongingCriteriaBinaryAlgorithm(Sbom.BelongingCondition.NAME);
     sbom.filterIgnoredDeps(ignoredDepsNoVersions);
-    // filter out by purl from sbom all exhortignore dependencies that their version hardcoded in requirements.txt
-    sbom.setBelongingCriteriaBinaryAlgorithm(Sbom.BelongingCondition.PURL);
-    sbom.filterIgnoredDeps(ignoredDepsVersions);
+    boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
+    // filter out by purl from sbom all exhortignore dependencies that their version hardcoded in requirements.txt - in case all versions in manifest matching installed versions of packages in environment.
+    if(matchManifestVersions)
+    {
+      sbom.setBelongingCriteriaBinaryAlgorithm(Sbom.BelongingCondition.PURL);
+      sbom.filterIgnoredDeps(ignoredDepsVersions);
+    }
+    else
+    {
+// in case version mismatch is possible (MATCH_MANIFEST_VERSIONS=false) , need to parse the name of package from the purl, and remove the package name from sbom according to name only
+      Set deps = (Set) ignoredDepsVersions.stream().map(purlString -> {
+        try {
+          return new PackageURL((String) purlString).getName();
+        } catch (MalformedPackageURLException e) {
+          throw new RuntimeException(e);
+        }
+      }).collect(Collectors.toSet());
+      sbom.setBelongingCriteriaBinaryAlgorithm(Sbom.BelongingCondition.NAME);
+      sbom.filterIgnoredDeps(deps);
+    }
+
+
+
+
   }
 
   private Set getIgnoredDependencies(String requirementsDeps) {

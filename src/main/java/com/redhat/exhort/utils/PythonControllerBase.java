@@ -343,7 +343,7 @@ public abstract class PythonControllerBase {
 
   }
 
-  private List getDepsList(String pipShowOutput) {
+  protected List getDepsList(String pipShowOutput) {
     int requiresKeyIndex = pipShowOutput.indexOf("Requires:");
     String requiresToken = pipShowOutput.substring(requiresKeyIndex + 9);
     int endOfLine = requiresToken.indexOf(System.lineSeparator());
@@ -357,14 +357,14 @@ public abstract class PythonControllerBase {
     return Arrays.stream(listOfDeps.split(",")).map(String::trim).filter(dep -> !dep.equals("")).collect(Collectors.toList());
   }
 
-  private String getDependencyVersion(String pipShowOutput) {
+  protected String getDependencyVersion(String pipShowOutput) {
     int versionKeyIndex = pipShowOutput.indexOf("Version:");
     String versionToken = pipShowOutput.substring(versionKeyIndex + 8);
     int endOfLine = versionToken.indexOf(System.lineSeparator());
     return versionToken.substring(0,endOfLine).trim();
   }
 
-  private String getDependencyNameShow(String pipShowOutput) {
+  protected String getDependencyNameShow(String pipShowOutput) {
     int versionKeyIndex = pipShowOutput.indexOf("Name:");
     String versionToken = pipShowOutput.substring(versionKeyIndex + 5);
     int endOfLine = versionToken.indexOf(System.lineSeparator());

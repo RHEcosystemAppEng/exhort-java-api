@@ -31,9 +31,12 @@ class PythonControllerBaseTest {
     assertEquals(EXPECTED_PIP_SHOW_RESULTS, results);
   }
 
+
+
   private static final String PIP_SHOW_LINES;
 
   static {
+
     PIP_SHOW_LINES = "Name: altgraph\n" +
       "Version: 0.17.2\n" +
       "Summary: Python graph (network) package\n" +

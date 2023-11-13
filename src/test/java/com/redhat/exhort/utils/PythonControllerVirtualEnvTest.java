@@ -67,4 +67,15 @@ class PythonControllerVirtualEnvTest {
 
 
   }
+
+  @Test
+  void isRealEnv() {
+
+    assertFalse(this.spiedPythonControllerVirtualEnv.isRealEnv());
+  }
+
+  @Test
+  void isVirtualEnv() {
+    assertTrue(this.spiedPythonControllerVirtualEnv.isVirtualEnv());
+  }
 }

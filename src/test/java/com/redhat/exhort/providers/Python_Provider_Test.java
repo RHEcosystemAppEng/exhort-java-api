@@ -16,6 +16,7 @@
 package com.redhat.exhort.providers;
 
 import com.redhat.exhort.Api;
+import com.redhat.exhort.ExhortTest;
 import com.redhat.exhort.utils.PythonControllerBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 @ExtendWith(PythonEnvironmentExtension.class)
-class Python_Provider_Test {
+class Python_Provider_Test extends ExhortTest {
 
   static Stream<String> testFolders() {
     return Stream.of(

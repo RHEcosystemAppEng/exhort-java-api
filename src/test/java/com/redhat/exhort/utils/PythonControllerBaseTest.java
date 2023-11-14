@@ -16,15 +16,45 @@
 
 package com.redhat.exhort.utils;
 
+import com.redhat.exhort.ExhortTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PythonControllerBaseTest {
+class PythonControllerBaseTest extends ExhortTest {
 
+  static ArgumentMatcher<String[]> matchCommandPipFreeze = new ArgumentMatcher<String[]>() {
+    @Override
+    public boolean matches(String[] command) {
+      return Arrays.stream(command).anyMatch(word -> word.contains("freeze"));
+    }
+    // in var args, must override type default method' void.class in argumentMatcher interface in order to let custom ArgumentMatcher work correctly.
+    @Override
+    public Class type()
+    {
+      return String[].class;
+    }
+
+  };
+
+  static ArgumentMatcher<String[]> matchCommandPipShow = new ArgumentMatcher<String[]>() {
+    @Override
+    public boolean matches(String[] command) {
+      return Arrays.stream(command).anyMatch(word -> word.contains("show"));
+    }
+
+    @Override
+    public Class type()
+    {
+      return String[].class;
+    }
+
+  };
   @Test
   void when_spliting_pip_show_dep_with_license() {
     List<String> results = PythonControllerBase.splitPipShowLines(PIP_SHOW_LINES);

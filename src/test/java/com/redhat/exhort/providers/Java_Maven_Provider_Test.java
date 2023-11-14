@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.redhat.exhort.ExhortTest;
 import com.redhat.exhort.tools.Operations;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(HelperExtension.class)
 @ExtendWith(MockitoExtension.class)
-class Java_Maven_Provider_Test {
+class Java_Maven_Provider_Test extends ExhortTest {
 //  private static System.Logger log = System.getLogger("Java_Maven_Provider_Test");
   // test folder are located at src/test/resources/tst_manifests
   // each folder should contain:

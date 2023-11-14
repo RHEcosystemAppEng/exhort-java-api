@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import com.redhat.exhort.ExhortTest;
 import com.redhat.exhort.tools.Operations;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,7 +34,7 @@ import com.redhat.exhort.Api;
 import org.mockito.*;
 
 @ExtendWith(HelperExtension.class)
-class Javascript_Npm_Provider_Test {
+class Javascript_Npm_Provider_Test extends ExhortTest {
   // test folder are located at src/test/resources/tst_manifests/npm
   // each folder should contain:
   // - package.json: the target manifest for testing

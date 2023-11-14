@@ -379,6 +379,8 @@ limitations under the License.]]>
           <configuration>
             <excludes>
               <exclude>com/redhat/exhort/api/*</exclude>
+              <exclude>com/redhat/exhort/api/serialization/*</exclude>
+              <exclude>com/redhat/exhort/exception/*</exclude>
 <!-- This one excluding ExhortApi implementation calss from coverage report as it's not tested by surefire plugin, but with junit-platform-maven-plugin              -->
               <exclude>com/redhat/exhort/impl/*</exclude>
 

@@ -77,7 +77,9 @@ public final class ExhortApi implements Api {
    * corresponding request headers.
    */
   private enum TokenProvider {
-    SNYK;
+    SNYK,
+    OSS_INDEX;
+
 
     /**
      * Get the expected environment variable name.
@@ -92,7 +94,7 @@ public final class ExhortApi implements Api {
      * @return i.e. ex-snyk-token
      */
     String getHeaderName() {
-      return String.format("ex-%s-token", this.toString().toLowerCase());
+      return String.format("ex-%s-token", this.toString().replace("_","-").toLowerCase());
     }
   }
 

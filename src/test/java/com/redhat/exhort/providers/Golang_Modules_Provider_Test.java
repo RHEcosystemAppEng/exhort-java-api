@@ -17,10 +17,12 @@ package com.redhat.exhort.providers;
 
 import com.redhat.exhort.Api;
 import com.redhat.exhort.ExhortTest;
+import com.redhat.exhort.sbom.Sbom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +30,8 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(HelperExtension.class)
 class Golang_Modules_Provider_Test extends ExhortTest {
   // test folder are located at src/test/resources/tst_manifests/npm
@@ -104,7 +108,33 @@ class Golang_Modules_Provider_Test extends ExhortTest {
 
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = { true,false })
+  void Test_Golang_Modules_with_Match_Manifest_Version(boolean MatchManifestVersionsEnabled) {
+    String goModPath = getFileFromResource("go.mod", "msc", "golang", "go.mod");
+    GoModulesProvider goModulesProvider = new GoModulesProvider();
+
+      if(MatchManifestVersionsEnabled)
+      {
+        System.setProperty("MATCH_MANIFEST_VERSIONS", "true");
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> goModulesProvider.getDependenciesSbom(Path.of(goModPath), true), "Expected getDependenciesSbom/2 to throw RuntimeException, due to version mismatch, but it didn't.");
+        assertTrue(runtimeException.getMessage().contains("Can't continue with analysis - versions mismatch for dependency name=github.com/google/uuid, manifest version=v1.1.0, installed Version=v1.1.1"));
+        System.clearProperty("MATCH_MANIFEST_VERSIONS");
+      }
+      else
+      {
+        String sbomString = assertDoesNotThrow(() -> goModulesProvider.getDependenciesSbom(Path.of(goModPath), false).getAsJsonString());
+        String actualSbomWithTSStripped = dropIgnoredKeepFormat(sbomString);
+        assertEquals(getStringFromFile("msc","golang","expected_sbom_ca.json").trim(), actualSbomWithTSStripped);
+        System.out.println(sbomString);
+      }
+  }
+
   private String dropIgnored(String s) {
     return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\",", "");
   }
+    private String dropIgnoredKeepFormat(String s) {
+    return s.replaceAll("\"timestamp\" : \"[a-zA-Z0-9\\-\\:]+\",\n    ", "");
+  }
+
 }

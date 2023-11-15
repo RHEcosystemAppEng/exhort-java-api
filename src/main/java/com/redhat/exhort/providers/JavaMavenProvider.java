@@ -47,6 +47,8 @@ import com.redhat.exhort.tools.Operations;
  * Component analysis.
  **/
 public final class JavaMavenProvider extends Provider {
+
+
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
     LocalDateTime start = LocalDateTime.now();
@@ -64,6 +66,8 @@ public final class JavaMavenProvider extends Provider {
   public JavaMavenProvider() {
     super(Type.MAVEN);
   }
+
+
 
   @Override
   public Content provideStack(final Path manifestPath) throws IOException {

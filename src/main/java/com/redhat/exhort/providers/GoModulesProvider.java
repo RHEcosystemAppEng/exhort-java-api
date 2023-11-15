@@ -158,7 +158,7 @@ public final class GoModulesProvider extends Provider {
 
 
 
-  private Sbom getDependenciesSbom(Path manifestPath, boolean buildTree) throws IOException {
+    Sbom getDependenciesSbom(Path manifestPath, boolean buildTree) throws IOException {
     var goModulesResult = buildGoModulesDependencies(manifestPath);
     calculateMainModuleVersion(manifestPath.getParent());
     Sbom sbom;
@@ -200,7 +200,7 @@ public final class GoModulesProvider extends Provider {
           String currentVersion = artifactParts[1];
           if(currentDepName.trim().equals(depName.trim()))
           {
-            if(currentVersion.trim().equals(version.trim()))
+            if(!currentVersion.trim().equals(version.trim()))
             {
               throw new RuntimeException(String.format("Can't continue with analysis - versions mismatch for dependency name=%s, manifest version=%s, installed Version=%s, if you want to allow version mismatch for analysis between installed and requested packages, set environment variable/setting - MATCH_MANIFEST_VERSIONS=false", depName, currentVersion, version));
             }
@@ -228,10 +228,10 @@ public final class GoModulesProvider extends Provider {
       int currentIndex = 0;
       while(currentIndex < endOfBlockIndex)
       {
-        int endOfLinePosition = depsInsideRequirementsBlock.indexOf(System.lineSeparator());
+        int endOfLinePosition = depsInsideRequirementsBlock.indexOf(System.lineSeparator(),currentIndex);
         String dependency = depsInsideRequirementsBlock.substring(currentIndex,endOfLinePosition).trim();
         result.add(dependency);
-        currentIndex = endOfBlockIndex + 1;
+        currentIndex = endOfLinePosition + 1;
       }
       currentSegmentOfGoMod = currentSegmentOfGoMod.substring(endOfBlockIndex + 1).trim();
       requirePosObject = decideRequireBlockIndex(currentSegmentOfGoMod);

@@ -89,12 +89,19 @@ public final class ExhortApi implements Api {
       return String.format("EXHORT_%s_TOKEN", this);
     }
 
+    String getUserVarName() {
+      return String.format("EXHORT_%s_USER", this);
+    }
     /**
      * Get the expected request header name.
      * @return i.e. ex-snyk-token
      */
     String getHeaderName() {
       return String.format("ex-%s-token", this.toString().replace("_","-").toLowerCase());
+    }
+
+    String getUserHeaderName() {
+      return String.format("ex-%s-user", this.toString().replace("_","-").toLowerCase());
     }
   }
 
@@ -344,6 +351,16 @@ public final class ExhortApi implements Api {
           request.setHeader(p.getHeaderName(), propToken);
         }
       }
+      var envUser = System.getenv(p.getUserHeaderName());
+      if (Objects.nonNull(envUser)) {
+        request.setHeader(p.getUserHeaderName(), envUser);
+      } else {
+        var propUser = System.getProperty(p.getUserVarName());
+        if (Objects.nonNull(propUser)) {
+          request.setHeader(p.getUserHeaderName(), propUser);
+        }
+      }
+
     });
     //set rhda-token
     // Environment variable/property name = RHDA_TOKEN

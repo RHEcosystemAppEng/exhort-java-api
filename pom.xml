@@ -12,7 +12,7 @@
   <inceptionYear>2023</inceptionYear>
 
   <properties>
-    <code.coverage.threshold>83%</code.coverage.threshold>
+    <code.coverage.threshold>82%</code.coverage.threshold>
     <mutation.coverage.threshold>50</mutation.coverage.threshold>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>

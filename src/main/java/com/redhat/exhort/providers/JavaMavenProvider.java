@@ -53,9 +53,9 @@ public final class JavaMavenProvider extends Provider {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
     LocalDateTime start = LocalDateTime.now();
     System.out.print(start);
-    Content content = javaMavenProvider.provideStack(Path.of("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/maven/pom_deps_with_no_ignore_common_paths/pom.xml"));
+    Content content = javaMavenProvider.provideStack(Path.of("/tmp/devfile-sample-java-springboot-basic/pom.xml"));
 
-//    PackageURL packageURL = javaMavenProvider.parseDep("pom-with-deps-no-ignore:pom-with-dependency-not-ignored-common-paths:jar:0.0.1");
+    PackageURL packageURL = javaMavenProvider.parseDep("pom-with-deps-no-ignore:pom-with-dependency-not-ignored-common-paths:jar:0.0.1");
 //    String report = new String(content.buffer);
     System.out.println(new String(content.buffer));
     LocalDateTime end = LocalDateTime.now();
@@ -193,6 +193,7 @@ public final class JavaMavenProvider extends Provider {
   public PackageURL parseDep(String dep) {
     //root package
     DependencyAggregator dependencyAggregator = new DependencyAggregator();
+    // in case line in dependency tree text starts with a letter ( for root artifact).
     if(dep.matches("^\\w.*"))
     {
       dependencyAggregator = new DependencyAggregator();
@@ -213,7 +214,7 @@ public final class JavaMavenProvider extends Provider {
      int endIndex = dependency.indexOf(":compile");
      dependency = dependency.substring(0,endIndex + 8);
     String[] parts = dependency.split(":");
-
+  // contains only GAV + packaging + scope
     if(parts.length == 5)
     {
       dependencyAggregator.groupId = parts[0];
@@ -224,13 +225,24 @@ public final class JavaMavenProvider extends Provider {
       {
         dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
       }
-      return dependencyAggregator.toPurl();
     }
-    else
+    // In case there are 6 parts, there is also a classifier for artifact (version suffix)
+    // contains GAV + packaging + classifier + scope
+    else if(parts.length == 6)
     {
+      dependencyAggregator.groupId = parts[0];
+      dependencyAggregator.artifactId= parts[1];
+      dependencyAggregator.version = String.format("%s-%s",parts[4],parts[3]);
+      String conflictMessage = "omitted for conflict with";
+      if (dep.contains(conflictMessage))
+      {
+        dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
+      }
+    }
+    else{
       throw new RuntimeException(String.format("Cannot parse dependency into PackageUrl from line = \"%s\"",dep));
     }
-
+    return dependencyAggregator.toPurl();
   }
 
   private PackageURL txtPkgToPurl(String dotPkg) {

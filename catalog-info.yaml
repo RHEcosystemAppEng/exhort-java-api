@@ -11,6 +11,8 @@ metadata:
     rhda/manifest-file-path: package.json
     backstage.io/techdocs-ref: url:https://github.com/RHEcosystemAppEng/exhort-java-api
   name: exhort-java-api
+  tags:
+    - rhda
 spec:
   lifecycle: production
   owner: ecosystem-appeng

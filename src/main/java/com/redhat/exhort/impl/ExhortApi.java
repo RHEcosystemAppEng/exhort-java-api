@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.api.AnalysisReport;
@@ -63,8 +64,9 @@ public final class ExhortApi implements Api {
      System.setProperty("EXHORT_DEV_MODE","true");
      AnalysisReport analysisReport = new ExhortApi()
 
-    .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_no_ignore/requirements.txt").get();
-    System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
+    .stackAnalysis("/tmp/071223/pom.xml").get();
+    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS,false);
+    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()
 //    byte[] analysisReport = new ExhortApi().
 //    stackAnalysisHtml("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_with_one_ignored_prefix_go/go.mod").get();

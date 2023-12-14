@@ -395,6 +395,34 @@ following keys for setting custom paths for the said executables.
 
 </table>
 
+#### Match Manifest Versions Feature
+
+##### Background
+
+In Python pip and in golang go modules package managers ( especially in Python pip) , There is a big chance that for a certain manifest and a given package inside it, the client machine environment has different version installed/resolved
+for that package, which can lead to perform the analysis on the installed packages' versions , instead on the declared versions ( in manifests - that is requirements.txt/go.mod ), and this
+can cause a confusion for the user in the client consuming the API and leads to inconsistent output ( in THE manifest there is version X For a given Package `A` , and in the analysis report there is another version for the same package `A` - Y).
+
+##### Usage
+
+To eliminate confusion and improve clarity as discussed above, the following setting was introduced - `MATCH_MANIFEST_VERSIONS`, in the form of environment variable/key in opts ( as usual , environment variable takes precedence )
+for two ecosystems:
+ - Golang - Go Modules
+ - Python - pip
+
+Two possible values for this setting:
+
+1. MATCH_MANIFEST_VERSIONS="false" - means that if installed/resolved versions of packages are different than the ones declared in the manifest, the process will ignore this difference and will continue to analysis with installed/resolved versions ( this is the original logic flow )
+<br>
+
+
+2. MATCH_MANIFEST_VERSIONS="true" - means that before starting the analysis,
+   the api will compare all the versions of packages in manifest against installed/resolved versions on client' environment, in case there is a difference, it will throw an error to the client/user with message containing the first encountered versions mismatch, including package name, and the versions difference, and will suggest to set setting `MATCH_MANIFEST_VERSIONS`="false" to ignore all differences
+
+
+
+
+
 ####  Python Support
 
 By default, Python support assumes that the package is installed using the pip/pip3 binary on the system PATH, or of the customized
@@ -404,7 +432,15 @@ There is an experimental feature of installing the requirement.txt on a virtual 
 it's important to pass in a path to python3 binary as `EXHORT_PYTHON3_PATH` or instead make sure that python3 is on the system path.
 in such case, You can use that feature by setting environment variable `EXHORT_PYTHON_VIRTUAL_ENV` to true 
 
+##### "Best Efforts Installation"
+Since Python pip packages are very sensitive/picky regarding python version changes( every small range of versions is only tailored for a certain python version), I'm introducing this feature, that
+tries to install all packages in requirements.txt onto created virtual environment while **disregarding** versions declared for packages in requirements.txt
+This increasing the chances and the probability a lot that the automatic installation will succeed.
 
+##### Usage
+A New setting is introduced - `EXHORT_PYTHON_INSTALL_BEST_EFFORTS` (as both env variable/key in `options` object)
+1. `EXHORT_PYTHON_INSTALL_BEST_EFFORTS`="false" - install requirements.txt while respecting declared versions for all packages.
+2. `EXHORT_PYTHON_INSTALL_BEST_EFFORTS`="true" - install all packages from requirements.txt, not respecting the declared version, but trying to install a version tailored for the used python version, when using this setting,you must set setting `MATCH_MANIFEST_VERSIONS`="false"
 
 <!-- Badge links -->
 [0]: https://img.shields.io/github/v/release/RHEcosystemAppEng/exhort-java-api?color=green&label=latest

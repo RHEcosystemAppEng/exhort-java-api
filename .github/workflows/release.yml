@@ -85,7 +85,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     name: Release
-    if: github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')
+    if: (github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')) || (github.repository_owner == 'RHEcosystemAppEng' && github.ref_name == 'main' && contains(github.event.commits[0].message, 'release/directly'))
     environment: staging
     needs: deploy
     steps:

@@ -19,7 +19,7 @@ jobs:
     name: Deploy release
     environment: staging
 #     only trigger the workflow on the base repository and if the merged branch name starts with release.
-    if: (github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')) || ( github.ref == 'main' && contains(github.event.commits[0].message, 'release/directly'))
+    if: (github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')) || (github.repository_owner == 'RHEcosystemAppEng' && github.ref_name == 'main' && contains(github.event.commits[0].message, 'release/directly'))
     outputs:
       project_version: ${{ steps.project.outputs.version }}
       last_release_tag: ${{ steps.last-release.outputs.tag-name }}

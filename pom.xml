@@ -5,7 +5,7 @@
 
   <groupId>com.redhat.exhort</groupId>
   <artifactId>exhort-java-api</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.0.4</version>
   <name>Exhort Java API</name>
   <description>Exhort Java API</description>
   <url>https://github.com/RHEcosystemAppEng/exhort-java-api#readme</url>
@@ -84,7 +84,7 @@
     <url>https://github.com/RHEcosystemAppEng/exhort-java-api</url>
     <connection>scm:git:git@github.com:RHEcosystemAppEng/exhort-java-api.git</connection>
     <developerConnection>scm:git:git@github.com:RHEcosystemAppEng/exhort-java-api.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v0.0.4</tag>
   </scm>
 
   <ciManagement>

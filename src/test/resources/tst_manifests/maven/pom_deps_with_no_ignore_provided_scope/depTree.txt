@@ -1,0 +1,576 @@
+org.acme.dbaas:postgresql-orm-quarkus:jar:1.0.0-SNAPSHOT
++- io.quarkus:quarkus-hibernate-orm:jar:2.13.5.Final:compile
+|  +- io.quarkus:quarkus-core:jar:2.13.5.Final:compile
+|  |  +- jakarta.annotation:jakarta.annotation-api:jar:1.3.5:compile
+|  |  +- jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:compile
+|  |  |  +- jakarta.el:jakarta.el-api:jar:3.0.3:compile
+|  |  |  +- jakarta.interceptor:jakarta.interceptor-api:jar:1.2.5:compile
+|  |  |  |  +- (jakarta.annotation:jakarta.annotation-api:jar:1.3.5:compile - omitted for duplicate)
+|  |  |  |  \- jakarta.ejb:jakarta.ejb-api:jar:3.2.6:compile
+|  |  |  |     \- (jakarta.transaction:jakarta.transaction-api:jar:1.3.2:compile - omitted for conflict with 1.3.3)
+|  |  |  \- (jakarta.inject:jakarta.inject-api:jar:1.0:compile - omitted for duplicate)
+|  |  +- jakarta.inject:jakarta.inject-api:jar:1.0:compile
+|  |  +- io.quarkus:quarkus-ide-launcher:jar:2.13.5.Final:compile
+|  |  +- io.quarkus:quarkus-development-mode-spi:jar:2.13.5.Final:compile
+|  |  +- io.smallrye.config:smallrye-config:jar:2.12.0:compile
+|  |  |  +- io.smallrye.config:smallrye-config-core:jar:2.12.0:compile
+|  |  |  |  +- org.eclipse.microprofile.config:microprofile-config-api:jar:2.0.1:compile
+|  |  |  |  +- (io.smallrye.common:smallrye-common-annotation:jar:1.13.1:compile - omitted for duplicate)
+|  |  |  |  +- io.smallrye.common:smallrye-common-expression:jar:1.13.1:compile
+|  |  |  |  |  +- io.smallrye.common:smallrye-common-function:jar:1.13.1:compile
+|  |  |  |  |  |  \- (io.smallrye.common:smallrye-common-constraint:jar:1.13.1:compile - omitted for duplicate)
+|  |  |  |  |  \- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  |  |  +- (io.smallrye.common:smallrye-common-constraint:jar:1.13.1:compile - omitted for duplicate)
+|  |  |  |  +- io.smallrye.common:smallrye-common-classloader:jar:1.13.1:compile
+|  |  |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  |  |  +- (org.ow2.asm:asm:jar:9.3:compile - omitted for conflict with 9.1)
+|  |  |  |  \- io.smallrye.config:smallrye-config-common:jar:2.12.0:compile
+|  |  |  |     +- (org.eclipse.microprofile.config:microprofile-config-api:jar:2.0.1:compile - omitted for duplicate)
+|  |  |  |     +- (io.smallrye.common:smallrye-common-classloader:jar:1.13.1:compile - omitted for duplicate)
+|  |  |  |     \- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  |  \- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  +- org.jboss.logging:jboss-logging:jar:3.5.0.Final:compile
+|  |  +- org.jboss.logmanager:jboss-logmanager-embedded:jar:1.0.10:compile
+|  |  |  \- (org.wildfly.common:wildfly-common:jar:1.5.0.Final-format-001:compile - omitted for conflict with 1.5.4.Final-format-001)
+|  |  +- org.jboss.logging:jboss-logging-annotations:jar:2.2.1.Final:compile
+|  |  +- org.jboss.threads:jboss-threads:jar:3.4.3.Final:compile
+|  |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.1.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  |  \- (org.wildfly.common:wildfly-common:jar:1.5.0.Final:compile - omitted for conflict with 1.5.4.Final-format-001)
+|  |  +- org.slf4j:slf4j-api:jar:1.7.36:compile
+|  |  +- org.jboss.slf4j:slf4j-jboss-logmanager:jar:1.2.0.Final:compile
+|  |  +- org.graalvm.sdk:graal-sdk:jar:22.3.0:compile
+|  |  +- org.wildfly.common:wildfly-common:jar:1.5.4.Final-format-001:compile
+|  |  +- io.quarkus:quarkus-bootstrap-runner:jar:2.13.5.Final:compile
+|  |  |  +- io.smallrye.common:smallrye-common-io:jar:1.13.1:compile
+|  |  |  +- (org.jboss.logmanager:jboss-logmanager-embedded:jar:1.0.10:compile - omitted for duplicate)
+|  |  |  +- (org.jboss.logging:jboss-logging:jar:3.5.0.Final:compile - omitted for duplicate)
+|  |  |  \- (io.github.crac:org-crac:jar:0.1.1:compile - omitted for duplicate)
+|  |  \- io.quarkus:quarkus-fs-util:jar:0.0.9:compile
+|  +- (io.quarkus:quarkus-agroal:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- io.quarkus:quarkus-narayana-jta:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- io.quarkus:quarkus-transaction-annotations:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-mutiny:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- io.smallrye:smallrye-context-propagation-jta:jar:1.2.2:compile
+|  |  |  \- (org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.2:compile - omitted for duplicate)
+|  |  +- (jakarta.transaction:jakarta.transaction-api:jar:1.3.3:compile - omitted for duplicate)
+|  |  +- io.smallrye.reactive:smallrye-reactive-converter-api:jar:2.7.0:compile
+|  |  |  \- org.reactivestreams:reactive-streams:jar:1.0.3:compile
+|  |  +- io.smallrye.reactive:smallrye-reactive-converter-mutiny:jar:2.7.0:compile
+|  |  |  +- (io.smallrye.reactive:mutiny:jar:1.4.0:compile - omitted for conflict with 1.7.0)
+|  |  |  \- (io.smallrye.reactive:smallrye-reactive-converter-api:jar:2.7.0:compile - omitted for duplicate)
+|  |  +- org.jboss.narayana.jta:narayana-jta:jar:5.13.1.Alpha1:compile
+|  |  |  +- (org.jboss:jboss-transaction-spi:jar:7.6.1.Final:compile - omitted for duplicate)
+|  |  |  \- org.jboss.spec.javax.resource:jboss-connector-api_1.7_spec:jar:1.0.0.Final:compile
+|  |  \- org.jboss.narayana.jts:narayana-jts-integration:jar:5.13.1.Alpha1:compile
+|  +- org.hibernate:hibernate-core:jar:5.6.14.Final:compile
+|  |  +- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  +- net.bytebuddy:byte-buddy:jar:1.12.18:compile
+|  |  +- antlr:antlr:jar:2.7.7:compile
+|  |  +- com.fasterxml:classmate:jar:1.5.1:compile
+|  |  \- org.hibernate.common:hibernate-commons-annotations:jar:5.1.2.Final:compile
+|  |     \- (org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile - omitted for conflict with 3.5.0.Final)
+|  +- org.hibernate:hibernate-graalvm:jar:5.6.14.Final:compile
+|  |  \- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  +- org.glassfish.jaxb:jaxb-runtime:jar:2.3.3-b02:compile
+|  |  +- org.glassfish.jaxb:txw2:jar:2.3.3-b02:compile
+|  |  +- com.sun.istack:istack-commons-runtime:jar:3.0.10:compile
+|  |  \- com.sun.activation:jakarta.activation:jar:1.2.1:compile
+|  +- org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:jar:2.0.0.Final:compile
+|  +- jakarta.persistence:jakarta.persistence-api:jar:2.2.3:compile
+|  +- jakarta.transaction:jakarta.transaction-api:jar:1.3.3:compile
+|  +- org.hibernate:quarkus-local-cache:jar:0.1.1:compile
+|  \- io.quarkus:quarkus-caffeine:jar:2.13.5.Final:compile
+|     +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|     \- com.github.ben-manes.caffeine:caffeine:jar:2.9.3:compile
+|        \- com.google.errorprone:error_prone_annotations:jar:2.10.0:compile
++- io.quarkus:quarkus-agroal:jar:2.13.5.Final:compile
+|  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- io.quarkus:quarkus-arc:jar:2.13.5.Final:compile
+|  |  +- io.quarkus.arc:arc:jar:2.13.5.Final:compile
+|  |  |  +- (jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:compile - omitted for duplicate)
+|  |  |  +- (jakarta.annotation:jakarta.annotation-api:jar:1.3.5:compile - omitted for duplicate)
+|  |  |  +- (jakarta.transaction:jakarta.transaction-api:jar:1.3.3:compile - omitted for duplicate)
+|  |  |  +- (io.smallrye.reactive:mutiny:jar:1.6.0:compile - omitted for conflict with 1.7.0)
+|  |  |  \- (org.jboss.logging:jboss-logging:jar:3.5.0.Final:compile - omitted for duplicate)
+|  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  \- org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.2:compile
+|  +- io.quarkus:quarkus-datasource:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- io.quarkus:quarkus-datasource-common:jar:2.13.5.Final:compile
+|  |  \- (io.quarkus:quarkus-credentials:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- (io.quarkus:quarkus-narayana-jta:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- io.agroal:agroal-api:jar:1.16:compile
+|  +- io.agroal:agroal-narayana:jar:1.16:compile
+|  |  +- (io.agroal:agroal-api:jar:1.16:compile - omitted for duplicate)
+|  |  \- org.jboss:jboss-transaction-spi:jar:7.6.1.Final:compile
+|  |     \- (org.jboss.spec.javax.resource:jboss-connector-api_1.7_spec:jar:1.0.0.Final:compile - omitted for duplicate)
+|  +- io.agroal:agroal-pool:jar:1.16:compile
+|  |  \- (io.agroal:agroal-api:jar:1.16:compile - omitted for duplicate)
+|  \- io.quarkus:quarkus-credentials:jar:2.13.5.Final:compile
+|     \- (io.quarkus.arc:arc:jar:2.13.5.Final:compile - omitted for duplicate)
++- io.quarkus:quarkus-resteasy:jar:2.13.5.Final:compile
+|  +- (io.quarkus:quarkus-vertx-http:jar:2.13.5.Final:compile - omitted for duplicate)
+|  \- io.quarkus:quarkus-resteasy-server-common:jar:2.13.5.Final:compile
+|     +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|     +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|     +- io.quarkus:quarkus-resteasy-common:jar:2.13.5.Final:compile
+|     |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|     |  +- org.jboss.resteasy:resteasy-core:jar:4.7.7.Final:compile
+|     |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:compile - omitted for conflict with 3.5.0.Final)
+|     |  |  +- org.jboss.spec.javax.annotation:jboss-annotations-api_1.3_spec:jar:2.0.1.Final:compile
+|     |  |  +- org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec:jar:2.0.1.Final:compile
+|     |  |  +- (org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:jar:2.0.0.Final:compile - omitted for duplicate)
+|     |  |  +- org.jboss.resteasy:resteasy-core-spi:jar:4.7.7.Final:compile
+|     |  |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:compile - omitted for conflict with 3.5.0.Final)
+|     |  |  |  +- (org.jboss.spec.javax.annotation:jboss-annotations-api_1.3_spec:jar:2.0.1.Final:compile - omitted for duplicate)
+|     |  |  |  +- (org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec:jar:2.0.1.Final:compile - omitted for duplicate)
+|     |  |  |  +- (org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:jar:2.0.0.Final:compile - omitted for duplicate)
+|     |  |  |  +- (org.reactivestreams:reactive-streams:jar:1.0.3:compile - omitted for duplicate)
+|     |  |  |  \- (jakarta.validation:jakarta.validation-api:jar:2.0.2:compile - omitted for duplicate)
+|     |  |  +- (org.reactivestreams:reactive-streams:jar:1.0.3:compile - omitted for duplicate)
+|     |  |  +- (jakarta.validation:jakarta.validation-api:jar:2.0.2:compile - omitted for duplicate)
+|     |  |  +- com.ibm.async:asyncutil:jar:0.1.0:compile
+|     |  |  \- (io.smallrye.config:smallrye-config:jar:2.3.0:compile - omitted for conflict with 2.12.0)
+|     |  +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|     |  \- (com.sun.activation:jakarta.activation:jar:1.2.1:compile - omitted for duplicate)
+|     \- (jakarta.validation:jakarta.validation-api:jar:2.0.2:compile - omitted for duplicate)
++- io.quarkus:quarkus-resteasy-jackson:jar:2.13.5.Final:compile
+|  +- (io.quarkus:quarkus-resteasy:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- io.quarkus:quarkus-jackson:jar:2.13.5.Final:compile
+|  |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.13.4.2:compile
+|  |  |  +- (com.fasterxml.jackson.core:jackson-annotations:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  |  \- (com.fasterxml.jackson.core:jackson-core:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.13.4:compile
+|  |  |  +- (com.fasterxml.jackson.core:jackson-annotations:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  |  +- (com.fasterxml.jackson.core:jackson-core:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  |  \- (com.fasterxml.jackson.core:jackson-databind:jar:2.13.4:compile - omitted for conflict with 2.13.4.2)
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.13.4:compile
+|  |  |  +- (com.fasterxml.jackson.core:jackson-core:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  |  \- (com.fasterxml.jackson.core:jackson-databind:jar:2.13.4:compile - omitted for conflict with 2.13.4.2)
+|  |  +- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.13.4:compile
+|  |  |  +- (com.fasterxml.jackson.core:jackson-core:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  |  \- (com.fasterxml.jackson.core:jackson-databind:jar:2.13.4:compile - omitted for conflict with 2.13.4.2)
+|  |  \- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- org.jboss.resteasy:resteasy-jackson2-provider:jar:4.7.7.Final:compile
+|  |  +- com.fasterxml.jackson.core:jackson-core:jar:2.12.6:compile
+|  |  +- (com.fasterxml.jackson.core:jackson-databind:jar:2.12.6.1:compile - omitted for conflict with 2.13.4.2)
+|  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.12.6:compile
+|  |  +- com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:jar:2.12.6:compile
+|  |  |  +- com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:jar:2.12.6:compile
+|  |  |  |  +- (com.fasterxml.jackson.core:jackson-core:jar:2.12.6:compile - omitted for duplicate)
+|  |  |  |  \- (com.fasterxml.jackson.core:jackson-databind:jar:2.12.6:compile - omitted for conflict with 2.13.4.2)
+|  |  |  \- com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jar:2.12.6:compile
+|  |  |     +- (com.fasterxml.jackson.core:jackson-annotations:jar:2.12.6:compile - omitted for duplicate)
+|  |  |     +- (com.fasterxml.jackson.core:jackson-core:jar:2.12.6:compile - omitted for duplicate)
+|  |  |     \- (com.fasterxml.jackson.core:jackson-databind:jar:2.12.6:compile - omitted for conflict with 2.13.4.2)
+|  |  +- com.github.java-json-tools:json-patch:jar:1.13:compile
+|  |  |  +- (com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:compile - omitted for conflict with 2.13.4.2)
+|  |  |  +- com.github.java-json-tools:msg-simple:jar:1.2:compile (scope not updated to compile)
+|  |  |  |  \- com.github.java-json-tools:btf:jar:1.3:compile
+|  |  |  \- com.github.java-json-tools:jackson-coreutils:jar:2.0:compile
+|  |  |     +- (com.fasterxml.jackson.core:jackson-databind:jar:2.11.0:runtime - omitted for conflict with 2.13.4.2)
+|  |  |     \- (com.github.java-json-tools:msg-simple:jar:1.2:runtime - omitted for duplicate)
+|  |  \- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:compile - omitted for conflict with 3.5.0.Final)
+|  \- (org.jboss.spec.javax.xml.bind:jboss-jaxb-api_2.3_spec:jar:2.0.0.Final:compile - omitted for duplicate)
++- io.quarkus:quarkus-jdbc-postgresql:jar:2.13.5.Final:compile
+|  +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  \- org.postgresql:postgresql:jar:42.5.0:compile
++- io.quarkus:quarkus-kubernetes-service-binding:jar:2.13.5.Final:compile
+|  \- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
++- io.quarkus:quarkus-container-image-docker:jar:2.13.5.Final:compile
+|  \- io.quarkus:quarkus-container-image:jar:2.13.5.Final:compile
+|     \- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
++- jakarta.validation:jakarta.validation-api:jar:2.0.2:compile
++- io.quarkus:quarkus-vertx-http:jar:2.13.5.Final:compile
+|  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- io.quarkus:quarkus-security-runtime-spi:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  \- (io.quarkus.security:quarkus-security:jar:1.1.4.Final:compile - omitted for duplicate)
+|  +- (io.quarkus:quarkus-credentials:jar:2.13.5.Final:compile - omitted for duplicate)
+|  +- io.quarkus:quarkus-mutiny:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- io.smallrye.reactive:mutiny:jar:1.7.0:compile
+|  |  |  +- (org.reactivestreams:reactive-streams:jar:1.0.3:compile - omitted for duplicate)
+|  |  |  \- (io.smallrye.common:smallrye-common-annotation:jar:1.13.0:compile - omitted for conflict with 1.13.1)
+|  |  +- io.quarkus:quarkus-smallrye-context-propagation:jar:2.13.5.Final:compile
+|  |  |  +- io.smallrye:smallrye-context-propagation:jar:1.2.2:compile
+|  |  |  |  +- (org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.2:compile - omitted for duplicate)
+|  |  |  |  +- io.smallrye:smallrye-context-propagation-api:jar:1.2.2:compile
+|  |  |  |  |  +- (org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.2:compile - omitted for duplicate)
+|  |  |  |  |  \- (jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:compile - omitted for duplicate)
+|  |  |  |  +- io.smallrye:smallrye-context-propagation-storage:jar:1.2.2:compile
+|  |  |  |  +- (org.eclipse.microprofile.config:microprofile-config-api:jar:1.4:compile - omitted for conflict with 2.0.1)
+|  |  |  |  \- (org.jboss.threads:jboss-threads:jar:3.1.1.Final:compile - omitted for conflict with 3.4.3.Final)
+|  |  |  +- (jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:compile - omitted for duplicate)
+|  |  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  |  \- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  \- io.smallrye.reactive:mutiny-smallrye-context-propagation:jar:1.7.0:compile
+|  |     +- (org.eclipse.microprofile.context-propagation:microprofile-context-propagation-api:jar:1.3:compile - omitted for conflict with 1.2)
+|  |     +- (io.smallrye.reactive:mutiny:jar:1.7.0:compile - omitted for duplicate)
+|  |     \- (io.smallrye:smallrye-context-propagation:jar:1.2.2:compile - omitted for duplicate)
+|  +- io.smallrye.common:smallrye-common-vertx-context:jar:1.13.1:compile
+|  |  +- io.vertx:vertx-core:jar:4.3.3:compile
+|  |  |  +- io.netty:netty-common:jar:4.1.78.Final:compile
+|  |  |  +- io.netty:netty-buffer:jar:4.1.78.Final:compile
+|  |  |  |  \- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  +- io.netty:netty-transport:jar:4.1.78.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  \- (io.netty:netty-resolver:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  +- io.netty:netty-handler:jar:4.1.78.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-resolver:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- io.netty:netty-transport-native-unix-common:jar:4.1.78.Final:compile
+|  |  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  \- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  \- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  +- io.netty:netty-handler-proxy:jar:4.1.78.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  |  +- io.netty:netty-codec-socks:jar:4.1.78.Final:compile
+|  |  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  \- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  |  \- (io.netty:netty-codec-http:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  +- io.netty:netty-codec-http:jar:4.1.78.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  |  \- (io.netty:netty-handler:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  +- io.netty:netty-codec-http2:jar:4.1.78.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  |  +- (io.netty:netty-handler:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  \- (io.netty:netty-codec-http:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  +- io.netty:netty-resolver:jar:4.1.78.Final:compile
+|  |  |  |  \- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  +- io.netty:netty-resolver-dns:jar:4.1.78.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-resolver:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  +- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  |  +- io.netty:netty-codec-dns:jar:4.1.78.Final:compile
+|  |  |  |  |  +- (io.netty:netty-common:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  +- (io.netty:netty-buffer:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  +- (io.netty:netty-transport:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  |  |  \- (io.netty:netty-codec:jar:4.1.78.Final:compile - omitted for conflict with 4.1.82.Final)
+|  |  |  |  \- (io.netty:netty-handler:jar:4.1.78.Final:compile - omitted for duplicate)
+|  |  |  \- (com.fasterxml.jackson.core:jackson-core:jar:2.13.2:compile - omitted for conflict with 2.12.6)
+|  |  \- io.smallrye.common:smallrye-common-constraint:jar:1.13.1:compile
+|  |     \- (org.jboss.logging:jboss-logging:jar:3.4.3.Final:compile - omitted for conflict with 3.5.0.Final)
+|  +- io.quarkus:quarkus-vertx-http-dev-console-runtime-spi:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-core:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- (io.quarkus.arc:arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  \- (io.vertx:vertx-web:jar:4.3.4:compile - omitted for duplicate)
+|  +- io.quarkus.security:quarkus-security:jar:1.1.4.Final:compile
+|  |  +- (org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile - omitted for conflict with 3.5.0.Final)
+|  |  \- (io.smallrye.reactive:mutiny:jar:0.4.3:compile - omitted for conflict with 1.7.0)
+|  +- io.quarkus:quarkus-vertx:jar:2.13.5.Final:compile
+|  |  +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- io.quarkus:quarkus-netty:jar:2.13.5.Final:compile
+|  |  |  +- io.netty:netty-codec:jar:4.1.82.Final:compile
+|  |  |  |  +- (io.netty:netty-common:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  |  +- (io.netty:netty-buffer:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  |  \- (io.netty:netty-transport:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  +- (io.netty:netty-codec-http:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  +- (io.netty:netty-codec-http2:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  +- (io.quarkus:quarkus-arc:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  |  +- (io.netty:netty-handler:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  +- (jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:compile - omitted for duplicate)
+|  |  |  \- com.aayushatharva.brotli4j:brotli4j:jar:1.7.1:compile
+|  |  |     \- com.aayushatharva.brotli4j:native-linux-x86_64:jar:1.7.1:compile
+|  |  +- io.netty:netty-codec-haproxy:jar:4.1.82.Final:compile
+|  |  |  +- (io.netty:netty-buffer:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  +- (io.netty:netty-transport:jar:4.1.82.Final:compile - omitted for conflict with 4.1.78.Final)
+|  |  |  \- (io.netty:netty-codec:jar:4.1.82.Final:compile - omitted for duplicate)
+|  |  +- io.smallrye.common:smallrye-common-annotation:jar:1.13.1:compile
+|  |  +- (io.smallrye.common:smallrye-common-vertx-context:jar:1.13.1:compile - omitted for duplicate)
+|  |  +- (io.quarkus:quarkus-mutiny:jar:2.13.5.Final:compile - omitted for duplicate)
+|  |  +- io.quarkus:quarkus-vertx-latebound-mdc-provider:jar:2.13.5.Final:compile
+|  |  |  \- (org.jboss.logmanager:jboss-logmanager-embedded:jar:1.0.10:compile - omitted for duplicate)
+|  |  +- io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:2.27.0:compile
+|  |  |  +- (io.smallrye.reactive:mutiny:jar:1.7.0:compile - omitted for duplicate)
+|  |  |  +- io.smallrye.reactive:smallrye-mutiny-vertx-runtime:jar:2.27.0:compile
+|  |  |  |  +- (io.smallrye.reactive:mutiny:jar:1.7.0:compile - omitted for duplicate)
+|  |  |  |  \- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  |  |  +- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  |  |  \- io.smallrye.reactive:vertx-mutiny-generator:jar:2.27.0:compile
+|  |  |     +- (io.smallrye.reactive:smallrye-mutiny-vertx-runtime:jar:2.27.0:compile - omitted for duplicate)
+|  |  |     +- io.vertx:vertx-codegen:jar:4.3.4:compile
+|  |  |     |  \- (com.fasterxml.jackson.core:jackson-core:jar:2.13.4:compile - omitted for conflict with 2.12.6)
+|  |  |     \- (io.smallrye.common:smallrye-common-annotation:jar:1.13.0:compile - omitted for conflict with 1.13.1)
+|  |  \- io.smallrye:smallrye-fault-tolerance-vertx:jar:5.5.0:compile
+|  +- io.smallrye.reactive:smallrye-mutiny-vertx-web:jar:2.27.0:compile
+|  |  +- (io.vertx:vertx-web:jar:4.3.4:compile - omitted for duplicate)
+|  |  +- (io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:2.27.0:compile - omitted for duplicate)
+|  |  +- io.smallrye.reactive:smallrye-mutiny-vertx-web-common:jar:2.27.0:compile
+|  |  |  +- (io.vertx:vertx-web-common:jar:4.3.4:compile - omitted for duplicate)
+|  |  |  \- (io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:2.27.0:compile - omitted for duplicate)
+|  |  +- io.smallrye.reactive:smallrye-mutiny-vertx-auth-common:jar:2.27.0:compile
+|  |  |  +- (io.vertx:vertx-auth-common:jar:4.3.4:compile - omitted for duplicate)
+|  |  |  \- (io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:2.27.0:compile - omitted for duplicate)
+|  |  +- io.smallrye.reactive:smallrye-mutiny-vertx-bridge-common:jar:2.27.0:compile
+|  |  |  +- (io.vertx:vertx-bridge-common:jar:4.3.4:compile - omitted for duplicate)
+|  |  |  \- (io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:2.27.0:compile - omitted for duplicate)
+|  |  \- io.smallrye.reactive:smallrye-mutiny-vertx-uri-template:jar:2.27.0:compile
+|  |     +- io.vertx:vertx-uri-template:jar:4.3.4:compile
+|  |     |  \- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  |     \- (io.smallrye.reactive:smallrye-mutiny-vertx-core:jar:2.27.0:compile - omitted for duplicate)
+|  +- io.vertx:vertx-web:jar:4.3.4:compile
+|  |  +- io.vertx:vertx-web-common:jar:4.3.4:compile
+|  |  |  \- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  |  +- io.vertx:vertx-auth-common:jar:4.3.4:compile
+|  |  |  \- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  |  +- io.vertx:vertx-bridge-common:jar:4.3.4:compile
+|  |  |  \- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  |  \- (io.vertx:vertx-core:jar:4.3.4:compile - omitted for conflict with 4.3.3)
+|  \- io.github.crac:org-crac:jar:0.1.1:compile
+\- io.quarkus:quarkus-hibernate-orm-deployment:jar:2.0.2.Final:provided
+   +- io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided
+   |  +- org.aesh:readline:jar:2.1:provided
+   |  |  \- org.fusesource.jansi:jansi:jar:1.18:provided
+   |  +- org.apache.commons:commons-lang3:jar:3.12.0:provided
+   |  +- (org.wildfly.common:wildfly-common:jar:1.5.4.Final-format-001:provided - omitted for duplicate)
+   |  +- io.quarkus.gizmo:gizmo:jar:1.0.9.Final:provided
+   |  |  +- (org.ow2.asm:asm:jar:9.1:provided - omitted for duplicate)
+   |  |  +- org.ow2.asm:asm-util:jar:9.1:provided
+   |  |  |  +- (org.ow2.asm:asm:jar:9.1:provided - omitted for duplicate)
+   |  |  |  +- org.ow2.asm:asm-tree:jar:9.1:provided
+   |  |  |  |  \- (org.ow2.asm:asm:jar:9.1:provided - omitted for duplicate)
+   |  |  |  \- org.ow2.asm:asm-analysis:jar:9.1:provided
+   |  |  |     \- (org.ow2.asm:asm-tree:jar:9.1:provided - omitted for duplicate)
+   |  |  \- (org.jboss:jandex:jar:2.3.0.Final:provided - omitted for duplicate)
+   |  +- org.jboss:jandex:jar:2.3.0.Final:provided
+   |  +- org.ow2.asm:asm:jar:9.1:compile
+   |  +- (io.quarkus:quarkus-development-mode-spi:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  +- io.quarkus:quarkus-class-change-agent:jar:2.0.2.Final:provided
+   |  +- io.quarkus:quarkus-bootstrap-core:jar:2.0.2.Final:provided
+   |  |  +- io.quarkus:quarkus-bootstrap-app-model:jar:2.0.2.Final:provided
+   |  |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:provided - omitted for conflict with 3.5.0.Final)
+   |  |  |  \- org.jboss.logging:commons-logging-jboss-logging:jar:1.0.0.Final:provided
+   |  |  |     \- (org.jboss.logging:jboss-logging:jar:3.3.1.Final:provided - omitted for conflict with 3.5.0.Final)
+   |  |  +- io.quarkus:quarkus-bootstrap-maven-resolver:jar:2.0.2.Final:provided
+   |  |  |  +- (io.quarkus:quarkus-bootstrap-app-model:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  |  +- (org.jboss.logmanager:jboss-logmanager-embedded:jar:1.0.9:provided - omitted for conflict with 1.0.10)
+   |  |  |  +- (org.jboss.slf4j:slf4j-jboss-logmanager:jar:1.1.0.Final:provided - omitted for conflict with 1.2.0.Final)
+   |  |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:provided - omitted for conflict with 3.5.0.Final)
+   |  |  |  +- (org.slf4j:slf4j-api:jar:1.7.30:provided - omitted for conflict with 1.7.36)
+   |  |  |  +- org.apache.maven:maven-embedder:jar:3.8.1:provided
+   |  |  |  |  +- org.apache.maven:maven-settings:jar:3.8.1:provided
+   |  |  |  |  |  \- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven:maven-settings-builder:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven:maven-core:jar:3.8.1:provided
+   |  |  |  |  |  +- (org.apache.maven:maven-model:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-settings:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-settings-builder:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-builder-support:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-repository-metadata:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- org.apache.maven:maven-artifact:jar:3.8.1:provided
+   |  |  |  |  |  |  +- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  |  |  \- (org.apache.commons:commons-lang3:jar:3.8.1:provided - omitted for conflict with 3.12.0)
+   |  |  |  |  |  +- (org.apache.maven:maven-plugin-api:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-model-builder:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-resolver-provider:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-impl:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-spi:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-util:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.shared:maven-shared-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.3.4:provided - omitted for duplicate)
+   |  |  |  |  |  +- (com.google.inject:guice:jar:no_aop:4.2.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.codehaus.plexus:plexus-classworlds:jar:2.6.0:provided - omitted for duplicate)
+   |  |  |  |  |  +- org.codehaus.plexus:plexus-component-annotations:jar:2.1.0:provided
+   |  |  |  |  |  \- (org.apache.commons:commons-lang3:jar:3.8.1:provided - omitted for conflict with 3.12.0)
+   |  |  |  |  +- org.apache.maven:maven-plugin-api:jar:3.8.1:provided
+   |  |  |  |  |  +- (org.apache.maven:maven-model:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-artifact:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.3.4:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  |  \- (org.codehaus.plexus:plexus-classworlds:jar:2.6.0:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven:maven-model:jar:3.8.1:provided
+   |  |  |  |  |  \- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven:maven-model-builder:jar:3.8.1:provided
+   |  |  |  |  |  +- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.codehaus.plexus:plexus-interpolation:jar:1.25:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-model:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven:maven-artifact:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  |  \- (org.apache.maven:maven-builder-support:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven:maven-builder-support:jar:3.8.1:provided
+   |  |  |  |  +- org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided
+   |  |  |  |  +- org.apache.maven.resolver:maven-resolver-util:jar:1.6.2:provided
+   |  |  |  |  |  \- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven.shared:maven-shared-utils:jar:3.2.1:provided
+   |  |  |  |  |  \- commons-io:commons-io:jar:2.5:provided
+   |  |  |  |  +- com.google.inject:guice:jar:no_aop:4.2.1:provided
+   |  |  |  |  |  \- com.google.guava:guava:jar:25.1-android:provided
+   |  |  |  |  +- org.codehaus.plexus:plexus-utils:jar:3.2.1:provided
+   |  |  |  |  +- org.codehaus.plexus:plexus-classworlds:jar:2.6.0:provided
+   |  |  |  |  +- (org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.3.4:provided - omitted for duplicate)
+   |  |  |  |  +- commons-cli:commons-cli:jar:1.4:provided
+   |  |  |  |  \- (org.apache.commons:commons-lang3:jar:3.8.1:provided - omitted for conflict with 3.12.0)
+   |  |  |  +- org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.3.4:provided
+   |  |  |  +- org.apache.maven:maven-settings-builder:jar:3.8.1:provided
+   |  |  |  |  +- (org.apache.maven:maven-builder-support:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  +- org.codehaus.plexus:plexus-interpolation:jar:1.25:provided
+   |  |  |  |  +- (org.apache.maven:maven-settings:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  \- org.sonatype.plexus:plexus-sec-dispatcher:jar:1.4:provided
+   |  |  |  |     \- org.sonatype.plexus:plexus-cipher:jar:1.4:provided
+   |  |  |  +- org.apache.maven:maven-resolver-provider:jar:3.8.1:provided
+   |  |  |  |  +- (org.apache.maven:maven-model:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven:maven-model-builder:jar:3.8.1:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven:maven-repository-metadata:jar:3.8.1:provided
+   |  |  |  |  |  \- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven.resolver:maven-resolver-spi:jar:1.6.2:provided
+   |  |  |  |  |  \- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-util:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.maven.resolver:maven-resolver-impl:jar:1.6.2:provided
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-spi:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-util:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  |  \- (org.apache.commons:commons-lang3:jar:3.8.1:provided - omitted for conflict with 3.12.0)
+   |  |  |  |  \- (org.codehaus.plexus:plexus-utils:jar:3.2.1:provided - omitted for duplicate)
+   |  |  |  +- org.apache.maven.resolver:maven-resolver-connector-basic:jar:1.6.2:provided
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-spi:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  \- (org.apache.maven.resolver:maven-resolver-util:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  +- org.apache.maven.resolver:maven-resolver-transport-wagon:jar:1.6.2:provided
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-api:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-spi:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  +- (org.apache.maven.resolver:maven-resolver-util:jar:1.6.2:provided - omitted for duplicate)
+   |  |  |  |  \- (org.slf4j:slf4j-api:jar:1.7.30:provided - omitted for conflict with 1.7.36)
+   |  |  |  +- org.apache.maven.wagon:wagon-http:jar:3.4.3:provided
+   |  |  |  |  +- org.apache.maven.wagon:wagon-http-shared:jar:3.4.3:provided
+   |  |  |  |  |  +- org.jsoup:jsoup:jar:1.12.1:provided
+   |  |  |  |  |  +- (org.apache.httpcomponents:httpclient:jar:4.5.13:provided - omitted for duplicate)
+   |  |  |  |  |  +- (org.apache.httpcomponents:httpcore:jar:4.4.14:provided - omitted for duplicate)
+   |  |  |  |  |  +- (commons-io:commons-io:jar:2.6:provided - omitted for conflict with 2.5)
+   |  |  |  |  |  +- (org.slf4j:slf4j-api:jar:1.7.25:provided - omitted for conflict with 1.7.36)
+   |  |  |  |  |  \- (org.apache.maven.wagon:wagon-provider-api:jar:3.4.3:provided - omitted for duplicate)
+   |  |  |  |  +- org.apache.httpcomponents:httpclient:jar:4.5.13:provided
+   |  |  |  |  |  +- (org.apache.httpcomponents:httpcore:jar:4.4.13:provided - omitted for conflict with 4.4.14)
+   |  |  |  |  |  \- commons-codec:commons-codec:jar:1.11:provided
+   |  |  |  |  +- org.apache.httpcomponents:httpcore:jar:4.4.14:provided
+   |  |  |  |  +- (org.codehaus.plexus:plexus-utils:jar:3.3.0:provided - omitted for conflict with 3.2.1)
+   |  |  |  |  \- org.apache.maven.wagon:wagon-provider-api:jar:3.4.3:provided
+   |  |  |  |     \- (org.codehaus.plexus:plexus-utils:jar:3.3.0:provided - omitted for conflict with 3.2.1)
+   |  |  |  \- org.apache.maven.wagon:wagon-file:jar:3.4.3:provided
+   |  |  |     +- (org.codehaus.plexus:plexus-utils:jar:3.3.0:provided - omitted for conflict with 3.2.1)
+   |  |  |     \- (org.apache.maven.wagon:wagon-provider-api:jar:3.4.3:provided - omitted for duplicate)
+   |  |  +- io.quarkus:quarkus-bootstrap-gradle-resolver:jar:2.0.2.Final:provided
+   |  |  |  +- (io.quarkus:quarkus-bootstrap-app-model:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:provided - omitted for conflict with 3.5.0.Final)
+   |  |  |  \- (org.jboss.slf4j:slf4j-jboss-logmanager:jar:1.1.0.Final:provided - omitted for conflict with 1.2.0.Final)
+   |  |  \- (io.smallrye.common:smallrye-common-io:jar:1.6.0:provided - omitted for conflict with 1.13.1)
+   |  +- io.quarkus:quarkus-devtools-utilities:jar:2.0.2.Final:provided
+   |  +- org.eclipse.sisu:org.eclipse.sisu.inject:jar:0.3.4:provided
+   |  +- (io.quarkus:quarkus-core:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  +- io.quarkus:quarkus-builder:jar:2.0.2.Final:provided
+   |  |  +- (org.wildfly.common:wildfly-common:jar:1.5.4.Final-format-001:provided - omitted for duplicate)
+   |  |  +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:provided - omitted for conflict with 3.5.0.Final)
+   |  |  \- (org.jboss.threads:jboss-threads:jar:3.4.0.Final:provided - omitted for conflict with 3.4.3.Final)
+   |  +- (org.graalvm.sdk:graal-sdk:jar:21.1.0:provided - omitted for conflict with 22.3.0)
+   |  +- org.junit.platform:junit-platform-launcher:jar:1.7.2:provided
+   |  |  +- org.apiguardian:apiguardian-api:jar:1.1.0:provided
+   |  |  \- org.junit.platform:junit-platform-engine:jar:1.7.2:provided
+   |  |     +- (org.apiguardian:apiguardian-api:jar:1.1.0:provided - omitted for duplicate)
+   |  |     +- org.opentest4j:opentest4j:jar:1.2.0:provided
+   |  |     \- org.junit.platform:junit-platform-commons:jar:1.7.2:provided
+   |  |        \- (org.apiguardian:apiguardian-api:jar:1.1.0:provided - omitted for duplicate)
+   |  \- org.junit.jupiter:junit-jupiter:jar:5.7.2:provided
+   |     +- org.junit.jupiter:junit-jupiter-api:jar:5.7.2:provided
+   |     |  +- (org.apiguardian:apiguardian-api:jar:1.1.0:provided - omitted for duplicate)
+   |     |  +- (org.opentest4j:opentest4j:jar:1.2.0:provided - omitted for duplicate)
+   |     |  \- (org.junit.platform:junit-platform-commons:jar:1.7.2:provided - omitted for duplicate)
+   |     +- org.junit.jupiter:junit-jupiter-params:jar:5.7.2:provided
+   |     |  +- (org.apiguardian:apiguardian-api:jar:1.1.0:provided - omitted for duplicate)
+   |     |  \- (org.junit.jupiter:junit-jupiter-api:jar:5.7.2:provided - omitted for duplicate)
+   |     \- org.junit.jupiter:junit-jupiter-engine:jar:5.7.2:provided
+   |        +- (org.apiguardian:apiguardian-api:jar:1.1.0:provided - omitted for duplicate)
+   |        +- (org.junit.platform:junit-platform-engine:jar:1.7.2:provided - omitted for duplicate)
+   |        \- (org.junit.jupiter:junit-jupiter-api:jar:5.7.2:provided - omitted for duplicate)
+   +- (io.quarkus:quarkus-hibernate-orm:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   +- io.quarkus:quarkus-narayana-jta-deployment:jar:2.0.2.Final:provided
+   |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  +- io.quarkus:quarkus-mutiny-deployment:jar:2.0.2.Final:provided
+   |  |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  +- io.quarkus:quarkus-smallrye-context-propagation-deployment:jar:2.0.2.Final:provided
+   |  |  |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  |  +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  |  \- (io.quarkus:quarkus-smallrye-context-propagation:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  |  \- (io.quarkus:quarkus-mutiny:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  \- (io.quarkus:quarkus-narayana-jta:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   +- io.quarkus:quarkus-agroal-deployment:jar:2.0.2.Final:provided
+   |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  +- io.quarkus:quarkus-datasource-deployment:jar:2.0.2.Final:provided
+   |  |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  +- (io.quarkus:quarkus-datasource:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  |  \- io.quarkus:quarkus-datasource-deployment-spi:jar:2.0.2.Final:provided
+   |  |     +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |     +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |     \- (io.quarkus:quarkus-datasource-common:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  +- (io.quarkus:quarkus-agroal:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  +- io.quarkus:quarkus-agroal-spi:jar:2.0.2.Final:provided
+   |  |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  \- (io.quarkus:quarkus-datasource-common:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  +- (io.quarkus:quarkus-narayana-jta-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  +- io.quarkus:quarkus-credentials-deployment:jar:2.0.2.Final:provided
+   |  |  +- (io.quarkus:quarkus-credentials:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  \- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  \- io.quarkus:quarkus-smallrye-health-spi:jar:2.0.2.Final:provided
+   |     \- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   +- io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided
+   |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  +- io.quarkus:quarkus-vertx-http-dev-console-spi:jar:2.0.2.Final:provided
+   |  |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  |  +- (io.quarkus:quarkus-vertx-http-dev-console-runtime-spi:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  |  +- (io.quarkus.arc:arc:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  |  \- (io.vertx:vertx-web:jar:4.1.0:provided - omitted for conflict with 4.3.4)
+   |  +- (io.quarkus:quarkus-arc:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |  \- io.quarkus.arc:arc-processor:jar:2.0.2.Final:provided
+   |     +- (io.quarkus.arc:arc:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   |     +- (jakarta.enterprise:jakarta.enterprise.cdi-api:jar:2.0.2:provided - omitted for duplicate)
+   |     +- (org.jboss.logging:jboss-logging:jar:3.4.2.Final:provided - omitted for conflict with 3.5.0.Final)
+   |     +- (org.jboss:jandex:jar:2.3.0.Final:provided - omitted for duplicate)
+   |     +- (io.quarkus.gizmo:gizmo:jar:1.0.8.Final:provided - omitted for conflict with 1.0.9.Final)
+   |     \- (jakarta.annotation:jakarta.annotation-api:jar:1.3.5:provided - omitted for duplicate)
+   +- io.quarkus:quarkus-caffeine-deployment:jar:2.0.2.Final:provided
+   |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+   |  \- (io.quarkus:quarkus-caffeine:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+   \- io.quarkus:quarkus-panache-hibernate-common-deployment:jar:2.0.2.Final:provided
+      +- io.quarkus:quarkus-panache-hibernate-common:jar:2.0.2.Final:provided
+      |  +- (io.quarkus:quarkus-core:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+      |  +- (io.quarkus:quarkus-arc:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+      |  +- io.quarkus:quarkus-panache-common:jar:2.0.2.Final:provided
+      |  |  +- (io.quarkus:quarkus-core:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+      |  |  \- (io.quarkus:quarkus-arc:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+      |  \- (io.quarkus:quarkus-hibernate-orm:jar:2.0.2.Final:provided - omitted for conflict with 2.13.5.Final)
+      +- io.quarkus:quarkus-panache-common-deployment:jar:2.0.2.Final:provided
+      |  +- (io.quarkus:quarkus-core-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+      |  +- (io.quarkus:quarkus-panache-common:jar:2.0.2.Final:provided - omitted for duplicate)
+      |  +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+      |  +- (org.jboss:jandex:jar:2.3.0.Final:provided - omitted for duplicate)
+      |  +- (jakarta.validation:jakarta.validation-api:jar:2.0.2:provided - omitted for duplicate)
+      |  \- (org.ow2.asm:asm:jar:9.1:provided - omitted for duplicate)
+      +- (io.quarkus:quarkus-arc-deployment:jar:2.0.2.Final:provided - omitted for duplicate)
+      +- (org.jboss:jandex:jar:2.3.0.Final:provided - omitted for duplicate)
+      \- (org.ow2.asm:asm:jar:9.1:provided - omitted for duplicate)

@@ -86,8 +86,6 @@ public final class JavaMavenProvider extends Provider {
       add("org.apache.maven.plugins:maven-dependency-plugin:3.6.0:tree");
       add("-Dverbose");
       add("-DoutputType=text");
-      add("-Dscope=compile");
-      add("-Dscope=runtime");
       add(String.format("-DoutputFile=%s", tmpFile.toString()));
       add("-f");
       add(manifestPath.toString());
@@ -134,7 +132,9 @@ public final class JavaMavenProvider extends Provider {
      if(targetDepth == srcDepth + 1) {
        PackageURL from = parseDep(src);
        PackageURL to = parseDep(target);
-       sbom.addDependency(from, to);
+       if(dependencyIsNotTestScope(from) && dependencyIsNotTestScope(to)) {
+         sbom.addDependency(from, to);
+       }
      }
      else {
        String[] modifiedLines = Arrays.copyOfRange(lines, index, lines.length);
@@ -149,6 +149,10 @@ public final class JavaMavenProvider extends Provider {
        index++;
      }
     }
+  }
+
+  private static boolean dependencyIsNotTestScope(PackageURL artifact) {
+    return (Objects.nonNull(artifact.getQualifiers()) && !artifact.getQualifiers().get("scope").equals("test")) || Objects.isNull(artifact.getQualifiers());
   }
 //  private void createSbomIteratively(List<String> lines,Sbom sbom)
 //  {
@@ -201,6 +205,7 @@ public final class JavaMavenProvider extends Provider {
       dependencyAggregator.groupId = parts[0];
       dependencyAggregator.artifactId = parts[1];
       dependencyAggregator.version = parts[3];
+
       return dependencyAggregator.toPurl();
 
     }
@@ -210,7 +215,7 @@ public final class JavaMavenProvider extends Provider {
     {
       dependency = dependency.substring(1);
     }
-     dependency = dependency.replace(":runtime", ":compile");
+     dependency = dependency.replace(":runtime", ":compile").replace(":provided", ":compile");
      int endIndex = dependency.indexOf(":compile");
      dependency = dependency.substring(0,endIndex + 8);
     String[] parts = dependency.split(":");
@@ -220,6 +225,7 @@ public final class JavaMavenProvider extends Provider {
       dependencyAggregator.groupId = parts[0];
       dependencyAggregator.artifactId= parts[1];
       dependencyAggregator.version = parts[3];
+
       String conflictMessage = "omitted for conflict with";
       if (dep.contains(conflictMessage))
       {
@@ -238,9 +244,17 @@ public final class JavaMavenProvider extends Provider {
       {
         dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
       }
+
     }
     else{
       throw new RuntimeException(String.format("Cannot parse dependency into PackageUrl from line = \"%s\"",dep));
+    }
+    if(parts[parts.length - 1].matches(".*[a-z]$")) {
+      dependencyAggregator.scope = parts[parts.length - 1];
+    }
+    else {
+      int endOfLine = Integer.min(parts[parts.length - 1].indexOf(""), parts[parts.length - 1].indexOf("-"));
+      dependencyAggregator.scope = parts[parts.length - 1].substring(0, endOfLine).trim();
     }
     return dependencyAggregator.toPurl();
   }
@@ -293,7 +307,7 @@ public final class JavaMavenProvider extends Provider {
     deps.stream()
       .filter(dep -> !testsDeps.contains(dep))
       .map(DependencyAggregator::toPurl)
-      .filter(dep -> !ignored.contains(dep))
+      .filter(dep -> ignored.stream().filter(artifact -> artifact.isCoordinatesEquals(dep)).collect(Collectors.toList()).size() == 0)
       .forEach(d -> sbom.addDependency(sbom.getRoot(), d));
 
     // build and return content for constructing request to the backend
@@ -400,7 +414,7 @@ public final class JavaMavenProvider extends Provider {
 
               case "scope":
                 reader.next();
-                dependencyAggregator.scope = reader.getText() != null ? reader.getText() : "*";
+                dependencyAggregator.scope = reader.getText() != null ? reader.getText().trim() : "*";
                 break;
               case "version": // starting "version" tag, get next event and set to aggregator
                 reader.next();
@@ -475,7 +489,7 @@ public final class JavaMavenProvider extends Provider {
      */
     public PackageURL toPurl() {
       try {
-        return new PackageURL(Ecosystem.Type.MAVEN.getType(), groupId, artifactId, version, null, null);
+        return new PackageURL(Ecosystem.Type.MAVEN.getType(), groupId, artifactId, version, this.scope == "*" ? null :new TreeMap<>(Map.of("scope",this.scope)), null);
       } catch (MalformedPackageURLException e) {
         throw new IllegalArgumentException("Unable to parse PackageURL", e);
       }
@@ -492,6 +506,7 @@ public final class JavaMavenProvider extends Provider {
       return Objects.equals(this.groupId, that.groupId) &&
         Objects.equals(this.artifactId, that.artifactId) &&
         Objects.equals(this.version, that.version);
+
     }
 
     @Override

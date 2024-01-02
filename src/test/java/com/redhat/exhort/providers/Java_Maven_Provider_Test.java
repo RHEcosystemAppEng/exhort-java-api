@@ -49,6 +49,7 @@ class Java_Maven_Provider_Test extends ExhortTest {
   // - expected_sbom.json: the SBOM expected to be provided
   static Stream<String> testFolders() {
     return Stream.of(
+      "pom_deps_with_no_ignore_provided_scope",
       "deps_no_trivial_with_ignore",
       "deps_with_ignore_on_artifact",
       "deps_with_ignore_on_dependency",
@@ -57,6 +58,8 @@ class Java_Maven_Provider_Test extends ExhortTest {
       "deps_with_ignore_on_wrong",
       "deps_with_no_ignore",
       "pom_deps_with_no_ignore_common_paths"
+
+
     );
   }
 

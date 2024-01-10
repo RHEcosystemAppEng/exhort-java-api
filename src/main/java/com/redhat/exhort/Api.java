@@ -17,10 +17,13 @@ package com.redhat.exhort;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.image.ImageRef;
 
 /** The Api interface is used for contracting API implementations. **/
 public interface Api {
@@ -104,4 +107,8 @@ public interface Api {
   CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent) throws IOException;
 
   CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException;
+
+  CompletableFuture<Map<ImageRef, AnalysisReport>> imageAnalysis(Set<ImageRef> imageRefs) throws IOException;
+
+  CompletableFuture<byte[]> imageAnalysisHtml(Set<ImageRef> imageRefs) throws IOException;
 }

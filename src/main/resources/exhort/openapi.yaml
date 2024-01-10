@@ -5,14 +5,14 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 4.0.0
+  version: 4.1.0
 servers:
-- url: https://rhda.rhcloud.com/api/v4
-  description: Production server
-- url: https://exhort-alpha.stage.devshift.net/api/v4
-  description: Staging server
-- url: http://localhost:8080/api/v4
-  description: Local development
+  - url: https://rhda.rhcloud.com/api/v4
+    description: Production server
+  - url: https://exhort-alpha.stage.devshift.net/api/v4
+    description: Staging server
+  - url: http://localhost:8080/api/v4
+    description: Local development
 paths:
   /analysis:
     post:
@@ -24,16 +24,16 @@ paths:
         - OssIndexUserAuth: []
           OssIndexTokenAuth: []
       parameters:
-      - name: providers
-        in: query
-        description: List of vulnerability providers to get the report from
-        required: false
-        schema:
-          enum:
-          - snyk
-          - oss-index
-          type: string
-        example: snyk
+        - name: providers
+          in: query
+          description: List of vulnerability providers to get the report from
+          required: false
+          schema:
+            enum:
+              - snyk
+              - oss-index
+            type: string
+          example: snyk
       requestBody:
         required: true
         description: Dependency graph in SBOM format
@@ -68,7 +68,70 @@ paths:
             text/plain:
               schema:
                 type: string
-                description: Error message  
+                description: Error message
+  /batch-analysis:
+    post:
+      operationId: batchAnalysis
+      summary: Takes an array of client-resolved dependency graphs to perform a full stack analysis from all the available Vulnerability sources
+      security:
+        - RhdaTokenAuth: [ ]
+        - SnykTokenAuth: [ ]
+        - OssIndexUserAuth: [ ]
+          OssIndexTokenAuth: [ ]
+      parameters:
+        - name: providers
+          in: query
+          description: List of vulnerability providers to get the report from
+          required: false
+          schema:
+            enum:
+              - snyk
+              - oss-index
+            type: string
+          example: snyk
+      requestBody:
+        required: true
+        description: An array of dependency graphs in SBOM format
+        content:
+          application/vnd.cyclonedx+json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+          application/vnd.spdx+json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+      responses:
+        '200':
+          description: Full dependency analysis from all the available providers
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/AnalysisReport'
+            text/html:
+              schema:
+                type: object
+            multipart/mixed:
+              schema:
+                type: object
+                properties:
+                  json_report:
+                    type: object
+                    additionalProperties:
+                      $ref: '#/components/schemas/AnalysisReport'
+                  html_report:
+                    type: object
+        '422':
+          description: Invalid request
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Error message
   /token:
     get:
       operationId: validateToken
@@ -184,6 +247,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DependencyReport'
+        unscanned:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnscannedDependency'
     SourceSummary:
       type: object
       properties:
@@ -215,6 +282,9 @@ components:
           type: integer
           default: 0
         recommendations:
+          type: integer
+          default: 0
+        unscanned:
           type: integer
           default: 0
     PackageRef:
@@ -327,4 +397,11 @@ components:
         reportConfidence:
           type: string
         cvss:
+          type: string
+    UnscannedDependency:
+      type: object
+      properties:
+        ref:
+          $ref: '#/components/schemas/PackageRef'
+        reason:
           type: string

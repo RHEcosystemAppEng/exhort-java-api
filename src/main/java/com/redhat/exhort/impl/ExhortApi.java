@@ -23,6 +23,8 @@ import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
@@ -44,7 +46,9 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
 
-/** Concrete implementation of the Exhort {@link Api} Service. **/
+/**
+ * Concrete implementation of the Exhort {@link Api} Service.
+ **/
 public final class ExhortApi implements Api {
 
   private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
@@ -53,6 +57,7 @@ public final class ExhortApi implements Api {
   public static final String RHDA_TOKEN_HEADER = "rhda-token";
   public static final String RHDA_SOURCE_HEADER = "rhda-source";
   public static final String RHDA_OPERATION_TYPE_HEADER = "rhda-operation-type";
+  public static final String EXHORT_REQUEST_ID_HEADER_NAME = "ex-request-id";
 
   private final String endpoint;
 
@@ -61,12 +66,11 @@ public final class ExhortApi implements Api {
   }
 
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-     System.setProperty("EXHORT_DEV_MODE","true");
-     AnalysisReport analysisReport = new ExhortApi()
-
-    .stackAnalysis("/tmp/071223/pom.xml").get();
-    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS,false);
-    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
+    System.setProperty("EXHORT_DEV_MODE", "true");
+    AnalysisReport analysisReport = new ExhortApi()
+      .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_no_ignore/requirements.txt").get();
+//    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+//    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()
 //    byte[] analysisReport = new ExhortApi().
 //    stackAnalysisHtml("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/golang/go_mod_with_one_ignored_prefix_go/go.mod").get();
@@ -74,17 +78,18 @@ public final class ExhortApi implements Api {
 //    Files.write(html,analysisReport);
 
   }
+
   /**
    * Enum for identifying token environment variables and their
    * corresponding request headers.
    */
   private enum TokenProvider {
-    SNYK,
-    OSS_INDEX;
+    SNYK, OSS_INDEX;
 
 
     /**
      * Get the expected environment variable name.
+     *
      * @return i.e. EXHORT_SNYK_TOKEN
      */
     String getVarName() {
@@ -94,21 +99,27 @@ public final class ExhortApi implements Api {
     String getUserVarName() {
       return String.format("EXHORT_%s_USER", this);
     }
+
     /**
      * Get the expected request header name.
+     *
      * @return i.e. ex-snyk-token
      */
     String getHeaderName() {
-      return String.format("ex-%s-token", this.toString().replace("_","-").toLowerCase());
+      return String.format("ex-%s-token", this.toString().replace("_", "-").toLowerCase());
     }
 
     String getUserHeaderName() {
-      return String.format("ex-%s-user", this.toString().replace("_","-").toLowerCase());
+      return String.format("ex-%s-user", this.toString().replace("_", "-").toLowerCase());
     }
   }
 
   private final HttpClient client;
   private final ObjectMapper mapper;
+
+  private LocalDateTime startTime;
+  private LocalDateTime providerEndTime;
+  private LocalDateTime endTime;
 
   public ExhortApi() {
     this(HttpClient.newHttpClient());
@@ -116,33 +127,37 @@ public final class ExhortApi implements Api {
 
   /**
    * Get the HTTP protocol Version set by client in environment variable, if not set, the default is HTTP Protocol Version 1.1
+   *
    * @return i.e. HttpClient.Version.HTTP_1.1
    */
   static HttpClient.Version getHttpVersion() {
-    return (System.getenv("HTTP_VERSION_EXHORT_CLIENT") != null && System.getenv("HTTP_VERSION_EXHORT_CLIENT").contains("2")) ? HttpClient.Version.HTTP_2 : HttpClient.Version.HTTP_1_1 ;
+    return (System.getenv("HTTP_VERSION_EXHORT_CLIENT") != null && System.getenv("HTTP_VERSION_EXHORT_CLIENT").contains("2")) ? HttpClient.Version.HTTP_2 : HttpClient.Version.HTTP_1_1;
   }
 
   ExhortApi(final HttpClient client) {
 //    // temp system property - as long as prod exhort url not implemented the multi-source v4 endpoint, this property needs to be true
 //    System.setProperty("EXHORT_DEV_MODE","true");
+      if(debugLoggingIsNeeded()) {
+        LOG.log(System.Logger.Level.INFO, "Start of exhort-java-api client");
+        this.startTime = LocalDateTime.now();
+        LOG.log(System.Logger.Level.INFO, String.format("Starting time: %s", this.startTime));
+      }
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     // Take default from config.properties in case client didn't override DEV MODE
-    if(System.getProperty("EXHORT_DEV_MODE") == null ) {
+    if (System.getProperty("EXHORT_DEV_MODE") == null) {
       try {
         InputStream exhortConfig = this.getClass().getClassLoader().getResourceAsStream("config.properties");
-        if (exhortConfig == null)
-        {
-          LOG.log(System.Logger.Level.INFO,"config.properties not found on the class path, fallback to default DEV MODE = false");
+        if (exhortConfig == null) {
+          LOG.log(System.Logger.Level.INFO, "config.properties not found on the class path, fallback to default DEV MODE = false");
           System.setProperty("EXHORT_DEV_MODE", "false");
-        }
-        else {
+        } else {
           Properties properties = new Properties();
           properties.load(exhortConfig);
           System.setProperty("EXHORT_DEV_MODE", (String) properties.get("EXHORT_DEV_MODE"));
         }
       } catch (IOException e) {
-        LOG.log(System.Logger.Level.INFO,String.format("Error loading config.properties , fallback to set default property DEV MODE = false, Error message = %s",e.getMessage()));
+        LOG.log(System.Logger.Level.INFO, String.format("Error loading config.properties , fallback to set default property DEV MODE = false, Error message = %s", e.getMessage()));
         System.setProperty("EXHORT_DEV_MODE", "false");
       }
     }
@@ -152,12 +167,14 @@ public final class ExhortApi implements Api {
 
   public String getExhortUrl() {
     String endpoint;
-    if(getBooleanValueEnvironment("EXHORT_DEV_MODE", "false")) {
+    if (getBooleanValueEnvironment("EXHORT_DEV_MODE", "false")) {
       endpoint = getStringValueEnvironment("DEV_EXHORT_BACKEND_URL", DEFAULT_ENDPOINT_DEV);
-    }
-    else
-    {
+
+    } else {
       endpoint = DEFAULT_ENDPOINT;
+    }
+    if (debugLoggingIsNeeded()) {
+      LOG.log(System.Logger.Level.INFO, String.format("EXHORT_DEV_MODE=%s,DEV_EXHORT_BACKEND_URL=%s, Chosen Backend URL=%s , DEFAULT_ENDPOINT_DEV=%s , DEFAULT_ENDPOINT=%s", getBooleanValueEnvironment("EXHORT_DEV_MODE", "false"), getStringValueEnvironment("DEV_EXHORT_BACKEND_URL", DEFAULT_ENDPOINT_DEV), endpoint, DEFAULT_ENDPOINT_DEV, DEFAULT_ENDPOINT));
     }
     return endpoint;
   }
@@ -166,181 +183,185 @@ public final class ExhortApi implements Api {
     String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), defaultValue));
     return Boolean.parseBoolean(result.trim().toLowerCase());
   }
-  public static String getStringValueEnvironment(String key,String defaultValue) {
+
+  public static String getStringValueEnvironment(String key, String defaultValue) {
     String result = Objects.requireNonNullElse(System.getenv(key), Objects.requireNonNullElse(System.getProperty(key), defaultValue));
     return result;
   }
 
   @Override
-  public CompletableFuture<MixedReport> stackAnalysisMixed(
-    final String manifestFile
-  ) throws IOException {
-    return this.client
-      .sendAsync(
-        this.buildStackRequest(manifestFile, MediaType.MULTIPART_MIXED),
-        HttpResponse.BodyHandlers.ofByteArray())
-      .thenApply(resp -> {
-        if(resp.statusCode() == 200) {
-          byte[] htmlPart = null;
-          AnalysisReport jsonPart = null;
-          var ds = new ByteArrayDataSource(resp.body(), MediaType.MULTIPART_MIXED.toString());
-          try {
-            var mp = new MimeMultipart(ds);
-            for (var i = 0; i < mp.getCount(); i++) {
-              if (Objects.isNull(htmlPart) &&
-                MediaType.TEXT_HTML.toString().equals(mp.getBodyPart(i).getContentType())) {
-                htmlPart = mp.getBodyPart(i).getInputStream().readAllBytes();
-              }
-              if (Objects.isNull(jsonPart) &&
-                MediaType.APPLICATION_JSON.toString().equals(mp.getBodyPart(i).getContentType())) {
-                jsonPart = this.mapper.readValue(
-                  mp.getBodyPart(i).getInputStream().readAllBytes(), AnalysisReport.class);
-              }
+  public CompletableFuture<MixedReport> stackAnalysisMixed(final String manifestFile) throws IOException {
+    return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.MULTIPART_MIXED), HttpResponse.BodyHandlers.ofByteArray()).thenApply(resp -> {
+      if(debugLoggingIsNeeded()) {
+        logExhortRequestId(resp);
+      }
+      if (resp.statusCode() == 200) {
+        byte[] htmlPart = null;
+        AnalysisReport jsonPart = null;
+        var ds = new ByteArrayDataSource(resp.body(), MediaType.MULTIPART_MIXED.toString());
+        try {
+          var mp = new MimeMultipart(ds);
+          for (var i = 0; i < mp.getCount(); i++) {
+            if (Objects.isNull(htmlPart) && MediaType.TEXT_HTML.toString().equals(mp.getBodyPart(i).getContentType())) {
+              htmlPart = mp.getBodyPart(i).getInputStream().readAllBytes();
             }
-          } catch (IOException | MessagingException e) {
-            throw new RuntimeException(e);
+            if (Objects.isNull(jsonPart) && MediaType.APPLICATION_JSON.toString().equals(mp.getBodyPart(i).getContentType())) {
+              jsonPart = this.mapper.readValue(mp.getBodyPart(i).getInputStream().readAllBytes(), AnalysisReport.class);
+            }
           }
-          return new MixedReport(Objects.requireNonNull(htmlPart), Objects.requireNonNull(jsonPart));
+        } catch (IOException | MessagingException e) {
+          throw new RuntimeException(e);
         }
-        else
-        {
-          LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysisMixed for getting the html and json reports, Http Response Status=%s , received message from server= %s ",resp.statusCode(),new String(resp.body())));
-          return new MixedReport();
-        }
-      });
+        commonHookAfterExhortResponse();
+        return new MixedReport(Objects.requireNonNull(htmlPart), Objects.requireNonNull(jsonPart));
+      } else {
+        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysisMixed for getting the html and json reports, Http Response Status=%s , received message from server= %s ", resp.statusCode(), new String(resp.body())));
+        return new MixedReport();
+      }
+    });
   }
 
   @Override
   public CompletableFuture<byte[]> stackAnalysisHtml(final String manifestFile) throws IOException {
-    return this.client
-      .sendAsync(
-        this.buildStackRequest(manifestFile, MediaType.TEXT_HTML),
-        HttpResponse.BodyHandlers.ofByteArray())
-      .thenApply(httpResponse -> {
-        if (httpResponse.statusCode() != 200)
-        {
-          LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysis for getting the html report, Http Response Status=%s , received message from server= %s ",httpResponse.statusCode(),new String(httpResponse.body())));
-          return httpResponse.body();
-        }
-        else
-        {
-          return httpResponse.body();
-        }
-      })
-      .exceptionally(exception -> {
-        LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysis for getting the html report, received message= %s ",exception.getMessage()));
-        LOG.log(System.Logger.Level.ERROR,"Exception Entity",exception);
-        return new byte[0];
-      });
+    return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.TEXT_HTML), HttpResponse.BodyHandlers.ofByteArray()).thenApply(httpResponse -> {
+      if(debugLoggingIsNeeded()) {
+        logExhortRequestId(httpResponse);
+      }
+      if (httpResponse.statusCode() != 200) {
+        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysis for getting the html report, Http Response Status=%s , received message from server= %s ", httpResponse.statusCode(), new String(httpResponse.body())));
+      }
+      commonHookAfterExhortResponse();
+      return httpResponse.body();
+    }).exceptionally(exception -> {
+      LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysis for getting the html report, received message= %s ", exception.getMessage()));
+      LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
+      return new byte[0];
+    });
   }
 
   @Override
-  public CompletableFuture<AnalysisReport> stackAnalysis(
-    final String manifestFile
-  ) throws IOException {
-    return this.client
-      .sendAsync(
-        this.buildStackRequest(manifestFile, MediaType.APPLICATION_JSON),
-        HttpResponse.BodyHandlers.ofString())
+  public CompletableFuture<AnalysisReport> stackAnalysis(final String manifestFile) throws IOException {
+    return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.APPLICATION_JSON), HttpResponse.BodyHandlers.ofString())
 //      .thenApply(HttpResponse::body)
-      .thenApply(
-        response -> getAnalysisReportFromResponse(response,"StackAnalysis","json")
-      ).exceptionally(exception -> {
-        LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke stackAnalysis for getting the json report, received message= %s ",exception.getMessage()));
-        LOG.log(System.Logger.Level.ERROR,"Exception Entity",exception);
+      .thenApply(response -> getAnalysisReportFromResponse(response, "StackAnalysis", "json")).exceptionally(exception -> {
+        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysis for getting the json report, received message= %s ", exception.getMessage()));
+        LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
         return new AnalysisReport();
       });
   }
 
-  private AnalysisReport getAnalysisReportFromResponse(HttpResponse<String> response,String operation,String reportName) {
-    if(response.statusCode() == 200) {
+  private AnalysisReport getAnalysisReportFromResponse(HttpResponse<String> response, String operation, String reportName) {
+    if (debugLoggingIsNeeded()) {
+      logExhortRequestId(response);
+    }
+    if (response.statusCode() == 200) {
+      if (debugLoggingIsNeeded()) {
+        LOG.log(System.Logger.Level.INFO, String.format("Response body received from exhort server : %s %s", System.lineSeparator(), response.body()));
+
+      }
+      commonHookAfterExhortResponse();
       try {
 
         return this.mapper.readValue(response.body(), AnalysisReport.class);
       } catch (JsonProcessingException e) {
         throw new CompletionException(e);
       }
-    }
-    else
-    {
-      LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke %s for getting the %s report, Http Response Status=%s , received message from server= %s ",operation,reportName, response.statusCode(), response.body()));
+
+    } else {
+      LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke %s for getting the %s report, Http Response Status=%s , received message from server= %s ", operation, reportName, response.statusCode(), response.body()));
       return new AnalysisReport();
     }
+
+  }
+
+  private static void logExhortRequestId(HttpResponse response) {
+    Optional<String> headerExRequestId = response.headers().allValues(EXHORT_REQUEST_ID_HEADER_NAME).stream().findFirst();
+    headerExRequestId.ifPresent(value -> LOG.log(System.Logger.Level.INFO, String.format("Unique Identifier associated with this request - ex-request-id= : %s", value)));
+  }
+
+  public static boolean debugLoggingIsNeeded() {
+    return Boolean.parseBoolean(Objects.requireNonNullElse(System.getenv("EXHORT_DEBUG"), "false"));
   }
 
   @Override
-  public CompletableFuture<AnalysisReport> componentAnalysis(
-    final String manifestType, final byte[] manifestContent
-  ) throws IOException {
+  public CompletableFuture<AnalysisReport> componentAnalysis(final String manifestType, final byte[] manifestContent) throws IOException {
     var provider = Ecosystem.getProvider(manifestType);
-    var uri = URI.create(
-      String.format("%s/api/v4/analysis", this.endpoint));
+    var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
-
+    commonHookAfterProviderCreatedSbomAndBeforeExhort();
     return getAnalysisReportForComponent(uri, content);
   }
 
+  private void commonHookAfterProviderCreatedSbomAndBeforeExhort() {
+    if(debugLoggingIsNeeded()) {
+      LOG.log(System.Logger.Level.INFO, "After Provider created sbom hook");
+      this.providerEndTime = LocalDateTime.now();
+      LOG.log(System.Logger.Level.INFO, String.format("After Creating Sbom time: %s", this.startTime));
+      LOG.log(System.Logger.Level.INFO,String.format("Time took to create sbom file to be sent to exhort backend, in ms : %s, in seconds: %s",this.startTime.until(this.providerEndTime, ChronoUnit.MILLIS),(float)(this.startTime.until(this.providerEndTime, ChronoUnit.MILLIS) / 1000F)));
+    }
+
+
+
+  }
+
+  private void commonHookAfterExhortResponse() {
+    if(debugLoggingIsNeeded()) {
+      this.endTime = LocalDateTime.now();
+      LOG.log(System.Logger.Level.INFO, String.format("After got response from exhort time: %s", this.endTime));
+      LOG.log(System.Logger.Level.INFO,String.format("Time took to get response from exhort backend, in ms: %s, in seconds: %s",this.providerEndTime.until(this.endTime, ChronoUnit.MILLIS),this.providerEndTime.until(this.endTime, ChronoUnit.MILLIS) / 1000F));
+      LOG.log(System.Logger.Level.INFO,String.format("Total time took for complete analysis, in ms: %s, in seconds: %s",this.startTime.until(this.endTime, ChronoUnit.MILLIS),this.startTime.until(this.endTime, ChronoUnit.MILLIS) / 1000F));
+
+    }
+
+  }
   @Override
   public CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException {
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
-    var uri = URI.create(
-      String.format("%s/api/v4/analysis", this.endpoint));
+    var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestPath);
+    commonHookAfterProviderCreatedSbomAndBeforeExhort();
     return getAnalysisReportForComponent(uri, content);
   }
 
   private CompletableFuture<AnalysisReport> getAnalysisReportForComponent(URI uri, Provider.Content content) {
-    return this.client
-      .sendAsync(
-        this.buildRequest(content, uri, MediaType.APPLICATION_JSON,"Component Analysis"),
-        HttpResponse.BodyHandlers.ofString())
+    return this.client.sendAsync(this.buildRequest(content, uri, MediaType.APPLICATION_JSON, "Component Analysis"), HttpResponse.BodyHandlers.ofString())
 //      .thenApply(HttpResponse::body)
-      .thenApply(
-        response -> getAnalysisReportFromResponse(response,"Component Analysis","json")
-      ).exceptionally(exception -> {
-        LOG.log(System.Logger.Level.ERROR,String.format("failed to invoke Component Analysis for getting the json report, received message= %s ",exception.getMessage()));
-        LOG.log(System.Logger.Level.ERROR,"Exception Entity",exception);
+      .thenApply(response -> getAnalysisReportFromResponse(response, "Component Analysis", "json")).exceptionally(exception -> {
+        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke Component Analysis for getting the json report, received message= %s ", exception.getMessage()));
+        LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
         return new AnalysisReport();
       });
   }
 
   /**
-   *  Build an HTTP request wrapper for sending to the Backend API for Stack Analysis only.
+   * Build an HTTP request wrapper for sending to the Backend API for Stack Analysis only.
    *
    * @param manifestFile the path for the manifest file
-   * @param acceptType the type of requested content
+   * @param acceptType   the type of requested content
    * @return a HttpRequest ready to be sent to the Backend API
-   * @throws IOException  when failed to load the manifest file
+   * @throws IOException when failed to load the manifest file
    */
-  private HttpRequest buildStackRequest(
-    final String manifestFile, final MediaType acceptType
-  ) throws IOException {
+  private HttpRequest buildStackRequest(final String manifestFile, final MediaType acceptType) throws IOException {
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
-    var uri = URI.create(
-      String.format("%s/api/v4/analysis", this.endpoint));
+    var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideStack(manifestPath);
+    commonHookAfterProviderCreatedSbomAndBeforeExhort();
 
-    return buildRequest(content, uri, acceptType,"Stack Analysis");
+    return buildRequest(content, uri, acceptType, "Stack Analysis");
   }
 
   /**
    * Build an HTTP request for sending to the Backend API.
    *
-   * @param content the {@link com.redhat.exhort.Provider.Content} info for the request body
-   * @param uri the {@link URI} for sending the request to
+   * @param content    the {@link com.redhat.exhort.Provider.Content} info for the request body
+   * @param uri        the {@link URI} for sending the request to
    * @param acceptType value the Accept header in the request, indicating the required response type
-   * @return  a HttpRequest ready to be sent to the Backend API
+   * @return a HttpRequest ready to be sent to the Backend API
    */
-  private HttpRequest buildRequest(
-    final Provider.Content content, final URI uri, final MediaType acceptType,final String analysisType
-  ) {
-    var request = HttpRequest.newBuilder(uri)
-    .version(Version.HTTP_1_1)
-      .setHeader("Accept", acceptType.toString())
-      .setHeader("Content-Type", content.type)
-      .POST(HttpRequest.BodyPublishers.ofString(new String(content.buffer)));
+  private HttpRequest buildRequest(final Provider.Content content, final URI uri, final MediaType acceptType, final String analysisType) {
+    var request = HttpRequest.newBuilder(uri).version(Version.HTTP_1_1).setHeader("Accept", acceptType.toString()).setHeader("Content-Type", content.type).POST(HttpRequest.BodyPublishers.ofString(new String(content.buffer)));
 
     // include tokens from environment variables of java properties as request headers
     Stream.of(ExhortApi.TokenProvider.values()).forEach(p -> {
@@ -367,18 +388,16 @@ public final class ExhortApi implements Api {
     //set rhda-token
     // Environment variable/property name = RHDA_TOKEN
     String rhdaToken = calculateHeaderValue(RHDA_TOKEN_HEADER);
-    if (rhdaToken != null && Optional.of(rhdaToken).isPresent())
-    {
-      request.setHeader(RHDA_TOKEN_HEADER,rhdaToken);
+    if (rhdaToken != null && Optional.of(rhdaToken).isPresent()) {
+      request.setHeader(RHDA_TOKEN_HEADER, rhdaToken);
     }
     //set rhda-source ( extension/plugin id/name)
     // Environment variable/property name = RHDA_SOURCE
     String rhdaSource = calculateHeaderValue(RHDA_SOURCE_HEADER);
-    if (rhdaSource != null && Optional.of(rhdaSource).isPresent())
-    {
-      request.setHeader(RHDA_SOURCE_HEADER,rhdaSource);
+    if (rhdaSource != null && Optional.of(rhdaSource).isPresent()) {
+      request.setHeader(RHDA_SOURCE_HEADER, rhdaSource);
     }
-      request.setHeader(RHDA_OPERATION_TYPE_HEADER,analysisType);
+    request.setHeader(RHDA_OPERATION_TYPE_HEADER, analysisType);
 
     return request.build();
   }
@@ -386,9 +405,8 @@ public final class ExhortApi implements Api {
   private String calculateHeaderValue(String headerName) {
     String result;
     result = calculateHeaderValueActual(headerName);
-    if(result== null)
-    {
-      result = calculateHeaderValueActual(headerName.toUpperCase().replace("-","_"));
+    if (result == null) {
+      result = calculateHeaderValueActual(headerName.toUpperCase().replace("-", "_"));
     }
     return result;
   }
@@ -396,8 +414,7 @@ public final class ExhortApi implements Api {
   private String calculateHeaderValueActual(String headerName) {
     String result = null;
     result = System.getenv(headerName);
-    if(result == null)
-    {
+    if (result == null) {
       result = System.getProperty(headerName);
     }
     return result;

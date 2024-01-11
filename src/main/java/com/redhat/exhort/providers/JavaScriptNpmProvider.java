@@ -41,6 +41,8 @@ import com.redhat.exhort.tools.Ecosystem;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+
 /**
  * Concrete implementation of the {@link Provider} used for converting
  * dependency trees
@@ -49,6 +51,7 @@ import com.redhat.exhort.tools.Operations;
  **/
 public final class JavaScriptNpmProvider extends Provider {
 
+  private System.Logger log = System.getLogger(this.getClass().getName());
   public JavaScriptNpmProvider() {
     super(Type.NPM);
   }
@@ -148,6 +151,9 @@ public final class JavaScriptNpmProvider extends Provider {
         npmEnvs.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).toArray(String[]::new));
     } else {
       npmOutput = Operations.runProcessGetOutput(null, npmAllDeps);
+    }
+    if(debugLoggingIsNeeded()) {
+      log.log(System.Logger.Level.INFO,String.format("Npm Listed Install Pacakges in Json : %s %s",System.lineSeparator(),npmOutput));
     }
     if(!includeTransitive)
     {

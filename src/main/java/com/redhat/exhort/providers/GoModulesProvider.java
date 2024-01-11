@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
 
 /**
@@ -48,6 +49,7 @@ import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
  **/
 public final class GoModulesProvider extends Provider {
 
+  private System.Logger log = System.getLogger(this.getClass().getName());
   private static final String goHostArchitectureEnvName = "GOHOSTARCH";
   private static final String goHostOperationSystemEnvName = "GOHOSTOS";
   public static final String defaultMainVersion = "v0.0.0";
@@ -383,6 +385,9 @@ public final class GoModulesProvider extends Provider {
 
     // execute the clean command
     String goModulesOutput = Operations.runProcessGetOutput(manifestPath.getParent(),goModulesDeps);
+    if(debugLoggingIsNeeded()) {
+      log.log(System.Logger.Level.INFO,String.format("Go Mod Graph : %s %s",System.lineSeparator(),goModulesOutput));
+    }
     return goModulesOutput;
   }
 

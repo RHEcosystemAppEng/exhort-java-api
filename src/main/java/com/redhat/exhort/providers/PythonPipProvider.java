@@ -15,6 +15,7 @@
  */
 package com.redhat.exhort.providers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
@@ -35,11 +36,12 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
 
 public final class PythonPipProvider extends Provider {
 
-
+  private System.Logger log = System.getLogger(this.getClass().getName());
   public void setPythonController(PythonControllerBase pythonController) {
     this.pythonController = pythonController;
   }
@@ -66,6 +68,7 @@ public final class PythonPipProvider extends Provider {
   public Content provideStack(Path manifestPath) throws IOException {
     PythonControllerBase pythonController = getPythonController();
     List<Map<String, Object>> dependencies = pythonController.getDependencies(manifestPath.toString(), true);
+    printDependenciesTree(dependencies);
     Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL,"sensitive");
     try {
       sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(), "root"));
@@ -110,6 +113,7 @@ public final class PythonPipProvider extends Provider {
     Path manifestPath = Files.createFile(path);
     Files.write(manifestPath, manifestContent);
     List<Map<String, Object>> dependencies = pythonController.getDependencies(manifestPath.toString(), false);
+    printDependenciesTree(dependencies);
     Sbom sbom = SbomFactory.newInstance();
     try {
       sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(), "root"));
@@ -127,6 +131,14 @@ public final class PythonPipProvider extends Provider {
     sbom.removeRootComponent();
     return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
 
+  }
+
+  private void printDependenciesTree(List<Map<String, Object>> dependencies) throws JsonProcessingException {
+    if(debugLoggingIsNeeded()) {
+      String pythonControllerTree = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(dependencies);
+      log.log(System.Logger.Level.INFO,String.format("Python Generated Dependency Tree in Json Format: %s %s %s",System.lineSeparator(),pythonControllerTree,System.lineSeparator()));
+
+    }
   }
 
   private void handleIgnoredDependencies(String manifestContent, Sbom sbom) {

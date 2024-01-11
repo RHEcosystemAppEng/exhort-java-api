@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
 import static java.lang.String.join;
 
@@ -73,7 +74,9 @@ public abstract class PythonControllerBase {
       throw new RuntimeException(e);
     }
   }
-//  private System.Logger log = System.getLogger(this.getClass().getName());
+
+
+  private System.Logger log = System.getLogger(this.getClass().getName());
   protected Path pythonEnvironmentDir;
   protected Path pipBinaryDir;
 
@@ -240,9 +243,15 @@ public abstract class PythonControllerBase {
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {
     List<Map<String,Object>> dependencies = new ArrayList<>();
     String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze","--all");
+    if(debugLoggingIsNeeded()) {
+      log.log(System.Logger.Level.INFO,String.format("pip freeze --all command result -> %s %s",System.lineSeparator(),freeze));
+    }
     String[] deps = freeze.split(System.lineSeparator());
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
+    if(debugLoggingIsNeeded()) {
+      log.log(System.Logger.Level.INFO,String.format("pip show command result -> %s %s",System.lineSeparator(),pipShowOutput));
+    }
     List<String> allPipShowLines = splitPipShowLines(pipShowOutput);
     boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
     Map<StringInsensitive,String> CachedTree = new HashMap<>();

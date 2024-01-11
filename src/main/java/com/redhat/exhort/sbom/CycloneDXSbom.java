@@ -31,6 +31,8 @@ import org.cyclonedx.model.Metadata;
 
 import com.github.packageurl.PackageURL;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+
 public class CycloneDXSbom implements Sbom {
 
   private System.Logger log = System.getLogger(this.getClass().getName());
@@ -244,7 +246,7 @@ public class CycloneDXSbom implements Sbom {
     @Override
     public String getAsJsonString() {
       String jsonString = BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
-      if(Boolean.parseBoolean(Objects.requireNonNullElse(System.getenv("EXHORT_DEBUG"),"false")))
+      if(debugLoggingIsNeeded())
       {
         log.log(System.Logger.Level.INFO,jsonString);
       }

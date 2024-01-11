@@ -41,6 +41,8 @@ import com.redhat.exhort.tools.Ecosystem;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+
 /**
  * Concrete implementation of the {@link Provider} used for converting dependency trees
  * for Java Maven projects (pom.xml) into a content Dot Graphs for Stack analysis or Json for
@@ -48,7 +50,7 @@ import com.redhat.exhort.tools.Operations;
  **/
 public final class JavaMavenProvider extends Provider {
 
-
+  private System.Logger log = System.getLogger(this.getClass().getName());
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
     LocalDateTime start = LocalDateTime.now();
@@ -98,6 +100,11 @@ public final class JavaMavenProvider extends Provider {
       .collect(Collectors.toList());
     // execute the tree command
     Operations.runProcess(mvnTreeCmd.toArray(String[]::new), mvnEnvs);
+    if(debugLoggingIsNeeded())
+    {
+      String stackAnalysisDependencyTree = Files.readString(tmpFile);
+      log.log(System.Logger.Level.INFO,String.format("Maven Stack Analysis Dependency Tree : %s %s",System.lineSeparator(),stackAnalysisDependencyTree));
+    }
     var sbom = buildSbomFromTextFormat(tmpFile);
     // build and return content for constructing request to the backend
     return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
@@ -297,6 +304,11 @@ public final class JavaMavenProvider extends Provider {
     };
     // execute the effective pom command
     Operations.runProcess(mvnEffPomCmd, getMvnExecEnvs());
+    if(debugLoggingIsNeeded())
+    {
+      String CaEffectivePoM = Files.readString(tmpEffPom);
+      log.log(System.Logger.Level.INFO,String.format("Maven Component Analysis Effective POM : %s %s",System.lineSeparator(),CaEffectivePoM));
+    }
     // if we have dependencies marked as ignored grab ignored dependencies from the original pom
     // the effective-pom goal doesn't carry comments
     List<DependencyAggregator> dependencies = getDependencies(originPom);

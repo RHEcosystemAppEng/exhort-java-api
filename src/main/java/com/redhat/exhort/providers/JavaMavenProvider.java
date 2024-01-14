@@ -53,11 +53,12 @@ public final class JavaMavenProvider extends Provider {
   private System.Logger log = System.getLogger(this.getClass().getName());
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
+    PackageURL packageURL = javaMavenProvider.parseDep("+- org.assertj:assertj-core:jar:3.24.2:test");
     LocalDateTime start = LocalDateTime.now();
     System.out.print(start);
     Content content = javaMavenProvider.provideStack(Path.of("/tmp/devfile-sample-java-springboot-basic/pom.xml"));
 
-    PackageURL packageURL = javaMavenProvider.parseDep("pom-with-deps-no-ignore:pom-with-dependency-not-ignored-common-paths:jar:0.0.1");
+//    PackageURL packageURL = javaMavenProvider.parseDep("pom-with-deps-no-ignore:pom-with-dependency-not-ignored-common-paths:jar:0.0.1");
 //    String report = new String(content.buffer);
     System.out.println(new String(content.buffer));
     LocalDateTime end = LocalDateTime.now();
@@ -223,8 +224,15 @@ public final class JavaMavenProvider extends Provider {
       dependency = dependency.substring(1);
     }
      dependency = dependency.replace(":runtime", ":compile").replace(":provided", ":compile");
-     int endIndex = dependency.indexOf(":compile");
-     dependency = dependency.substring(0,endIndex + 8);
+     int endIndex = Math.max(dependency.indexOf(":compile"),dependency.indexOf(":test"));
+     int scopeLength;
+     if(dependency.indexOf(":compile") > -1) {
+       scopeLength =   ":compile".length();
+     }
+     else {
+       scopeLength =   ":test".length();
+     }
+     dependency = dependency.substring(0,endIndex + scopeLength);
     String[] parts = dependency.split(":");
   // contains only GAV + packaging + scope
     if(parts.length == 5)

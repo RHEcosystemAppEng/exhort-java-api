@@ -29,8 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
-import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
+import static com.redhat.exhort.impl.ExhortApi.*;
 import static java.lang.String.join;
 
 public abstract class PythonControllerBase {
@@ -242,13 +241,13 @@ public abstract class PythonControllerBase {
 
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {
     List<Map<String,Object>> dependencies = new ArrayList<>();
-    String freeze = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "freeze","--all");
+    String freeze = getPipFreezeFromEnvironment();
     if(debugLoggingIsNeeded()) {
       log.log(System.Logger.Level.INFO,String.format("pip freeze --all command result -> %s %s",System.lineSeparator(),freeze));
     }
     String[] deps = freeze.split(System.lineSeparator());
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
-    String pipShowOutput = Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
+    String pipShowOutput = getPipShowFromEnvironment(depNames);
     if(debugLoggingIsNeeded()) {
       log.log(System.Logger.Level.INFO,String.format("pip show command result -> %s %s",System.lineSeparator(),pipShowOutput));
     }
@@ -312,6 +311,19 @@ public abstract class PythonControllerBase {
     });
 
     return dependencies;
+  }
+
+  private String getPipShowFromEnvironment(String depNames) {
+    return getPipCommandInvokedOrDecodedFromEnvironment("EXHORT_PIP_SHOW",pipBinaryLocation,"show",depNames);
+//    return Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show", depNames);
+  }
+
+  String getPipFreezeFromEnvironment() {
+    return getPipCommandInvokedOrDecodedFromEnvironment("EXHORT_PIP_FREEZE",pipBinaryLocation,"freeze","--all");
+  }
+
+  private String getPipCommandInvokedOrDecodedFromEnvironment(String EnvVar, String... cmdList) {
+    return getStringValueEnvironment(EnvVar, "").trim().equals("") ? Operations.runProcessGetOutput(pythonEnvironmentDir, cmdList) : new String(Base64.getDecoder().decode(getStringValueEnvironment(EnvVar, "")));
   }
 
   private void bringAllDependencies(List<Map<String, Object>> dependencies, String depName, Map<StringInsensitive, String> cachedTree, boolean includeTransitive, List<String> path) {

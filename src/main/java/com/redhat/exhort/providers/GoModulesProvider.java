@@ -176,7 +176,7 @@ public final class GoModulesProvider extends Provider {
     }
     else
     {
-      sbom = buildSbomFromGraph(goModulesResult,ignoredDeps);
+      sbom = buildSbomFromGraph(goModulesResult,ignoredDeps,manifestPath);
     }
 //    List<String> ignoredDeps = getIgnoredDeps(manifestPath);
 //    sbom.filterIgnoredDeps(ignoredDeps);
@@ -287,13 +287,14 @@ public final class GoModulesProvider extends Provider {
     }
   }
 
-  private Sbom buildSbomFromGraph(String goModulesResult, List<PackageURL> ignoredDeps) throws IOException{
+  private Sbom buildSbomFromGraph(String goModulesResult, List<PackageURL> ignoredDeps, Path manifestPath) throws IOException{
 //    Each entry contains a key of the module, and the list represents the module direct dependencies , so pairing of the key with each of the dependencies in a list is basically an edge in the graph.
     Map<String,List> edges = new HashMap<>();
     // iterate over go mod graph line by line and create map , with each entry to contain module as a key , and value of list of that module' dependencies.
     String[] lines = goModulesResult.split(System.lineSeparator());
     List<String> linesList = Arrays.asList(lines);
 //    System.out.print("Start time: " + LocalDateTime.now() + System.lineSeparator());
+
     Integer startingIndex=0;
     Integer EndingIndex=lines.length - 1;
     String[] targetLines = Arrays.copyOfRange(lines,0,lines.length-1);
@@ -311,6 +312,12 @@ public final class GoModulesProvider extends Provider {
         }
 
       }
+    }
+    //DEBUG
+//    System.setProperty("EXHORT_GO_MVS_LOGIC_ENABLED","true");
+    boolean goMvsLogicEnabled = getBooleanValueEnvironment("EXHORT_GO_MVS_LOGIC_ENABLED", "false");
+    if(goMvsLogicEnabled) {
+      edges = getFinalPackagesVersionsForModule(edges,manifestPath);
     }
 //    Build Sbom
     String rootPackage = getParentVertex(lines[0]);
@@ -341,6 +348,37 @@ public final class GoModulesProvider extends Provider {
 
  return sbom;
 
+  }
+
+  private Map<String, List> getFinalPackagesVersionsForModule(Map<String, List> edges, Path manifestPath) {
+    Operations.runProcessGetOutput(manifestPath.getParent(),"go","mod","download");
+    String finalVersionsForAllModules = Operations.runProcessGetOutput(manifestPath.getParent(), "go", "list", "-m", "all");
+    Map<String, String> finalModulesVersions = Arrays.stream(finalVersionsForAllModules.split(System.lineSeparator())).filter(string -> string.trim().split(" ").length == 2).collect(Collectors.toMap(t -> t.split(" ")[0], t -> t.split(" ")[1], (first, second) -> second));
+    Map<String, List> listWithModifiedVersions = new HashMap<>();
+    edges.entrySet().stream().filter(string -> string.getKey().trim().split("@").length == 2).collect(Collectors.toList()).forEach((entry) -> {
+      String packageWithSelectedVersion = getPackageWithFinalVersion(finalModulesVersions, entry.getKey());
+      List packagesWithFinalVersions = getListOfPackagesWithFinlVersions(finalModulesVersions,entry);
+      listWithModifiedVersions.put(packageWithSelectedVersion,packagesWithFinalVersions);
+    });
+
+
+    return listWithModifiedVersions;
+  }
+
+  private List getListOfPackagesWithFinlVersions(Map<String, String> finalModulesVersions, Map.Entry<String, List> entry) {
+    return (List)entry.getValue().stream().map((packageWithVersion) -> getPackageWithFinalVersion(finalModulesVersions,(String)packageWithVersion)).collect(Collectors.toList());
+  }
+
+   public static String getPackageWithFinalVersion(Map<String, String> finalModulesVersions, String packagePlusVersion) {
+    String packageName = packagePlusVersion.split("@")[0];
+    String originalVersion = packagePlusVersion.split("@")[1];
+    String finalVersion = finalModulesVersions.get(packageName);
+    if(Objects.nonNull(finalVersion)) {
+         return String.format("%s@%s",packageName,finalVersion);
+    }
+    else {
+      return packagePlusVersion;
+    }
   }
 
   private boolean dependencyNotToBeIgnored(List<PackageURL> ignoredDeps, PackageURL checkedPurl) {

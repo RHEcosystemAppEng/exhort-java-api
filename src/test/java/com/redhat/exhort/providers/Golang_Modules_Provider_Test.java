@@ -15,8 +15,10 @@
  */
 package com.redhat.exhort.providers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.ExhortTest;
+import com.redhat.exhort.Provider;
 import com.redhat.exhort.sbom.Sbom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -126,9 +129,33 @@ class Golang_Modules_Provider_Test extends ExhortTest {
         String sbomString = assertDoesNotThrow(() -> goModulesProvider.getDependenciesSbom(Path.of(goModPath), false).getAsJsonString());
         String actualSbomWithTSStripped = dropIgnoredKeepFormat(sbomString);
         assertEquals(getStringFromFile("msc","golang","expected_sbom_ca.json").trim(), actualSbomWithTSStripped);
+
         System.out.println(sbomString);
       }
   }
+
+  @Test
+  void Test_Golang_MvS_Logic_Enabled() throws IOException {
+    ObjectMapper om = new ObjectMapper();
+    System.setProperty("EXHORT_GO_MVS_LOGIC_ENABLED", "true");
+    String goModPath = getFileFromResource("go.mod", "msc", "golang","mvs_logic", "go.mod");
+    GoModulesProvider goModulesProvider = new GoModulesProvider();
+    String resultSbom = dropIgnoredKeepFormat(goModulesProvider.getDependenciesSbom(Path.of(goModPath),true).getAsJsonString());
+    String expectedSbom = getStringFromFile("msc", "golang", "mvs_logic", "expected_sbom_stack_analysis.json").trim();
+
+    assertEquals(expectedSbom,resultSbom);
+
+    // check that only one version of package golang/go.opencensus.io is in sbom for EXHORT_GO_MVS_LOGIC_ENABLED=true
+    assertTrue(Arrays.stream(resultSbom.split(System.lineSeparator())).filter(str -> str.contains("\"ref\" : \"pkg:golang/go.opencensus.io@")).count() == 1);
+
+    System.clearProperty("EXHORT_GO_MVS_LOGIC_ENABLED");
+
+    resultSbom = dropIgnoredKeepFormat(goModulesProvider.getDependenciesSbom(Path.of(goModPath),true).getAsJsonString());
+    // check that there is more than one version of package golang/go.opencensus.io in sbom for EXHORT_GO_MVS_LOGIC_ENABLED=false
+    assertTrue(Arrays.stream(resultSbom.split(System.lineSeparator())).filter(str -> str.contains("\"ref\" : \"pkg:golang/go.opencensus.io@")).count() > 1);
+
+  }
+
 
   private String dropIgnored(String s) {
     return s.replaceAll("\\s+","").replaceAll("\"timestamp\":\"[a-zA-Z0-9\\-\\:]+\",", "");

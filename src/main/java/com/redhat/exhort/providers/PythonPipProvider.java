@@ -36,8 +36,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
-import static com.redhat.exhort.impl.ExhortApi.getBooleanValueEnvironment;
+import static com.redhat.exhort.impl.ExhortApi.*;
 
 public final class PythonPipProvider extends Provider {
 
@@ -222,11 +221,24 @@ public final class PythonPipProvider extends Provider {
   }
 
   private PythonControllerBase getPythonController() {
-    String pythonPipBinaries = getPythonPipBinaries();
+    String pythonPipBinaries;
+    String useVirtualPythonEnv;
+    if(!getStringValueEnvironment("EXHORT_PIP_SHOW","").trim().equals("")
+       && !getStringValueEnvironment("EXHORT_PIP_FREEZE","").trim().equals("")) {
+      pythonPipBinaries = "python;;pip";
+      useVirtualPythonEnv = "false";
+    }
+    else {
+      pythonPipBinaries = getPythonPipBinaries();
+      useVirtualPythonEnv = Objects.requireNonNullElseGet(
+        System.getenv("EXHORT_PYTHON_VIRTUAL_ENV"),
+        () -> Objects.requireNonNullElse(System.getProperty("EXHORT_PYTHON_VIRTUAL_ENV"), "false"));
+    }
+
     String[] parts = pythonPipBinaries.split(";;");
     var python = parts[0];
     var pip = parts[1];
-    String useVirtualPythonEnv = Objects.requireNonNullElseGet(
+    useVirtualPythonEnv = Objects.requireNonNullElseGet(
       System.getenv("EXHORT_PYTHON_VIRTUAL_ENV"),
       () -> Objects.requireNonNullElse(System.getProperty("EXHORT_PYTHON_VIRTUAL_ENV"), "false"));
     PythonControllerBase pythonController;

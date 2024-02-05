@@ -137,11 +137,7 @@ public final class ExhortApi implements Api {
   ExhortApi(final HttpClient client) {
 //    // temp system property - as long as prod exhort url not implemented the multi-source v4 endpoint, this property needs to be true
 //    System.setProperty("EXHORT_DEV_MODE","true");
-      if(debugLoggingIsNeeded()) {
-        LOG.log(System.Logger.Level.INFO, "Start of exhort-java-api client");
-        this.startTime = LocalDateTime.now();
-        LOG.log(System.Logger.Level.INFO, String.format("Starting time: %s", this.startTime));
-      }
+    commonHookBeginning(true);
     this.client = client;
     this.mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     // Take default from config.properties in case client didn't override DEV MODE
@@ -163,6 +159,19 @@ public final class ExhortApi implements Api {
     }
 
     this.endpoint = getExhortUrl();
+  }
+
+  private void commonHookBeginning(boolean startOfApi) {
+    if(startOfApi) {
+      LOG.log(System.Logger.Level.INFO, "Start of exhort-java-api client");
+    }
+    else {
+      if (debugLoggingIsNeeded()) {
+
+        this.startTime = LocalDateTime.now();
+        LOG.log(System.Logger.Level.INFO, String.format("Starting time: %s", this.startTime));
+      }
+    }
   }
 
   public String getExhortUrl() {
@@ -191,6 +200,7 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<MixedReport> stackAnalysisMixed(final String manifestFile) throws IOException {
+    commonHookBeginning(false);
     return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.MULTIPART_MIXED), HttpResponse.BodyHandlers.ofByteArray()).thenApply(resp -> {
       if(debugLoggingIsNeeded()) {
         logExhortRequestId(resp);
@@ -223,6 +233,7 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<byte[]> stackAnalysisHtml(final String manifestFile) throws IOException {
+    commonHookBeginning(false);
     return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.TEXT_HTML), HttpResponse.BodyHandlers.ofByteArray()).thenApply(httpResponse -> {
       if(debugLoggingIsNeeded()) {
         logExhortRequestId(httpResponse);
@@ -241,6 +252,7 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<AnalysisReport> stackAnalysis(final String manifestFile) throws IOException {
+    commonHookBeginning(false);
     return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.APPLICATION_JSON), HttpResponse.BodyHandlers.ofString())
 //      .thenApply(HttpResponse::body)
       .thenApply(response -> getAnalysisReportFromResponse(response, "StackAnalysis", "json")).exceptionally(exception -> {
@@ -285,6 +297,7 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<AnalysisReport> componentAnalysis(final String manifestType, final byte[] manifestContent) throws IOException {
+    commonHookBeginning(false);
     var provider = Ecosystem.getProvider(manifestType);
     var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
@@ -316,6 +329,7 @@ public final class ExhortApi implements Api {
   }
   @Override
   public CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException {
+    commonHookBeginning(false);
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));

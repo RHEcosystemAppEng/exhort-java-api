@@ -242,14 +242,17 @@ public abstract class PythonControllerBase {
   private List<Map<String, Object>> getDependenciesImpl(String pathToRequirements, boolean includeTransitive) {
     List<Map<String,Object>> dependencies = new ArrayList<>();
     String freeze = getPipFreezeFromEnvironment();
+    String freezeMessage = "";
     if(debugLoggingIsNeeded()) {
-      log.log(System.Logger.Level.INFO,String.format("pip freeze --all command result -> %s %s",System.lineSeparator(),freeze));
+      freezeMessage = String.format("pip freeze --all command result -> %s %s", System.lineSeparator(), freeze);
+      log.log(System.Logger.Level.INFO, freezeMessage);
     }
     String[] deps = freeze.split(System.lineSeparator());
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = getPipShowFromEnvironment(depNames);
     if(debugLoggingIsNeeded()) {
-      log.log(System.Logger.Level.INFO,String.format("pip show command result -> %s %s",System.lineSeparator(),pipShowOutput));
+      String pipShowMessage = String.format("pip show command result -> %s %s", System.lineSeparator(), pipShowOutput);
+      log.log(System.Logger.Level.INFO, pipShowMessage);
     }
     List<String> allPipShowLines = splitPipShowLines(pipShowOutput);
     boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");

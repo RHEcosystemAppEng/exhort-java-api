@@ -59,7 +59,7 @@ public final class JavaScriptNpmProvider extends Provider {
   @Override
   public Content provideStack(final Path manifestPath) throws IOException {
     // check for custom npm executable
-    Sbom sbom = getDependencySbom(manifestPath, true);
+    Sbom sbom = getDependencySbom(manifestPath, true, false);
     return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
@@ -72,7 +72,7 @@ public final class JavaScriptNpmProvider extends Provider {
 
   @Override
   public Content provideComponent(Path manifestPath) throws IOException {
-    return new Content(getDependencySbom(manifestPath, false).getAsJsonString().getBytes(StandardCharsets.UTF_8),
+    return new Content(getDependencySbom(manifestPath, false,false).getAsJsonString().getBytes(StandardCharsets.UTF_8),
       Api.CYCLONEDX_MEDIA_TYPE);
   }
 
@@ -82,7 +82,7 @@ public final class JavaScriptNpmProvider extends Provider {
       Path tempDir = Files.createTempDirectory("exhort_npm");
       Path path = Files.createFile(Path.of(tempDir.toString(),"package.json"));
       Files.write(path, manifestContent);
-      sbom = getDependencySbom(path, false);
+      sbom = getDependencySbom(path, false, true);
       Files.delete(path);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -122,25 +122,24 @@ public final class JavaScriptNpmProvider extends Provider {
     }
   }
 
-  private Sbom getDependencySbom(Path manifestPath, boolean includeTransitive) throws IOException {
-    var npmListResult = buildNpmDependencyTree(manifestPath, includeTransitive);
+  private Sbom getDependencySbom(Path manifestPath, boolean includeTransitive, boolean deletePackageLock) throws IOException {
+    var npmListResult = buildNpmDependencyTree(manifestPath, includeTransitive,deletePackageLock);
     var sbom = buildSbom(npmListResult);
     sbom.filterIgnoredDeps(getIgnoredDeps(manifestPath));
     return sbom;
   }
 
-  private JsonNode buildNpmDependencyTree(Path manifestPath, boolean includeTransitive)
+  private JsonNode buildNpmDependencyTree(Path manifestPath, boolean includeTransitive, boolean deletePackageLock)
       throws JsonMappingException, JsonProcessingException {
     var npm = Operations.getCustomPathOrElse("npm");
     var npmEnvs = getNpmExecEnv();
     // clean command used to clean build target
     Path packageLockJson = Path.of(manifestPath.getParent().toString(), "package-lock.json");
-    if (!packageLockJson.toFile().exists()) {
-      var createPackageLock = new String[] { npm, "i", "--package-lock-only", "--prefix",
-          manifestPath.getParent().toString() };
-      // execute the clean command
-      Operations.runProcess(createPackageLock, npmEnvs);
-    }
+    var createPackageLock = new String[] { npm, "i", "--package-lock-only", "--prefix",
+        manifestPath.getParent().toString() };
+    // execute the clean command
+    Operations.runProcess(createPackageLock, npmEnvs);
+
 
     var npmAllDeps = new String[] { npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
         "--json", "--prefix", manifestPath.getParent().toString() };
@@ -155,12 +154,13 @@ public final class JavaScriptNpmProvider extends Provider {
     if(debugLoggingIsNeeded()) {
       log.log(System.Logger.Level.INFO,String.format("Npm Listed Install Pacakges in Json : %s %s",System.lineSeparator(),npmOutput));
     }
-    if(!includeTransitive)
-    {
-      try {
-        Files.delete(packageLockJson);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+    if(!includeTransitive) {
+      if (deletePackageLock) {
+        try {
+          Files.delete(packageLockJson);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
     return objectMapper.readTree(npmOutput);

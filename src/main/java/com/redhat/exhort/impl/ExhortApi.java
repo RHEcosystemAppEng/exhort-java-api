@@ -28,9 +28,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.*;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,7 +53,9 @@ import jakarta.mail.util.ByteArrayDataSource;
  **/
 public final class ExhortApi implements Api {
 
-  private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
+//  private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
+
+  private static final Logger LOG = Logger.getLogger(ExhortApi.class.getName());
   public static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
   public static final String DEFAULT_ENDPOINT_DEV = "https://exhort.stage.devshift.net";
   public static final String RHDA_TOKEN_HEADER = "rhda-token";
@@ -68,7 +72,7 @@ public final class ExhortApi implements Api {
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     System.setProperty("EXHORT_DEV_MODE", "true");
     AnalysisReport analysisReport = new ExhortApi()
-      .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/pip/pip_requirements_txt_no_ignore/requirements.txt").get();
+      .componentAnalysis("/tmp/node-express-hello-devfile-no-dockerfile/package.json").get();
 //    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
 //    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()
@@ -145,7 +149,7 @@ public final class ExhortApi implements Api {
       try {
         InputStream exhortConfig = this.getClass().getClassLoader().getResourceAsStream("config.properties");
         if (exhortConfig == null) {
-          LOG.log(System.Logger.Level.INFO, "config.properties not found on the class path, fallback to default DEV MODE = false");
+          LOG.info("config.properties not found on the class path, fallback to default DEV MODE = false");
           System.setProperty("EXHORT_DEV_MODE", "false");
         } else {
           Properties properties = new Properties();
@@ -153,7 +157,7 @@ public final class ExhortApi implements Api {
           System.setProperty("EXHORT_DEV_MODE", (String) properties.get("EXHORT_DEV_MODE"));
         }
       } catch (IOException e) {
-        LOG.log(System.Logger.Level.INFO, String.format("Error loading config.properties , fallback to set default property DEV MODE = false, Error message = %s", e.getMessage()));
+        LOG.info(String.format("Error loading config.properties , fallback to set default property DEV MODE = false, Error message = %s", e.getMessage()));
         System.setProperty("EXHORT_DEV_MODE", "false");
       }
     }
@@ -161,17 +165,31 @@ public final class ExhortApi implements Api {
     this.endpoint = getExhortUrl();
   }
 
-  private void commonHookBeginning(boolean startOfApi) {
+  private String commonHookBeginning(boolean startOfApi) {
     if(startOfApi) {
-      LOG.log(System.Logger.Level.INFO, "Start of exhort-java-api client");
+      LOG.info("Start of exhort-java-api client");
+      generateClientRequestId();
     }
     else {
+      if(Objects.isNull(getClientRequestId())) {
+        generateClientRequestId();
+      }
       if (debugLoggingIsNeeded()) {
 
         this.startTime = LocalDateTime.now();
-        LOG.log(System.Logger.Level.INFO, String.format("Starting time: %s", this.startTime));
+
+        LOG.info(String.format("Starting time: %s", this.startTime));
       }
     }
+    return getClientRequestId();
+  }
+
+  private static void generateClientRequestId() {
+    RequestManager.getInstance().addClientTraceIdToRequest(UUID.randomUUID().toString());
+  }
+
+  private static String getClientRequestId() {
+    return RequestManager.getInstance().getTraceIdOfRequest();
   }
 
   public String getExhortUrl() {
@@ -183,7 +201,7 @@ public final class ExhortApi implements Api {
       endpoint = DEFAULT_ENDPOINT;
     }
     if (debugLoggingIsNeeded()) {
-      LOG.log(System.Logger.Level.INFO, String.format("EXHORT_DEV_MODE=%s,DEV_EXHORT_BACKEND_URL=%s, Chosen Backend URL=%s , DEFAULT_ENDPOINT_DEV=%s , DEFAULT_ENDPOINT=%s", getBooleanValueEnvironment("EXHORT_DEV_MODE", "false"), getStringValueEnvironment("DEV_EXHORT_BACKEND_URL", DEFAULT_ENDPOINT_DEV), endpoint, DEFAULT_ENDPOINT_DEV, DEFAULT_ENDPOINT));
+      LOG.info(String.format("EXHORT_DEV_MODE=%s,DEV_EXHORT_BACKEND_URL=%s, Chosen Backend URL=%s , DEFAULT_ENDPOINT_DEV=%s , DEFAULT_ENDPOINT=%s", getBooleanValueEnvironment("EXHORT_DEV_MODE", "false"), getStringValueEnvironment("DEV_EXHORT_BACKEND_URL", DEFAULT_ENDPOINT_DEV), endpoint, DEFAULT_ENDPOINT_DEV, DEFAULT_ENDPOINT));
     }
     return endpoint;
   }
@@ -200,8 +218,9 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<MixedReport> stackAnalysisMixed(final String manifestFile) throws IOException {
-    commonHookBeginning(false);
+    String exClientTraceId = commonHookBeginning(false);
     return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.MULTIPART_MIXED), HttpResponse.BodyHandlers.ofByteArray()).thenApply(resp -> {
+      RequestManager.getInstance().addClientTraceIdToRequest(exClientTraceId);
       if(debugLoggingIsNeeded()) {
         logExhortRequestId(resp);
       }
@@ -225,7 +244,7 @@ public final class ExhortApi implements Api {
         commonHookAfterExhortResponse();
         return new MixedReport(Objects.requireNonNull(htmlPart), Objects.requireNonNull(jsonPart));
       } else {
-        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysisMixed for getting the html and json reports, Http Response Status=%s , received message from server= %s ", resp.statusCode(), new String(resp.body())));
+        LOG.severe(String.format("failed to invoke stackAnalysisMixed for getting the html and json reports, Http Response Status=%s , received message from server= %s ", resp.statusCode(), new String(resp.body())));
         return new MixedReport();
       }
     });
@@ -233,42 +252,45 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<byte[]> stackAnalysisHtml(final String manifestFile) throws IOException {
-    commonHookBeginning(false);
+    String exClientTraceId = commonHookBeginning(false);
     return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.TEXT_HTML), HttpResponse.BodyHandlers.ofByteArray()).thenApply(httpResponse -> {
+      RequestManager.getInstance().addClientTraceIdToRequest(exClientTraceId);
       if(debugLoggingIsNeeded()) {
         logExhortRequestId(httpResponse);
       }
       if (httpResponse.statusCode() != 200) {
-        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysis for getting the html report, Http Response Status=%s , received message from server= %s ", httpResponse.statusCode(), new String(httpResponse.body())));
+        LOG.severe(String.format("failed to invoke stackAnalysis for getting the html report, Http Response Status=%s , received message from server= %s ", httpResponse.statusCode(), new String(httpResponse.body())));
       }
       commonHookAfterExhortResponse();
       return httpResponse.body();
     }).exceptionally(exception -> {
-      LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysis for getting the html report, received message= %s ", exception.getMessage()));
-      LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
+      LOG.severe(String.format("failed to invoke stackAnalysis for getting the html report, received message= %s ", exception.getMessage()));
+//      LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
+      commonHookAfterExhortResponse();
       return new byte[0];
     });
   }
 
   @Override
   public CompletableFuture<AnalysisReport> stackAnalysis(final String manifestFile) throws IOException {
-    commonHookBeginning(false);
+    String exClientTraceId = commonHookBeginning(false);
     return this.client.sendAsync(this.buildStackRequest(manifestFile, MediaType.APPLICATION_JSON), HttpResponse.BodyHandlers.ofString())
 //      .thenApply(HttpResponse::body)
-      .thenApply(response -> getAnalysisReportFromResponse(response, "StackAnalysis", "json")).exceptionally(exception -> {
-        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke stackAnalysis for getting the json report, received message= %s ", exception.getMessage()));
-        LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
+      .thenApply(response -> getAnalysisReportFromResponse(response, "StackAnalysis", "json",exClientTraceId)).exceptionally(exception -> {
+        LOG.severe(String.format("failed to invoke stackAnalysis for getting the json report, received message= %s ", exception.getMessage()));
+//        LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
         return new AnalysisReport();
       });
   }
 
-  private AnalysisReport getAnalysisReportFromResponse(HttpResponse<String> response, String operation, String reportName) {
+  private AnalysisReport getAnalysisReportFromResponse(HttpResponse<String> response, String operation, String reportName,String exClientTraceId) {
+    RequestManager.getInstance().addClientTraceIdToRequest(exClientTraceId);
     if (debugLoggingIsNeeded()) {
       logExhortRequestId(response);
     }
     if (response.statusCode() == 200) {
       if (debugLoggingIsNeeded()) {
-        LOG.log(System.Logger.Level.INFO, String.format("Response body received from exhort server : %s %s", System.lineSeparator(), response.body()));
+        LOG.info(String.format("Response body received from exhort server : %s %s", System.lineSeparator(), response.body()));
 
       }
       commonHookAfterExhortResponse();
@@ -280,7 +302,7 @@ public final class ExhortApi implements Api {
       }
 
     } else {
-      LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke %s for getting the %s report, Http Response Status=%s , received message from server= %s ", operation, reportName, response.statusCode(), response.body()));
+      LOG.severe(String.format("failed to invoke %s for getting the %s report, Http Response Status=%s , received message from server= %s ", operation, reportName, response.statusCode(), response.body()));
       return new AnalysisReport();
     }
 
@@ -288,7 +310,7 @@ public final class ExhortApi implements Api {
 
   private static void logExhortRequestId(HttpResponse response) {
     Optional<String> headerExRequestId = response.headers().allValues(EXHORT_REQUEST_ID_HEADER_NAME).stream().findFirst();
-    headerExRequestId.ifPresent(value -> LOG.log(System.Logger.Level.INFO, String.format("Unique Identifier associated with this request - ex-request-id= : %s", value)));
+    headerExRequestId.ifPresent(value -> LOG.info(String.format("Unique Identifier associated with this request - ex-request-id= : %s", value)));
   }
 
   public static boolean debugLoggingIsNeeded() {
@@ -297,20 +319,20 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<AnalysisReport> componentAnalysis(final String manifestType, final byte[] manifestContent) throws IOException {
-    commonHookBeginning(false);
+    String exClientTraceId = commonHookBeginning(false);
     var provider = Ecosystem.getProvider(manifestType);
     var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
     commonHookAfterProviderCreatedSbomAndBeforeExhort();
-    return getAnalysisReportForComponent(uri, content);
+    return getAnalysisReportForComponent(uri, content,exClientTraceId);
   }
 
   private void commonHookAfterProviderCreatedSbomAndBeforeExhort() {
     if(debugLoggingIsNeeded()) {
-      LOG.log(System.Logger.Level.INFO, "After Provider created sbom hook");
+      LOG.info("After Provider created sbom hook");
       this.providerEndTime = LocalDateTime.now();
-      LOG.log(System.Logger.Level.INFO, String.format("After Creating Sbom time: %s", this.startTime));
-      LOG.log(System.Logger.Level.INFO,String.format("Time took to create sbom file to be sent to exhort backend, in ms : %s, in seconds: %s",this.startTime.until(this.providerEndTime, ChronoUnit.MILLIS),(float)(this.startTime.until(this.providerEndTime, ChronoUnit.MILLIS) / 1000F)));
+      LOG.info(String.format("After Creating Sbom time: %s", this.startTime));
+      LOG.info(String.format("Time took to create sbom file to be sent to exhort backend, in ms : %s, in seconds: %s",this.startTime.until(this.providerEndTime, ChronoUnit.MILLIS),(float)(this.startTime.until(this.providerEndTime, ChronoUnit.MILLIS) / 1000F)));
     }
 
 
@@ -320,30 +342,30 @@ public final class ExhortApi implements Api {
   private void commonHookAfterExhortResponse() {
     if(debugLoggingIsNeeded()) {
       this.endTime = LocalDateTime.now();
-      LOG.log(System.Logger.Level.INFO, String.format("After got response from exhort time: %s", this.endTime));
-      LOG.log(System.Logger.Level.INFO,String.format("Time took to get response from exhort backend, in ms: %s, in seconds: %s",this.providerEndTime.until(this.endTime, ChronoUnit.MILLIS),this.providerEndTime.until(this.endTime, ChronoUnit.MILLIS) / 1000F));
-      LOG.log(System.Logger.Level.INFO,String.format("Total time took for complete analysis, in ms: %s, in seconds: %s",this.startTime.until(this.endTime, ChronoUnit.MILLIS),this.startTime.until(this.endTime, ChronoUnit.MILLIS) / 1000F));
+      LOG.info(String.format("After got response from exhort time: %s", this.endTime));
+      LOG.info(String.format("Time took to get response from exhort backend, in ms: %s, in seconds: %s",this.providerEndTime.until(this.endTime, ChronoUnit.MILLIS),this.providerEndTime.until(this.endTime, ChronoUnit.MILLIS) / 1000F));
+      LOG.info(String.format("Total time took for complete analysis, in ms: %s, in seconds: %s",this.startTime.until(this.endTime, ChronoUnit.MILLIS),this.startTime.until(this.endTime, ChronoUnit.MILLIS) / 1000F));
 
     }
-
+    RequestManager.getInstance().removeClientTraceIdFromRequest();
   }
   @Override
   public CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException {
-    commonHookBeginning(false);
+    String exClientTraceId = commonHookBeginning(false);
     var manifestPath = Paths.get(manifestFile);
     var provider = Ecosystem.getProvider(manifestPath);
     var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestPath);
     commonHookAfterProviderCreatedSbomAndBeforeExhort();
-    return getAnalysisReportForComponent(uri, content);
+    return getAnalysisReportForComponent(uri, content, exClientTraceId);
   }
 
-  private CompletableFuture<AnalysisReport> getAnalysisReportForComponent(URI uri, Provider.Content content) {
+  private CompletableFuture<AnalysisReport> getAnalysisReportForComponent(URI uri, Provider.Content content, String exClientTraceId) {
     return this.client.sendAsync(this.buildRequest(content, uri, MediaType.APPLICATION_JSON, "Component Analysis"), HttpResponse.BodyHandlers.ofString())
 //      .thenApply(HttpResponse::body)
-      .thenApply(response -> getAnalysisReportFromResponse(response, "Component Analysis", "json")).exceptionally(exception -> {
-        LOG.log(System.Logger.Level.ERROR, String.format("failed to invoke Component Analysis for getting the json report, received message= %s ", exception.getMessage()));
-        LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
+      .thenApply(response -> getAnalysisReportFromResponse(response, "Component Analysis", "json",exClientTraceId)).exceptionally(exception -> {
+        LOG.severe( String.format("failed to invoke Component Analysis for getting the json report, received message= %s ", exception.getMessage()));
+//        LOG.log(System.Logger.Level.ERROR, "Exception Entity", exception);
         return new AnalysisReport();
       });
   }

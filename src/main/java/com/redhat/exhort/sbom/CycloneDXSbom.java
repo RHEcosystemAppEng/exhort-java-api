@@ -18,9 +18,11 @@ package com.redhat.exhort.sbom;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.github.packageurl.MalformedPackageURLException;
+import com.redhat.exhort.logging.LoggersFactory;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.model.Bom;
@@ -35,7 +37,7 @@ import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 
 public class CycloneDXSbom implements Sbom {
 
-  private System.Logger log = System.getLogger(this.getClass().getName());
+  private Logger log = LoggersFactory.getLogger(this.getClass().getName());
   private static final Version VERSION = Version.VERSION_14;
   private String exhortIgnoreMethod;
   private Bom bom;
@@ -248,7 +250,7 @@ public class CycloneDXSbom implements Sbom {
       String jsonString = BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
       if(debugLoggingIsNeeded())
       {
-        log.log(System.Logger.Level.INFO,jsonString);
+        log.info("Generated Sbom Json:" + System.lineSeparator() + jsonString);
       }
       return jsonString;
     }

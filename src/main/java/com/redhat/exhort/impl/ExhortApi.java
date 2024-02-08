@@ -38,10 +38,10 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.tools.Ecosystem;
 
 import jakarta.mail.MessagingException;
@@ -55,7 +55,10 @@ public final class ExhortApi implements Api {
 
 //  private static final System.Logger LOG = System.getLogger(ExhortApi.class.getName());
 
-  private static final Logger LOG = Logger.getLogger(ExhortApi.class.getName());
+  private static final Logger LOG = LoggersFactory.getLogger(ExhortApi.class.getName());
+
+
+
   public static final String DEFAULT_ENDPOINT = "https://rhda.rhcloud.com";
   public static final String DEFAULT_ENDPOINT_DEV = "https://exhort.stage.devshift.net";
   public static final String RHDA_TOKEN_HEADER = "rhda-token";
@@ -72,7 +75,7 @@ public final class ExhortApi implements Api {
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     System.setProperty("EXHORT_DEV_MODE", "true");
     AnalysisReport analysisReport = new ExhortApi()
-      .componentAnalysis("/tmp/node-express-hello-devfile-no-dockerfile/package.json").get();
+      .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_ignore_on_artifact/pom.xml").get();
 //    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
 //    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()

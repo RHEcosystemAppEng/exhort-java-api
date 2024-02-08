@@ -18,6 +18,7 @@ package com.redhat.exhort.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.exhort.exception.PackageNotInstalledException;
+import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.tools.Operations;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,7 +77,7 @@ public abstract class PythonControllerBase {
   }
 
 
-  private System.Logger log = System.getLogger(this.getClass().getName());
+  private Logger log = LoggersFactory.getLogger(this.getClass().getName());
   protected Path pythonEnvironmentDir;
   protected Path pipBinaryDir;
 
@@ -244,15 +246,15 @@ public abstract class PythonControllerBase {
     String freeze = getPipFreezeFromEnvironment();
     String freezeMessage = "";
     if(debugLoggingIsNeeded()) {
-      freezeMessage = String.format("pip freeze --all command result -> %s %s", System.lineSeparator(), freeze);
-      log.log(System.Logger.Level.INFO, freezeMessage);
+      freezeMessage = String.format("Package Manager PIP freeze --all command result output -> %s %s", System.lineSeparator(), freeze);
+      log.info(freezeMessage);
     }
     String[] deps = freeze.split(System.lineSeparator());
     String depNames = Arrays.stream(deps).map(PythonControllerBase::getDependencyName).collect(Collectors.joining(" "));
     String pipShowOutput = getPipShowFromEnvironment(depNames);
     if(debugLoggingIsNeeded()) {
-      String pipShowMessage = String.format("pip show command result -> %s %s", System.lineSeparator(), pipShowOutput);
-      log.log(System.Logger.Level.INFO, pipShowMessage);
+      String pipShowMessage = String.format("Package Manager PIP show command result output -> %s %s", System.lineSeparator(), pipShowOutput);
+      log.info(pipShowMessage);
     }
     List<String> allPipShowLines = splitPipShowLines(pipShowOutput);
     boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");

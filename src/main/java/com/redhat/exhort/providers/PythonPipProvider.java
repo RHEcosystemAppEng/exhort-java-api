@@ -20,6 +20,7 @@ import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
+import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem;
@@ -34,13 +35,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.redhat.exhort.impl.ExhortApi.*;
 
 public final class PythonPipProvider extends Provider {
 
-  private System.Logger log = System.getLogger(this.getClass().getName());
+  private Logger log = LoggersFactory.getLogger(this.getClass().getName());
   public void setPythonController(PythonControllerBase pythonController) {
     this.pythonController = pythonController;
   }
@@ -135,7 +137,7 @@ public final class PythonPipProvider extends Provider {
   private void printDependenciesTree(List<Map<String, Object>> dependencies) throws JsonProcessingException {
     if(debugLoggingIsNeeded()) {
       String pythonControllerTree = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(dependencies);
-      log.log(System.Logger.Level.INFO,String.format("Python Generated Dependency Tree in Json Format: %s %s %s",System.lineSeparator(),pythonControllerTree,System.lineSeparator()));
+      log.info(String.format("Python Generated Dependency Tree in Json Format: %s %s %s",System.lineSeparator(),pythonControllerTree,System.lineSeparator()));
 
     }
   }

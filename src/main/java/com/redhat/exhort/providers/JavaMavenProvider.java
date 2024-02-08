@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -35,6 +36,7 @@ import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
+import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem;
@@ -50,7 +52,7 @@ import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
  **/
 public final class JavaMavenProvider extends Provider {
 
-  private System.Logger log = System.getLogger(this.getClass().getName());
+  private Logger log = LoggersFactory.getLogger(this.getClass().getName());
   public static void main(String[] args) throws IOException {
     JavaMavenProvider javaMavenProvider = new JavaMavenProvider();
     PackageURL packageURL = javaMavenProvider.parseDep("+- org.assertj:assertj-core:jar:3.24.2:test");
@@ -104,9 +106,10 @@ public final class JavaMavenProvider extends Provider {
     if(debugLoggingIsNeeded())
     {
       String stackAnalysisDependencyTree = Files.readString(tmpFile);
-      log.log(System.Logger.Level.INFO,String.format("Maven Stack Analysis Dependency Tree : %s %s",System.lineSeparator(),stackAnalysisDependencyTree));
+      log.info(String.format("Package Manager Maven Stack Analysis Dependency Tree Output: %s %s",System.lineSeparator(),stackAnalysisDependencyTree));
     }
     var sbom = buildSbomFromTextFormat(tmpFile);
+    // build and return content for constructing request to the backend
     // build and return content for constructing request to the backend
     return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
@@ -315,7 +318,7 @@ public final class JavaMavenProvider extends Provider {
     if(debugLoggingIsNeeded())
     {
       String CaEffectivePoM = Files.readString(tmpEffPom);
-      log.log(System.Logger.Level.INFO,String.format("Maven Component Analysis Effective POM : %s %s",System.lineSeparator(),CaEffectivePoM));
+      log.info(String.format("Package Manager Maven Component Analysis Effective POM Output : %s %s",System.lineSeparator(),CaEffectivePoM));
     }
     // if we have dependencies marked as ignored grab ignored dependencies from the original pom
     // the effective-pom goal doesn't carry comments

@@ -313,7 +313,7 @@ public final class ExhortApi implements Api {
 
   private static void logExhortRequestId(HttpResponse response) {
     Optional<String> headerExRequestId = response.headers().allValues(EXHORT_REQUEST_ID_HEADER_NAME).stream().findFirst();
-    headerExRequestId.ifPresent(value -> LOG.info(String.format("Unique Identifier associated with this request - ex-request-id= : %s", value)));
+    headerExRequestId.ifPresent(value -> LOG.info(String.format("Unique Identifier associated with this request ( Received from Exhort Backend ) - ex-request-id= : %s", value)));
   }
 
   public static boolean debugLoggingIsNeeded() {

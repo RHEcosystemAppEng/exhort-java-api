@@ -317,7 +317,7 @@ public final class ExhortApi implements Api {
   }
 
   public static boolean debugLoggingIsNeeded() {
-    return Boolean.parseBoolean(Objects.requireNonNullElse(System.getenv("EXHORT_DEBUG"), "false"));
+    return Boolean.parseBoolean(getStringValueEnvironment("EXHORT_DEBUG","false"));
   }
 
   @Override

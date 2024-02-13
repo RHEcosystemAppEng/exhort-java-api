@@ -75,7 +75,7 @@ public final class ExhortApi implements Api {
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     System.setProperty("EXHORT_DEV_MODE", "true");
     AnalysisReport analysisReport = new ExhortApi()
-      .stackAnalysis("/home/zgrinber/git/exhort-java-api/src/test/resources/tst_manifests/maven/deps_with_ignore_on_artifact/pom.xml").get();
+      .stackAnalysisMixed("/home/zgrinber/.jenkins/workspace/run RHDA Analysis/package.json").get().json;
 //    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
 //    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()
@@ -170,8 +170,8 @@ public final class ExhortApi implements Api {
 
   private String commonHookBeginning(boolean startOfApi) {
     if(startOfApi) {
-      LOG.info("Start of exhort-java-api client");
       generateClientRequestId();
+      LOG.info("Start of exhort-java-api client");
     }
     else {
       if(Objects.isNull(getClientRequestId())) {

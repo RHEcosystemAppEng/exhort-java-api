@@ -139,17 +139,25 @@ public final class JavaScriptNpmProvider extends Provider {
         manifestPath.getParent().toString() };
     // execute the clean command
     Operations.runProcess(createPackageLock, npmEnvs);
+    String[] npmAllDeps;
+    Path workDir=null;
+    if(!manifestPath.getParent().toString().trim().contains(" ")) {
 
-
-    var npmAllDeps = new String[] { npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
-        "--json", "--prefix", manifestPath.getParent().toString() };
+      npmAllDeps = new String[]{npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
+        "--json", "--prefix", manifestPath.getParent().toString()};
+    }
+    else {
+      npmAllDeps = new String[]{npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
+        "--json"};
+      workDir = manifestPath.getParent();
+    }
     // execute the clean command
     String npmOutput;
     if (npmEnvs != null) {
-      npmOutput = Operations.runProcessGetOutput(null, npmAllDeps,
+      npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps,
         npmEnvs.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).toArray(String[]::new));
     } else {
-      npmOutput = Operations.runProcessGetOutput(null, npmAllDeps);
+      npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps);
     }
     if(debugLoggingIsNeeded()) {
       log.log(System.Logger.Level.INFO,String.format("Npm Listed Install Pacakges in Json : %s %s",System.lineSeparator(),npmOutput));

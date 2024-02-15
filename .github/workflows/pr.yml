@@ -15,6 +15,7 @@ jobs:
       pull-requests: write
     env:
       MAIN_JAVA_VER: 11
+      RUN_PYTHON_BIN: ${{ vars.RUN_PYTHON_BIN }}
     strategy:
       matrix:
         java: [11, 20]

@@ -19,7 +19,7 @@ jobs:
     name: Deploy release
     environment: staging
     env:
-      runPythonBins: ${{ vars.RUN_PYTHON_BIN }}
+      RUN_PYTHON_BIN: ${{ vars.RUN_PYTHON_BIN }}
 #     only trigger the workflow on the base repository and if the merged branch name starts with release.
     if: (github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')) || (github.repository_owner == 'RHEcosystemAppEng' && github.ref_name == 'main' && contains(github.event.commits[0].message, 'release/directly'))
     outputs:

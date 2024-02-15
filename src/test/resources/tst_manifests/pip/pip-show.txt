@@ -1,0 +1,483 @@
+Name: anyio
+Version: 3.6.2
+Summary: High level compatibility layer for multiple asynchronous event loop implementations
+Home-page: 
+Author: Alex Grönholm
+Author-email: alex.gronholm@nextday.fi
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: idna, sniffio
+Required-by: starlette
+---
+Name: asgiref
+Version: 3.4.1
+Summary: ASGI specs, helper code, and adapters
+Home-page: https://github.com/django/asgiref/
+Author: Django Software Foundation
+Author-email: foundation@djangoproject.com
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: uvicorn
+---
+Name: beautifulsoup4
+Version: 4.12.2
+Summary: Screen-scraping library
+Home-page: 
+Author: 
+Author-email: Leonard Richardson <leonardr@segfault.org>
+License: 
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: soupsieve
+Required-by: gTTS, wikipedia
+---
+Name: certifi
+Version: 2023.7.22
+Summary: Python package for providing Mozilla's CA Bundle.
+Home-page: https://github.com/certifi/python-certifi
+Author: Kenneth Reitz
+Author-email: me@kennethreitz.com
+License: MPL-2.0
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: requests
+---
+Name: chardet
+Version: 4.0.0
+Summary: Universal encoding detector for Python 2 and 3
+Home-page: https://github.com/chardet/chardet
+Author: Mark Pilgrim
+Author-email: mark@diveintomark.org
+License: LGPL
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: requests
+---
+Name: click
+Version: 8.0.4
+Summary: Composable command line interface toolkit
+Home-page: https://palletsprojects.com/p/click/
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: Flask, gTTS, uvicorn
+---
+Name: contextlib2
+Version: 21.6.0
+Summary: Backports and enhancements for the contextlib module
+Home-page: http://contextlib2.readthedocs.org
+Author: Nick Coghlan
+Author-email: ncoghlan@gmail.com
+License: PSF License
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: cycler
+Version: 0.10.0
+Summary: Composable style cycles
+Home-page: http://github.com/matplotlib/cycler
+Author: Thomas A Caswell
+Author-email: matplotlib-users@python.org
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: six
+Required-by: 
+---
+Name: dnspython
+Version: 2.0.0
+Summary: DNS toolkit
+Home-page: http://www.dnspython.org
+Author: Bob Halley
+Author-email: halley@dnspython.org
+License: ISC
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: ExifRead
+Version: 2.3.1
+Summary: Read Exif metadata from tiff and jpeg files.
+Home-page: https://github.com/ianare/exif-py
+Author: Ianaré Sévi
+Author-email: ianare@gmail.com
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: fastapi
+Version: 0.75.1
+Summary: FastAPI framework, high performance, easy to learn, fast to code, ready for production
+Home-page: https://github.com/tiangolo/fastapi
+Author: Sebastián Ramírez
+Author-email: tiangolo@gmail.com
+License: 
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: pydantic, starlette
+Required-by: 
+---
+Name: Flask
+Version: 2.0.3
+Summary: A simple framework for building complex web applications.
+Home-page: https://palletsprojects.com/p/flask
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: click, itsdangerous, Jinja2, Werkzeug
+Required-by: Flask-SQLAlchemy
+---
+Name: Flask-SQLAlchemy
+Version: 2.4.4
+Summary: Adds SQLAlchemy support to your Flask application.
+Home-page: https://github.com/pallets/flask-sqlalchemy
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: Flask, SQLAlchemy
+Required-by: 
+---
+Name: geographiclib
+Version: 1.52
+Summary: The geodesic routines from GeographicLib
+Home-page: https://geographiclib.sourceforge.io/1.52/python
+Author: Charles Karney
+Author-email: charles@karney.com
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: geopy
+---
+Name: geopy
+Version: 2.0.0
+Summary: Python Geocoding Toolbox
+Home-page: https://github.com/geopy/geopy
+Author: 
+Author-email: 
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: geographiclib
+Required-by: 
+---
+Name: greenlet
+Version: 3.0.3
+Summary: Lightweight in-process concurrent programming
+Home-page: https://greenlet.readthedocs.io/
+Author: Alexey Borzenkov
+Author-email: snaury@gmail.com
+License: MIT License
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: SQLAlchemy
+---
+Name: h11
+Version: 0.13.0
+Summary: A pure-Python, bring-your-own-I/O implementation of HTTP/1.1
+Home-page: https://github.com/python-hyper/h11
+Author: Nathaniel J. Smith
+Author-email: njs@pobox.com
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: uvicorn
+---
+Name: idna
+Version: 2.10
+Summary: Internationalized Domain Names in Applications (IDNA)
+Home-page: https://github.com/kjd/idna
+Author: Kim Davies
+Author-email: kim@cynosure.com.au
+License: BSD-like
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: anyio, requests
+---
+Name: immutables
+Version: 0.19
+Summary: Immutable Collections
+Home-page: https://github.com/MagicStack/immutables
+Author: MagicStack Inc
+Author-email: hello@magic.io
+License: Apache License, Version 2.0
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: importlib-metadata
+Version: 4.8.3
+Summary: Read metadata from Python packages
+Home-page: https://github.com/python/importlib_metadata
+Author: Jason R. Coombs
+Author-email: jaraco@jaraco.com
+License: UNKNOWN
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: zipp
+Required-by: 
+---
+Name: itsdangerous
+Version: 2.0.1
+Summary: Safely pass data to untrusted environments and back.
+Home-page: https://palletsprojects.com/p/itsdangerous/
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: Flask
+---
+Name: Jinja2
+Version: 3.0.3
+Summary: A very fast and expressive template engine.
+Home-page: https://palletsprojects.com/p/jinja/
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: MarkupSafe
+Required-by: Flask
+---
+Name: MarkupSafe
+Version: 2.0.1
+Summary: Safely add untrusted strings to HTML/XML markup.
+Home-page: https://palletsprojects.com/p/markupsafe/
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: Jinja2
+---
+Name: oauthlib
+Version: 3.2.2
+Summary: A generic, spec-compliant, thorough implementation of the OAuth request-signing logic
+Home-page: https://github.com/oauthlib/oauthlib
+Author: The OAuthlib Community
+Author-email: idan@gazit.me
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: requests-oauthlib
+---
+Name: pip
+Version: 24.0
+Summary: The PyPA recommended tool for installing Python packages.
+Home-page: 
+Author: 
+Author-email: The pip developers <distutils-sig@python.org>
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: pydantic
+Version: 1.9.2
+Summary: Data validation and settings management using python type hints
+Home-page: https://github.com/samuelcolvin/pydantic
+Author: Samuel Colvin
+Author-email: s@muelcolvin.com
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: typing-extensions
+Required-by: fastapi
+---
+Name: PyPDF2
+Version: 1.27.5
+Summary: A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files
+Home-page: https://pypdf2.readthedocs.io/en/latest/
+Author: Mathieu Fenniak
+Author-email: biziqe@mathieu.fenniak.net
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: PySocks
+Version: 1.7.1
+Summary: A Python SOCKS client module. See https://github.com/Anorov/PySocks for more information.
+Home-page: https://github.com/Anorov/PySocks
+Author: Anorov
+Author-email: anorov.vorona@gmail.com
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: requests
+Version: 2.25.1
+Summary: Python HTTP for Humans.
+Home-page: https://requests.readthedocs.io
+Author: Kenneth Reitz
+Author-email: me@kennethreitz.org
+License: Apache 2.0
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: certifi, chardet, idna, urllib3
+Required-by: gTTS, gTTS-token, requests-oauthlib, tweepy, wikipedia
+---
+Name: requests-oauthlib
+Version: 1.3.1
+Summary: OAuthlib authentication support for Requests.
+Home-page: https://github.com/requests/requests-oauthlib
+Author: Kenneth Reitz
+Author-email: me@kennethreitz.com
+License: ISC
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: oauthlib, requests
+Required-by: tweepy
+---
+Name: setuptools
+Version: 65.5.0
+Summary: Easily download, build, install, upgrade, and uninstall Python packages
+Home-page: https://github.com/pypa/setuptools
+Author: Python Packaging Authority
+Author-email: distutils-sig@python.org
+License: 
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: six
+Version: 1.16.0
+Summary: Python 2 and 3 compatibility utilities
+Home-page: https://github.com/benjaminp/six
+Author: Benjamin Peterson
+Author-email: benjamin@python.org
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: cycler, gTTS, tweepy
+---
+Name: sniffio
+Version: 1.2.0
+Summary: Sniff out which async library your code is running under
+Home-page: https://github.com/python-trio/sniffio
+Author: Nathaniel J. Smith
+Author-email: njs@pobox.com
+License: MIT -or- Apache License 2.0
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: anyio
+---
+Name: soupsieve
+Version: 2.3.2.post1
+Summary: A modern CSS selector implementation for Beautiful Soup.
+Home-page: 
+Author: 
+Author-email: Isaac Muse <Isaac.Muse@gmail.com>
+License: 
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: beautifulsoup4
+---
+Name: SpeechRecognition
+Version: 3.8.1
+Summary: Library for performing speech recognition, with support for several engines and APIs, online and offline.
+Home-page: https://github.com/Uberi/speech_recognition#readme
+Author: Anthony Zhang (Uberi)
+Author-email: azhang9@gmail.com
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: SQLAlchemy
+Version: 2.0.25
+Summary: Database Abstraction Library
+Home-page: https://www.sqlalchemy.org
+Author: Mike Bayer
+Author-email: mike_mp@zzzcomputing.com
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: greenlet, typing-extensions
+Required-by: Flask-SQLAlchemy
+---
+Name: starlette
+Version: 0.17.1
+Summary: The little ASGI library that shines.
+Home-page: https://github.com/encode/starlette
+Author: Tom Christie
+Author-email: tom@tomchristie.com
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: anyio
+Required-by: fastapi
+---
+Name: tqdm
+Version: 4.48.2
+Summary: Fast, Extensible Progress Meter
+Home-page: https://github.com/tqdm/tqdm
+Author: 
+Author-email: 
+License: MPLv2.0, MIT Licences
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: 
+---
+Name: tweepy
+Version: 3.9.0
+Summary: Twitter library for Python
+Home-page: https://www.tweepy.org/
+Author: Joshua Roesslein
+Author-email: tweepy@googlegroups.com
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: requests, requests-oauthlib, six
+Required-by: 
+---
+Name: typing_extensions
+Version: 4.1.1
+Summary: Backported and Experimental Type Hints for Python 3.6+
+Home-page: 
+Author: 
+Author-email: "Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee" <levkivskyi@gmail.com>
+License: 
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: pydantic, SQLAlchemy
+---
+Name: urllib3
+Version: 1.26.16
+Summary: HTTP library with thread-safe connection pooling, file post, and more.
+Home-page: https://urllib3.readthedocs.io/
+Author: Andrey Petrov
+Author-email: andrey.petrov@shazow.net
+License: MIT
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: requests
+---
+Name: uvicorn
+Version: 0.17.0
+Summary: The lightning-fast ASGI server.
+Home-page: https://www.uvicorn.org/
+Author: Tom Christie
+Author-email: tom@tomchristie.com
+License: BSD
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: asgiref, click, h11
+Required-by: 
+---
+Name: Werkzeug
+Version: 2.0.3
+Summary: The comprehensive WSGI web application library.
+Home-page: https://palletsprojects.com/p/werkzeug/
+Author: Armin Ronacher
+Author-email: armin.ronacher@active-4.com
+License: BSD-3-Clause
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: Flask
+---
+Name: zipp
+Version: 3.6.0
+Summary: Backport of pathlib-compatible object wrapper for zip files
+Home-page: https://github.com/jaraco/zipp
+Author: Jason R. Coombs
+Author-email: jaraco@jaraco.com
+License: UNKNOWN
+Location: /home/zgrinber/.pyenv/versions/3.10.13/lib/python3.10/site-packages
+Requires: 
+Required-by: importlib-metadata

@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.redhat.exhort.impl;
+package com.redhat.exhort.logging;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.redhat.exhort.impl.RequestManager;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -77,7 +78,7 @@ public class ClientTraceIdSimpleFormatter extends SimpleFormatter {
 //                         message,
 //                         throwable);
     messageKeysValues.put("timestamp",zdt.toString());
-    messageKeysValues.put("ex-client-trace-id",RequestManager.getInstance().getTraceIdOfRequest());
+    messageKeysValues.put("ex-client-trace-id", RequestManager.getInstance().getTraceIdOfRequest());
     messageKeysValues.put("methodName",source);
     messageKeysValues.put("loggerName",record.getLoggerName());
     messageKeysValues.put("logLevel",record.getLevel().toString());

@@ -390,6 +390,7 @@ limitations under the License.]]>
               <exclude>com/redhat/exhort/exception/*</exclude>
 <!-- This one excluding ExhortApi implementation calss from coverage report as it's not tested by surefire plugin, but with junit-platform-maven-plugin              -->
               <exclude>com/redhat/exhort/impl/*</exclude>
+              <exclude>com/redhat/exhort/logging/*</exclude>
 
             </excludes>
             <propertyName>jacoco.java.option</propertyName>

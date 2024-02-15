@@ -23,4 +23,5 @@ module com.redhat.exhort {
   opens com.redhat.exhort.sbom to com.fasterxml.jackson.databind, packageurl.java;
   opens com.redhat.exhort.api.serialization to com.fasterxml.jackson.databind;
     exports com.redhat.exhort.providers;
+  exports com.redhat.exhort.logging;
 }

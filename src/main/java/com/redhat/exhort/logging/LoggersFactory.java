@@ -16,8 +16,6 @@
 
 package com.redhat.exhort.logging;
 
-import com.redhat.exhort.impl.ClientTraceIdSimpleFormatter;
-
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 

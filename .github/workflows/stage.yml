@@ -13,6 +13,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      runPythonBins: ${{ vars.RUN_PYTHON_BIN }}
     name: Deploy snapshot
     if: github.repository_owner == 'RHEcosystemAppEng'
     outputs:

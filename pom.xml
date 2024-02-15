@@ -12,6 +12,7 @@
   <inceptionYear>2023</inceptionYear>
 
   <properties>
+    <skip.junit_platform>false</skip.junit_platform>
     <code.coverage.threshold>81%</code.coverage.threshold>
     <mutation.coverage.threshold>50</mutation.coverage.threshold>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -456,6 +457,7 @@ limitations under the License.]]>
 <!--            <tag>ExhortApi</tag>-->
 <!--            <tag>Operations</tag>-->
 <!--          </tags>-->
+          <skip>${skip.junit_platform}</skip>
           <classNamePatterns>
             <pattern>.*Exhort_Api_Test</pattern>
             <pattern>.*Operations_Test</pattern>

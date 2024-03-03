@@ -19,7 +19,6 @@ jobs:
     name: Deploy release
     environment: staging
     env:
-      RUN_PYTHON_BIN: ${{ vars.RUN_PYTHON_BIN }}
 #     only trigger the workflow on the base repository and if the merged branch name starts with release.
     if: (github.repository_owner == 'RHEcosystemAppEng' && startsWith(github.head_ref, 'release/')) || (github.repository_owner == 'RHEcosystemAppEng' && github.ref_name == 'main' && contains(github.event.commits[0].message, 'release/directly'))
     outputs:
@@ -39,17 +38,6 @@ jobs:
           distribution: temurin
           java-version: 11
           cache: maven
-
-      - name: setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: get Python location
-        id: python-location
-        run: |
-          echo "python-bin-location=$(echo $pythonLocation)/bin" >> $GITHUB_OUTPUT
-
 
       - name: create ssh agent
         uses: webfactory/ssh-agent@v0.7.0
@@ -73,8 +61,6 @@ jobs:
           mvn release:perform -B -ff -DskipTests -Dskip.junit_platform=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EXHORT_PYTHON3_PATH: "${{steps.python-location.outputs.python-bin-location}}/python3"
-          EXHORT_PIP3_PATH: "${{steps.python-location.outputs.python-bin-location}}/pip3"
 
       - name: Get pom version of released artifact
         id: project

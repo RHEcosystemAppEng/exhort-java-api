@@ -75,7 +75,7 @@ public final class ExhortApi implements Api {
   public static final void main(String[] args) throws IOException, InterruptedException, ExecutionException {
     System.setProperty("EXHORT_DEV_MODE", "true");
     AnalysisReport analysisReport = new ExhortApi()
-      .stackAnalysisMixed("/home/zgrinber/.jenkins/workspace/run RHDA Analysis/package.json").get().json;
+      .stackAnalysisMixed("/tmp/030324/requirements.txt").get().json;
 //    ObjectMapper om = new ObjectMapper().configure(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
 //    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(analysisReport));
 //    AnalysisReport analysisReport = new ExhortApi()

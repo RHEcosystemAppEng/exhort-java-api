@@ -22,9 +22,11 @@ import java.util.logging.Logger;
 public class LoggersFactory {
   public static Logger getLogger(String loggerName) {
     Logger logger = Logger.getLogger(loggerName);
-    ConsoleHandler handler = new ConsoleHandler();
-    handler.setFormatter(new ClientTraceIdSimpleFormatter());
-    logger.addHandler(handler);
+    if(logger.getHandlers().length == 0 ) {
+      ConsoleHandler handler = new ConsoleHandler();
+      handler.setFormatter(new ClientTraceIdSimpleFormatter());
+      logger.addHandler(handler);
+    }
     logger.setUseParentHandlers(false);
     return logger;
 

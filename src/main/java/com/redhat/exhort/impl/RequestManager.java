@@ -39,15 +39,19 @@ public class RequestManager {
   }
 
   public synchronized void addClientTraceIdToRequest(String requestId) {
-    requests.put(Thread.currentThread().getName(),requestId);
+    requests.put(concatenatedThreadId(), requestId);
   }
 
   public synchronized void removeClientTraceIdFromRequest() {
-    requests.remove(Thread.currentThread().getName());
+    requests.remove(concatenatedThreadId());
   }
 
   public String getTraceIdOfRequest() {
-    return requests.get(Thread.currentThread().getName());
+    return requests.get(concatenatedThreadId());
+  }
+
+  private static String concatenatedThreadId() {
+    return String.format("%s-%s",Thread.currentThread().getName(),Thread.currentThread().getId());
   }
 
 }

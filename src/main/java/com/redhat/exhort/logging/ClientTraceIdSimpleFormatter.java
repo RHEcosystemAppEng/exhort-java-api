@@ -82,6 +82,8 @@ public class ClientTraceIdSimpleFormatter extends SimpleFormatter {
     messageKeysValues.put("methodName",source);
     messageKeysValues.put("loggerName",record.getLoggerName());
     messageKeysValues.put("logLevel",record.getLevel().toString());
+    messageKeysValues.put("threadName",Thread.currentThread().getName());
+    messageKeysValues.put("threadId",Thread.currentThread().getId());
     String jsonPartOfMessage = getJsonPartOfMessage(message);
     if(isValidJson(jsonPartOfMessage) || messageContainsOutputStructure(message)) {
       messageKeysValues.put("logMessage", "log Message Contains a structure , and it will follow after the log entry");

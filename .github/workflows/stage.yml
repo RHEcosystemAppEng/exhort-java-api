@@ -30,16 +30,6 @@ jobs:
           java-version: 11
           cache: maven
 
-      - name: setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-      - name: get Python location
-        id: python-location
-        run: |
-          echo "python-bin-location=$(echo $pythonLocation)/bin" >> $GITHUB_OUTPUT
-
       - name: Get pom specs
         id: project
         run: |
@@ -51,8 +41,6 @@ jobs:
           github.repository == 'RHEcosystemAppEng/exhort-java-api'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EXHORT_PYTHON3_PATH: "${{steps.python-location.outputs.python-bin-location}}/python3"
-          EXHORT_PIP3_PATH: "${{steps.python-location.outputs.python-bin-location}}/pip3"
         run: mvn deploy -Pprepare-deployment,deploy-github -B -ff -DskipTests=true -Dskip.junit_platform=true
 
   release:

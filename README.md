@@ -419,7 +419,22 @@ Two possible values for this setting:
 2. MATCH_MANIFEST_VERSIONS="true" - means that before starting the analysis,
    the api will compare all the versions of packages in manifest against installed/resolved versions on client' environment, in case there is a difference, it will throw an error to the client/user with message containing the first encountered versions mismatch, including package name, and the versions difference, and will suggest to set setting `MATCH_MANIFEST_VERSIONS`="false" to ignore all differences
 
+#### Golang Support
 
+By default, all go.mod' packages' transitive modules will be taken to analysis with their original package version, that is,
+if go.mod has 2 modules, `a` and `b`, and each one of them has the same package c with same major version v1, but different minor versions:
+- namespace/c/v1@v1.1
+- namespace/c/v1@v1.2
+
+
+Then both of these packages will be entered to the generated sbom and will be included in analysis returned to client.
+In golang, in an actual build of an application into an actual application executable binary, only one of the minor versions will be included in the executable, as only packages with same name but different major versions considered different packages ,
+hence can co-exist together in the application executable.
+
+Go ecosystem knows how to select one minor version among all the minor versions of the same major version of a given package, using the [MVS Algorithm](https://go.dev/ref/mod#minimal-version-selection).
+
+In order to enable this behavior, that only shows in analysis modules versions that are actually built into the application executable, please set
+system property/environment variable - `EXHORT_GO_MVS_LOGIC_ENABLED=true`(Default is false)
 
 
 

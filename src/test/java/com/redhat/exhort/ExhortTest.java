@@ -49,7 +49,7 @@ public class ExhortTest {
     try {
       var tmpDir = Files.createTempDirectory("exhort_test_");
       tmpFile = Files.createFile(tmpDir.resolve(fileName));
-      try (var is = getResourceAsStreamDecision(pathList)) {
+      try (var is = getResourceAsStreamDecision(this.getClass(), pathList)) {
         if(Objects.nonNull(is)) {
           Files.write(tmpFile, is.readAllBytes());
         }

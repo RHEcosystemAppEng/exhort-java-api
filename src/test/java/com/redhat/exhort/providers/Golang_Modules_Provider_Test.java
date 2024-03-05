@@ -18,8 +18,6 @@ package com.redhat.exhort.providers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.ExhortTest;
-import com.redhat.exhort.Provider;
-import com.redhat.exhort.sbom.Sbom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

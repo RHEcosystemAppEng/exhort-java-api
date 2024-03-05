@@ -15,6 +15,7 @@
  */
 package com.redhat.exhort.impl;
 
+import static com.redhat.exhort.ExhortTest.getResourceAsStreamDecision;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -30,6 +31,7 @@ import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import com.redhat.exhort.ExhortTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -54,7 +56,7 @@ import com.redhat.exhort.tools.Ecosystem;
 @ClearEnvironmentVariable(key="RHDA_TOKEN")
 @ClearEnvironmentVariable(key="RHDA_SOURCE")
 @SuppressWarnings("unchecked")
-class Exhort_Api_Test {
+class Exhort_Api_Test extends ExhortTest {
   @Mock
   Provider mockProvider;
   @Mock

@@ -56,20 +56,36 @@ class Javascript_Npm_Provider_Test extends ExhortTest {
     var tmpNpmFolder = Files.createTempDirectory("exhort_test_");
     var tmpNpmFile = Files.createFile(tmpNpmFolder.resolve("package.json"));
     var tmpLockFile = Files.createFile(tmpNpmFolder.resolve("package-lock.json"));
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
+      Files.write(tmpNpmFile, is.readAllBytes());
+    }
+
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package-lock.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "package.json"})) {
       Files.write(tmpNpmFile, is.readAllBytes());
     }
 
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "package-lock.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpLockFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_stack_sbom.json"))) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+    String npmListingStack;
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "npm-ls-stack.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "expected_stack_sbom.json"})) {
       expectedSbom = new String(is.readAllBytes());
     }
     String npmListingStack;
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "npm-ls-stack.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       npmListingStack = new String(is.readAllBytes());
     }
     MockedStatic<Operations> mockedOperations = mockStatic(Operations.class);
@@ -94,16 +110,28 @@ class Javascript_Npm_Provider_Test extends ExhortTest {
   void test_the_provideComponent(String testFolder) throws IOException, InterruptedException {
     // load the pom target pom file
     byte[] targetPom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "package.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       targetPom = is.readAllBytes();
     }
     // load expected SBOM
     String expectedSbom = "";
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_component_sbom.json"))) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+    String npmListingComponent;
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "npm-ls-component.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "expected_component_sbom.json"})) {
       expectedSbom = new String(is.readAllBytes());
     }
     String npmListingComponent;
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "npm-ls-component.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       npmListingComponent = new String(is.readAllBytes());
     }
 
@@ -138,6 +166,17 @@ class Javascript_Npm_Provider_Test extends ExhortTest {
     // create temp file hosting our sut package.json
     var tmpNpmFolder = Files.createTempDirectory("exhort_test_");
     var tmpNpmFile = Files.createFile(tmpNpmFolder.resolve("package.json"));
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "package.json"))) {
+    Files.write(tmpNpmFile, is.readAllBytes());
+  }
+      String expectedSbom = "";
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "expected_component_sbom.json"))) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+  String npmListingComponent;
+  try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "npm", testFolder, "npm-ls-component.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "package.json"})) {
     Files.write(tmpNpmFile, is.readAllBytes());
   }
@@ -147,6 +186,7 @@ class Javascript_Npm_Provider_Test extends ExhortTest {
     }
   String npmListingComponent;
   try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "npm", testFolder, "npm-ls-component.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
     npmListingComponent = new String(is.readAllBytes());
   }
   ArgumentMatcher<Path> matchPath = path -> path == null;

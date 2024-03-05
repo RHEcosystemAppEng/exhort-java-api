@@ -15,6 +15,7 @@
  */
 package com.redhat.exhort.impl;
 
+import static com.redhat.exhort.ExhortTest.getResourceAsStreamDecision;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -30,6 +31,7 @@ import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import com.redhat.exhort.ExhortTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -54,7 +56,7 @@ import com.redhat.exhort.tools.Ecosystem;
 @ClearEnvironmentVariable(key="RHDA_TOKEN")
 @ClearEnvironmentVariable(key="RHDA_SOURCE")
 @SuppressWarnings("unchecked")
-class Exhort_Api_Test {
+class Exhort_Api_Test extends ExhortTest {
   @Mock
   Provider mockProvider;
   @Mock
@@ -75,7 +77,11 @@ class Exhort_Api_Test {
       throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"tst_manifests","maven","empty","pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -97,7 +103,11 @@ class Exhort_Api_Test {
 
     // load dummy html and set as the expected analysis
     byte[] expectedHtml;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.html")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.html"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedHtml = is.readAllBytes();
     }
 
@@ -134,7 +144,11 @@ class Exhort_Api_Test {
     throws IOException, ExecutionException, InterruptedException {
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"tst_manifests","maven","empty","pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -159,7 +173,11 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedAnalysis;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedAnalysis = mapper.readValue(is, AnalysisReport.class);
     }
 
@@ -191,7 +209,11 @@ class Exhort_Api_Test {
     throws IOException, ExecutionException, InterruptedException {
     // load pom.xml
     byte[] targetPom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] {"tst_manifests","maven","empty","pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       targetPom = is.readAllBytes();
     }
 
@@ -218,7 +240,11 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedReport;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedReport = mapper.readValue(is, AnalysisReport.class);
     }
 
@@ -249,19 +275,31 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedJson;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedJson = mapper.readValue(is, AnalysisReport.class);
     }
 
     // load dummy html and set as the expected analysis
     byte[] expectedHtml;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.html")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.html"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedHtml = is.readAllBytes();
     }
 
     // create a temporary pom.xml file
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"tst_manifests","maven","empty","pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -277,7 +315,11 @@ class Exhort_Api_Test {
 
     // load dummy mixed and set as the expected analysis
     byte[] mixedResponse;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.mixed")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.mixed"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       mixedResponse = is.readAllBytes();
     }
 
@@ -310,7 +352,11 @@ class Exhort_Api_Test {
     throws IOException, ExecutionException, InterruptedException {
     // load pom.xml
     var tmpFile = Files.createTempFile("exhort_test_pom_", ".xml");
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("tst_manifests/maven/empty/pom.xml")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"tst_manifests","maven","empty","pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpFile, is.readAllBytes());
     }
 
@@ -332,7 +378,11 @@ class Exhort_Api_Test {
     // load dummy json and set as the expected analysis
     var mapper = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     AnalysisReport expectedReport;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream("dummy_responses/maven/analysis-report.json")) {
+=======
     try (var is = getResourceAsStreamDecision(this.getClass(), new String [] {"dummy_responses","maven","analysis-report.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedReport = mapper.readValue(is, AnalysisReport.class);
     }
 

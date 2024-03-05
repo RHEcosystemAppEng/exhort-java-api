@@ -69,16 +69,28 @@ class Java_Maven_Provider_Test extends ExhortTest {
     // create temp file hosting our sut pom.xml
     var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
 //    log.log(System.Logger.Level.INFO,"the test folder is : " + testFolder);
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
+=======
     try (var is = getResourceAsStreamDecision(getClass(), new String []{ "tst_manifests", "maven", testFolder, "pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpPomFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_stack_sbom.json"))) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+    String depTree;
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "depTree.txt"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "expected_stack_sbom.json"})) {
       expectedSbom = new String(is.readAllBytes());
     }
     String depTree;
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "depTree.txt"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       depTree = new String(is.readAllBytes());
     }
 
@@ -118,17 +130,29 @@ class Java_Maven_Provider_Test extends ExhortTest {
   void test_the_provideComponent(String testFolder) throws IOException, InterruptedException {
     // load the pom target pom file
     byte[] targetPom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       targetPom = is.readAllBytes();
     }
     // load expected SBOM
     String expectedSbom = "";
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_component_sbom.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "expected_component_sbom.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedSbom = new String(is.readAllBytes());
     }
 
     String effectivePom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "effectivePom.xml"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "effectivePom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       effectivePom = new String(is.readAllBytes());
     }
 
@@ -152,17 +176,29 @@ class Java_Maven_Provider_Test extends ExhortTest {
     // load the pom target pom file
     // create temp file hosting our sut pom.xml
     var tmpPomFile = Files.createTempFile("exhort_test_", ".xml");
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "pom.xml"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(),new String [] { "tst_manifests", "maven", testFolder, "pom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpPomFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom = "";
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "expected_component_sbom.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "expected_component_sbom.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedSbom = new String(is.readAllBytes());
     }
 
     String effectivePom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "maven", testFolder, "effectivePom.xml"))) {
+=======
     try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "maven", testFolder, "effectivePom.xml"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       effectivePom = new String(is.readAllBytes());
     }
 

@@ -36,7 +36,6 @@
     <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
     <maven-help-plugin.version>3.4.0</maven-help-plugin.version>
     <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
-    <maven-invoker-plugin.version>3.2.2</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
     <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
@@ -54,6 +53,7 @@
     <pitest-maven.version>1.13.2</pitest-maven.version>
     <pitest-junit5-plugin.version>1.1.2</pitest-junit5-plugin.version>
     <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
+    <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
   </properties>
 
   <licenses>
@@ -270,10 +270,6 @@
           <version>${maven-install-plugin.version}</version>
         </plugin>
         <plugin>
-          <artifactId>maven-invoker-plugin</artifactId>
-          <version>${maven-invoker-plugin.version}</version>
-        </plugin>
-        <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>${maven-jar-plugin.version}</version>
         </plugin>
@@ -434,6 +430,11 @@ limitations under the License.]]>
             <timestampedReports>false</timestampedReports>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${maven-failsafe-plugin.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -486,6 +487,9 @@ limitations under the License.]]>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
         <configuration>
+          <excludedGroups>
+            IntegrationTest
+          </excludedGroups>
           <reportFormat>plain</reportFormat>
           <consoleOutputReporter>
             <disable>false</disable>
@@ -663,7 +667,6 @@ limitations under the License.]]>
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
@@ -714,24 +717,27 @@ limitations under the License.]]>
       <id>its</id>
       <build>
         <plugins>
-          <!-- invoker:install is bound to the pre-integration-test phase and will install the project and create the local repository-->
-          <!-- invoker:run is bound to the integration-test phase and will invoke all integration test projects -->
           <plugin>
-            <artifactId>maven-invoker-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${maven-failsafe-plugin.version}</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>5.9.1</version>
+              </dependency>
+            </dependencies>
             <configuration>
-              <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-              <localRepositoryPath>${project.build.directory}/local-it-repo</localRepositoryPath>
-              <goals>
-                <goal>test</goal>
-              </goals>
-              <settingsFile>src/it/settings.xml</settingsFile>
-              <showErrors>true</showErrors>
+              <groups>
+                IntegrationTest
+              </groups>
             </configuration>
             <executions>
               <execution>
                 <goals>
-                  <goal>install</goal>
-                  <goal>run</goal>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
                 </goals>
               </execution>
             </executions>

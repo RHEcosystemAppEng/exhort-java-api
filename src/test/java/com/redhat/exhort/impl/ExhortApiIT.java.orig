@@ -61,8 +61,12 @@ class ExhortApiIT extends ExhortTest {
   @BeforeAll
   static void beforeAll() {
     api = new ExhortApi();
+<<<<<<< HEAD
+    System.setProperty("EXHORT_DEV_MODE","true");
+=======
     System.setProperty("RHDA_SOURCE","exhort-java-api-it");
     System.setProperty("EXHORT_DEV_MODE","false");
+>>>>>>> java-enhanced-it-working
     ecoSystemsManifestNames = Map.of("golang", "go.mod","maven","pom.xml","npm","package.json","pypi","requirements.txt");
 
   }
@@ -70,7 +74,10 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @AfterAll
   static void afterAll() {
+<<<<<<< HEAD
+=======
     System.clearProperty("RHDA_SOURCE");
+>>>>>>> java-enhanced-it-working
     System.clearProperty("EXHORT_DEV_MODE");
     api = null;
   }

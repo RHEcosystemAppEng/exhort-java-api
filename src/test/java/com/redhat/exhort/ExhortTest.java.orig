@@ -36,13 +36,8 @@ public class ExhortTest {
     return new String(bytes);
   }
 
-<<<<<<< HEAD
-  private static InputStream getResourceAsStreamDecision(String[] list) throws IOException {
-    InputStream resourceAsStreamFromModule = ExhortTest.class.getModule().getResourceAsStream(String.join("/", list));
-=======
   public static InputStream getResourceAsStreamDecision(Class<? extends ExhortTest> theClass, String[] list) throws IOException {
     InputStream resourceAsStreamFromModule = theClass.getModule().getResourceAsStream(String.join("/", list));
->>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
     if (Objects.isNull(resourceAsStreamFromModule)) {
       return theClass.getClassLoader().getResourceAsStream(String.join("/", list));
     }
@@ -54,7 +49,11 @@ public class ExhortTest {
     try {
       var tmpDir = Files.createTempDirectory("exhort_test_");
       tmpFile = Files.createFile(tmpDir.resolve(fileName));
+<<<<<<< HEAD
+      try (var is = getResourceAsStreamDecision(pathList)) {
+=======
       try (var is = getResourceAsStreamDecision(this.getClass(), pathList)) {
+>>>>>>> java-enhanced-it-working
         if(Objects.nonNull(is)) {
           Files.write(tmpFile, is.readAllBytes());
         }

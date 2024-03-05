@@ -58,7 +58,7 @@ public class PythonEnvironmentExtension implements BeforeAllCallback, AfterAllCa
 //    var tmpPythonModuleDir = Files.createTempDirectory("exhort_test_");
 //    var tmpPythonFile = Files.createFile(tmpPythonModuleDir.resolve("requirements.txt"));
 //    Python_Provider_Test.testFolders().forEach( test -> {
-//      try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "pip", test, "requirements.txt"))) {
+//      try (var is = getClass().getClassLoader().getResourceAsStream(String.join("/","tst_manifests", "pip", test, "requirements.txt"))) {
 //        Files.write(tmpPythonFile, is.readAllBytes());
 //        pythonController.installPackage(tmpPythonFile.toAbsolutePath().toString());
 //

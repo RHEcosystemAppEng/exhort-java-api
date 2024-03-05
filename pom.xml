@@ -795,9 +795,6 @@ limitations under the License.]]>
             <artifactId>junit-platform-maven-plugin</artifactId>
             <version>${junit-platform-maven-plugin.version}</version>
             <configuration>
-<!--               <tags>-->
-<!--                 <tag>!gitTest</tag>-->
-<!--               </tags>-->
             </configuration>
           </plugin>
         </plugins>

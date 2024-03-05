@@ -19,13 +19,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class ExhortTest {
 
   protected String getStringFromFile(String... list) {
     byte[] bytes = new byte[0];
     try {
-      InputStream resourceAsStream = ExhortTest.class.getModule().getResourceAsStream(String.join("/", list));
+      InputStream resourceAsStream = getResourceAsStreamDecision(list);
       bytes = resourceAsStream.readAllBytes();
       resourceAsStream.close();
     } catch (IOException e) {
@@ -35,13 +36,29 @@ public class ExhortTest {
     return new String(bytes);
   }
 
+  private static InputStream getResourceAsStreamDecision(String[] list) throws IOException {
+    InputStream resourceAsStreamFromModule = ExhortTest.class.getModule().getResourceAsStream(String.join("/", list));
+    if (Objects.isNull(resourceAsStreamFromModule)) {
+      return ExhortTest.class.getClassLoader().getResourceAsStream(String.join("/", list));
+    }
+    return resourceAsStreamFromModule;
+  }
+
   protected String getFileFromResource(String fileName, String... pathList) {
     Path tmpFile;
     try {
       var tmpDir = Files.createTempDirectory("exhort_test_");
       tmpFile = Files.createFile(tmpDir.resolve(fileName));
-      try (var is = getClass().getModule().getResourceAsStream(String.join("/", pathList))) {
-        Files.write(tmpFile, is.readAllBytes());
+      try (var is = getResourceAsStreamDecision(pathList)) {
+        if(Objects.nonNull(is)) {
+          Files.write(tmpFile, is.readAllBytes());
+        }
+        else
+        {
+          InputStream resourceIs = getClass().getClassLoader().getResourceAsStream(String.join("/", pathList));
+          Files.write(tmpFile, resourceIs.readAllBytes());
+          resourceIs.close();
+        }
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

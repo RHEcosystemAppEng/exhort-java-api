@@ -41,7 +41,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(HelperExtension.class)
 @ExtendWith(MockitoExtension.class)
-class Java_Maven_Provider_Test extends ExhortTest {
+public class Java_Maven_Provider_Test extends ExhortTest {
+
+
 //  private static System.Logger log = System.getLogger("Java_Maven_Provider_Test");
   // test folder are located at src/test/resources/tst_manifests
   // each folder should contain:
@@ -100,7 +102,7 @@ class Java_Maven_Provider_Test extends ExhortTest {
 
   }
 
-  private static String getOutputFileAndOverwriteItWithMock(String outputFileContent, InvocationOnMock invocationOnMock,String parameterPrefix) throws IOException {
+  public static String getOutputFileAndOverwriteItWithMock(String outputFileContent, InvocationOnMock invocationOnMock,String parameterPrefix) throws IOException {
     String[] rawArguments = (String[]) invocationOnMock.getRawArguments()[0];
     Optional<String> outputFileArg = Arrays.stream(rawArguments).filter(arg -> arg!= null && arg.startsWith(parameterPrefix)).findFirst();
     String outputFilePath=null;

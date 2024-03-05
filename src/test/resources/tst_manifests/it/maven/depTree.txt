@@ -1,0 +1,6 @@
+pom-with-deps-no-ignore:pom-with-dependency-not-ignored-for-tests:jar:0.0.1
++- log4j:log4j:jar:1.2.17:compile
++- org.projectlombok:lombok:jar:1.16.6:compile
+\- com.fasterxml.jackson.core:jackson-databind:jar:2.14.0:compile
+   +- com.fasterxml.jackson.core:jackson-annotations:jar:2.14.0:compile
+   \- com.fasterxml.jackson.core:jackson-core:jar:2.14.0:compile

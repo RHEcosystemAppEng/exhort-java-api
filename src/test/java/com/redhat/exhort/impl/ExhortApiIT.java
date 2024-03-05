@@ -24,13 +24,15 @@ import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.ProviderReport;
 import com.redhat.exhort.providers.HelperExtension;
 import com.redhat.exhort.tools.Ecosystem;
+import com.redhat.exhort.tools.Operations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -38,14 +40,20 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static com.redhat.exhort.providers.Java_Maven_Provider_Test.getOutputFileAndOverwriteItWithMock;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 
 @Tag("IntegrationTest")
 @ExtendWith(HelperExtension.class)
+@ExtendWith(MockitoExtension.class)
 class ExhortApiIT extends ExhortTest {
 
   private static Api api;
   private static Map<String,String> ecoSystemsManifestNames;
+
+  private MockedStatic<Operations> mockedOperations;
   @BeforeAll
   static void beforeAll() {
     api = new ExhortApi();
@@ -67,9 +75,21 @@ class ExhortApiIT extends ExhortTest {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
+    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
+    // locally it's not recreated with same versions
+    mockMavenDependencyTree(packageManager);
+    releaseStaticMock(packageManager);
     AnalysisReport analysisReportResult = api.stackAnalysis(pathToManifest).get();
     handleJsonResponse(analysisReportResult,true);
   }
+
+  private void releaseStaticMock(Ecosystem.Type packageManager) {
+    if(packageManager.equals(Ecosystem.Type.MAVEN)) {
+      this.mockedOperations.close();
+    }
+  }
+
+
   @Tag("IntegrationTest")
   @ParameterizedTest
   @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
@@ -77,6 +97,10 @@ class ExhortApiIT extends ExhortTest {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
+    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
+    // locally it's not recreated with same versions
+    mockMavenDependencyTree(packageManager);
+    releaseStaticMock(packageManager);
     AnalysisReport analysisReportJson = api.stackAnalysisMixed(pathToManifest).get().json;
     String analysisReportHtml = new String(api.stackAnalysisMixed(pathToManifest).get().html);
     handleJsonResponse(analysisReportJson,true);
@@ -90,6 +114,10 @@ class ExhortApiIT extends ExhortTest {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
+    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
+    // locally it's not recreated with same versions
+    mockMavenDependencyTree(packageManager);
+    releaseStaticMock(packageManager);
     String analysisReportHtml = new String(api.stackAnalysisHtml(pathToManifest).get());
     handleHtmlResponse(analysisReportHtml);
   }
@@ -101,7 +129,7 @@ class ExhortApiIT extends ExhortTest {
   void Integration_Test_End_To_End_Component_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
   byte[] manifestContent = getStringFromFile("tst_manifests", "it", packageManager.getType(), manifestFileName).getBytes();
-  preparePythonEnvironment(packageManager);
+    preparePythonEnvironment(packageManager);
     AnalysisReport analysisReportResult = api.componentAnalysis(manifestFileName,manifestContent).get();
     handleJsonResponse(analysisReportResult,false);
   }
@@ -155,7 +183,16 @@ class ExhortApiIT extends ExhortTest {
     assertTrue(status.get("ok").asBoolean(false));
 
   }
-
+  private void mockMavenDependencyTree(Ecosystem.Type packageManager) throws IOException {
+    if(packageManager.equals(Ecosystem.Type.MAVEN)) {
+      mockedOperations = mockStatic(Operations.class);
+      String depTree;
+      try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "it","maven", "depTree.txt"})) {
+        depTree = new String(is.readAllBytes());
+      }
+      mockedOperations.when(() -> Operations.runProcess(any(),any())).thenAnswer(invocationOnMock -> getOutputFileAndOverwriteItWithMock(depTree, invocationOnMock, "-DoutputFile"));
+    }
+  }
 
 }
 

@@ -22,11 +22,13 @@ import com.redhat.exhort.Api;
 import com.redhat.exhort.ExhortTest;
 import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.ProviderReport;
+import com.redhat.exhort.providers.HelperExtension;
 import com.redhat.exhort.tools.Ecosystem;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -39,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("IntegrationTest")
+@ExtendWith(HelperExtension.class)
 class ExhortApiIT extends ExhortTest {
 
   private static Api api;

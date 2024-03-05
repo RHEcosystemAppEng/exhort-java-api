@@ -48,7 +48,7 @@ jobs:
         EXHORT_PYTHON3_PATH: "${{steps.python-location.outputs.python-bin-location}}/python3"
         EXHORT_PIP3_PATH: "${{steps.python-location.outputs.python-bin-location}}/pip3"
       run: |
-        mvn verify -Pcov -B -ff
+        mvn verify -Pits,cov -B -ff
 
     - name: Report test summary
       if: ${{ matrix.java == env.MAIN_JAVA_VER  && always() }}

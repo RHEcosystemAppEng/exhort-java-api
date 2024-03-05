@@ -32,15 +32,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.MockedStatic;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import static com.redhat.exhort.providers.Java_Maven_Provider_Test.getOutputFileAndOverwriteItWithMock;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
@@ -78,9 +82,9 @@ class ExhortApiIT extends ExhortTest {
     // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
-    releaseStaticMock(packageManager);
     AnalysisReport analysisReportResult = api.stackAnalysis(pathToManifest).get();
     handleJsonResponse(analysisReportResult,true);
+    releaseStaticMock(packageManager);
   }
 
   private void releaseStaticMock(Ecosystem.Type packageManager) {
@@ -100,11 +104,11 @@ class ExhortApiIT extends ExhortTest {
     // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
-    releaseStaticMock(packageManager);
     AnalysisReport analysisReportJson = api.stackAnalysisMixed(pathToManifest).get().json;
     String analysisReportHtml = new String(api.stackAnalysisMixed(pathToManifest).get().html);
     handleJsonResponse(analysisReportJson,true);
     handleHtmlResponse(analysisReportHtml);
+    releaseStaticMock(packageManager);
   }
 
   @Tag("IntegrationTest")
@@ -117,8 +121,8 @@ class ExhortApiIT extends ExhortTest {
     // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
-    releaseStaticMock(packageManager);
     String analysisReportHtml = new String(api.stackAnalysisHtml(pathToManifest).get());
+    releaseStaticMock(packageManager);
     handleHtmlResponse(analysisReportHtml);
   }
 
@@ -190,8 +194,21 @@ class ExhortApiIT extends ExhortTest {
       try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "it","maven", "depTree.txt"})) {
         depTree = new String(is.readAllBytes());
       }
-      mockedOperations.when(() -> Operations.runProcess(any(),any())).thenAnswer(invocationOnMock -> getOutputFileAndOverwriteItWithMock(depTree, invocationOnMock, "-DoutputFile"));
+      mockedOperations.when(() -> Operations.runProcess(any(),any())).thenAnswer(invocationOnMock ->  { return getOutputFileAndOverwriteItWithMock(depTree, invocationOnMock, "-DoutputFile");});
     }
+  }
+
+  public static String getOutputFileAndOverwriteItWithMock(String outputFileContent, InvocationOnMock invocationOnMock, String parameterPrefix) throws IOException {
+    String[] rawArguments = (String[]) invocationOnMock.getRawArguments()[0];
+    Optional<String> outputFileArg = Arrays.stream(rawArguments).filter(arg -> arg!= null && arg.startsWith(parameterPrefix)).findFirst();
+    String outputFilePath=null;
+    if(outputFileArg.isPresent())
+    {
+      String outputFile = outputFileArg.get();
+      outputFilePath = outputFile.substring(outputFile.indexOf("=") + 1);
+      Files.writeString(Path.of(outputFilePath), outputFileContent);
+    }
+    return outputFilePath;
   }
 
 }

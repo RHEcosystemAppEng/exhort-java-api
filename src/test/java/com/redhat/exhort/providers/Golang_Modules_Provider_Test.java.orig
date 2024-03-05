@@ -18,8 +18,6 @@ package com.redhat.exhort.providers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.ExhortTest;
-import com.redhat.exhort.Provider;
-import com.redhat.exhort.sbom.Sbom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,12 +56,20 @@ class Golang_Modules_Provider_Test extends ExhortTest {
     // create temp file hosting our sut package.json
     var tmpGoModulesDir = Files.createTempDirectory("exhort_test_");
     var tmpGolangFile = Files.createFile(tmpGoModulesDir.resolve("go.mod"));
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "go.mod"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "golang", testFolder, "go.mod"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       Files.write(tmpGolangFile, is.readAllBytes());
     }
     // load expected SBOM
     String expectedSbom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "expected_sbom_stack_analysis.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "golang", testFolder, "expected_sbom_stack_analysis.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing stack content for our pom
@@ -81,12 +87,20 @@ class Golang_Modules_Provider_Test extends ExhortTest {
   void test_the_provideComponent(String testFolder) throws IOException, InterruptedException {
     // load the pom target pom file
     byte[] targetPom;
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "go.mod"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "golang", testFolder, "go.mod"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       targetPom = is.readAllBytes();
     }
     // load expected SBOM
     String expectedSbom = "";
+<<<<<<< HEAD
+    try (var is = getClass().getModule().getResourceAsStream(String.join("/","tst_manifests", "golang", testFolder, "expected_sbom_component_analysis.json"))) {
+=======
     try (var is =  getResourceAsStreamDecision(this.getClass(), new String [] { "tst_manifests", "golang", testFolder, "expected_sbom_component_analysis.json"})) {
+>>>>>>> 73f7443 (test: fix and tailor tests also for new java versions)
       expectedSbom = new String(is.readAllBytes());
     }
     // when providing component content for our pom

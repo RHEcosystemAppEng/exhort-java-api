@@ -63,7 +63,7 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @ParameterizedTest
   @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
-  void Test_End_To_End_Stack_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  void Integration_Test_End_To_End_Stack_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
@@ -73,7 +73,7 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @ParameterizedTest
   @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
-  void Test_End_To_End_Stack_Analysis_Mixed(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  void Integration_Test_End_To_End_Stack_Analysis_Mixed(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
@@ -86,7 +86,7 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @ParameterizedTest
   @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
-  void Test_End_To_End_Stack_Analysis_Html(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  void Integration_Test_End_To_End_Stack_Analysis_Html(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
@@ -98,7 +98,7 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @ParameterizedTest
   @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
-  void Test_End_To_End_Component_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  void Integration_Test_End_To_End_Component_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
   byte[] manifestContent = getStringFromFile("tst_manifests", "it", packageManager.getType(), manifestFileName).getBytes();
   preparePythonEnvironment(packageManager);

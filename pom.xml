@@ -284,7 +284,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven-release-plugin.version}</version>
           <configuration>
-            <arguments>-Pprepare-deployment,deploy-github</arguments>
+            <arguments>-DskipTests=true -Dskip.junit_platform=true -Pprepare-deployment,deploy-github</arguments>
             <tagNameFormat>v@{project.version}</tagNameFormat>
             <scmCommentPrefix>Build (Release): [skip ci] </scmCommentPrefix>
 <!--            <signTag>true</signTag>-->

@@ -2,13 +2,15 @@
 name: Stage
 
 on:
-  workflow_dispatch:
-  push:
+  pull_request_target:
+    types:
+      - closed
     branches:
       - main
     paths:
       - "src/main/**"
       - "pom.xml"
+      - ".github/workflows/**"
 
 jobs:
   deploy:
@@ -16,7 +18,7 @@ jobs:
     name: Deploy snapshot
     env:
       RUN_PYTHON_BIN: ${{ vars.RUN_PYTHON_BIN }}
-    if: github.repository_owner == 'RHEcosystemAppEng'
+    if: github.repository_owner == 'RHEcosystemAppEng' && github.event.pull_request.merged == true &&  !startsWith(github.head_ref, 'release/')
     outputs:
       project_version: ${{ steps.project.outputs.version }}
     steps:
@@ -50,7 +52,7 @@ jobs:
     needs: deploy
     if: |
       contains(needs.deploy.outputs.project_version, 'SNAPSHOT') &&
-      github.repository_owner == 'RHEcosystemAppEng'
+      github.repository_owner == 'RHEcosystemAppEng' && github.event.pull_request.merged == true &&  !startsWith(github.head_ref, 'release/')
     steps:
       - name: Check for existing ${{ needs.deploy.outputs.project_version }} release
         id: existing_release

@@ -120,7 +120,7 @@ class ExhortApiIT extends ExhortTest {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
-    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
+    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when running dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
     String analysisReportHtml = new String(api.stackAnalysisHtml(pathToManifest).get());
@@ -179,12 +179,15 @@ class ExhortApiIT extends ExhortTest {
     assertTrue(analysisReportHtml.contains("svg") && analysisReportHtml.contains("html"));
     int jsonStart = analysisReportHtml.indexOf("\"report\":");
     int jsonEnd = analysisReportHtml.indexOf("}}}}}");
+    if(jsonEnd == -1) {
+      jsonEnd = analysisReportHtml.indexOf("}}}}");
+    }
     String embeddedJson = analysisReportHtml.substring(jsonStart + 9 ,jsonEnd + 5);
     JsonNode jsonInHtml = om.readTree(embeddedJson);
     JsonNode scannedNode = jsonInHtml.get("scanned");
     assertTrue(scannedNode.get("total").asInt(0) > 0);
     assertTrue(scannedNode.get("transitive").asInt(0) > 0);
-    JsonNode status = jsonInHtml.get("providers").get("snyk").get("status");
+    JsonNode status = jsonInHtml.get("providers").get("osv-nvd").get("status");
     assertTrue(status.get("code").asInt(0) == 200);
     assertTrue(status.get("ok").asBoolean(false));
 

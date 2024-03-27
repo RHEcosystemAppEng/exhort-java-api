@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.lang.String.join;
@@ -181,5 +182,73 @@ public final class Operations {
       throw new RuntimeException(String.format("Failed to execute command '%s' ", join(" ",cmdList)),e);
     }
     return sb.toString();
+  }
+
+  public static ProcessExecOutput runProcessGetFullOutput(Path dir, final String[] cmdList, String[] envList) {
+    try {
+      Process process;
+      if (dir == null) {
+        if (envList != null) {
+          process = Runtime.getRuntime().exec(join(" ", cmdList), envList);
+        } else {
+          process = Runtime.getRuntime().exec(join(" ", cmdList));
+        }
+      } else {
+        if (envList != null) {
+          process = Runtime.getRuntime().exec(join(" ", cmdList), envList, dir.toFile());
+        } else {
+          process = Runtime.getRuntime().exec(join(" ", cmdList), null, dir.toFile());
+        }
+      }
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      StringBuilder output = new StringBuilder();
+      String line;
+      while ((line = reader.readLine()) != null) {
+        output.append(line);
+        if (!line.endsWith(System.lineSeparator())) {
+          output.append("\n");
+        }
+      }
+
+      reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+      StringBuilder error = new StringBuilder();
+      while ((line = reader.readLine()) != null) {
+        error.append(line);
+        if (!line.endsWith(System.lineSeparator())) {
+          error.append("\n");
+        }
+      }
+
+      process.waitFor(30L, TimeUnit.SECONDS);
+
+      return new ProcessExecOutput(output.toString(), error.toString(), process.exitValue());
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(String.format("Failed to execute command '%s' ", join(" ",cmdList)),e);
+    }
+  }
+
+  public static class ProcessExecOutput {
+    private String output;
+    private String error;
+    private int exitCode;
+
+    public ProcessExecOutput(String output, String error, int exitCode) {
+      this.output = output;
+      this.error = error;
+      this.exitCode = exitCode;
+    }
+
+    public String getOutput() {
+      return output;
+    }
+
+    public String getError() {
+      return error;
+    }
+
+    public int getExitCode() {
+      return exitCode;
+    }
   }
 }

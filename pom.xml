@@ -388,6 +388,7 @@ limitations under the License.]]>
 <!-- This one excluding ExhortApi implementation calss from coverage report as it's not tested by surefire plugin, but with junit-platform-maven-plugin              -->
               <exclude>com/redhat/exhort/impl/*</exclude>
               <exclude>com/redhat/exhort/logging/*</exclude>
+              <exclude>com/redhat/exhort/image/ImageUtils.class</exclude>
 
             </excludes>
             <propertyName>jacoco.java.option</propertyName>
@@ -462,6 +463,8 @@ limitations under the License.]]>
           <classNamePatterns>
             <pattern>.*Exhort_Api_Test</pattern>
             <pattern>.*Operations_Test</pattern>
+            <pattern>.*Envs_Test</pattern>
+            <pattern>.*ImageUtilsTest</pattern>
           </classNamePatterns>
 
 
@@ -501,6 +504,12 @@ limitations under the License.]]>
             </exclude>
             <exclude>
               **/Operations_Test.java
+            </exclude>
+            <exclude>
+              **/*Envs_Test.java
+            </exclude>
+            <exclude>
+              **/*ImageUtilsTest.java
             </exclude>
           </excludes>
           <argLine>@{surefire.argLine}</argLine>

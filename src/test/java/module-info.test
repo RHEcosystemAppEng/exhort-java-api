@@ -3,6 +3,8 @@
 
 --add-reads
   com.redhat.exhort=org.assertj.core,org.junit.jupiter.api
+--add-reads
+  com.redhat.exhort=org.junit.jupiter.params
 
 --add-opens
   com.redhat.exhort/com.redhat.exhort.impl=org.junit.platform.commons
@@ -11,9 +13,13 @@
 --add-opens
   com.redhat.exhort/com.redhat.exhort.tools=org.junit.platform.commons
 --add-opens
+  com.redhat.exhort/com.redhat.exhort.image=org.junit.platform.commons
+--add-opens
   com.redhat.exhort/com.redhat.exhort=org.mockito
-  --add-opens
+--add-opens
   com.redhat.exhort.providers/com.redhat.exhort.providers=org.mockito
+--add-opens
+  com.redhat.exhort.providers/com.redhat.exhort.image=org.mockito
 --add-opens
   java.base/java.lang=org.junitpioneer
 --add-opens

@@ -24,4 +24,6 @@ module com.redhat.exhort {
   opens com.redhat.exhort.api.serialization to com.fasterxml.jackson.databind;
     exports com.redhat.exhort.providers;
   exports com.redhat.exhort.logging;
+  exports com.redhat.exhort.image;
+  opens com.redhat.exhort.image to com.fasterxml.jackson.databind;
 }

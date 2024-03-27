@@ -22,31 +22,44 @@ import com.redhat.exhort.Api;
 import com.redhat.exhort.ExhortTest;
 import com.redhat.exhort.api.AnalysisReport;
 import com.redhat.exhort.api.ProviderReport;
+import com.redhat.exhort.image.ImageRef;
 import com.redhat.exhort.providers.HelperExtension;
 import com.redhat.exhort.tools.Ecosystem;
 import com.redhat.exhort.tools.Operations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mockStatic;
 
 @Tag("IntegrationTest")
@@ -140,6 +153,56 @@ class ExhortApiIT extends ExhortTest {
     handleJsonResponse(analysisReportResult,false);
   }
 
+  @Tag("IntegrationTest")
+  @Test
+  void Integration_Test_End_To_End_Image_Analysis() throws IOException {
+    var result = testImageAnalysis(i -> {
+      try {
+        return api.imageAnalysis(i).get();
+      } catch (InterruptedException | ExecutionException | IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    assertEquals(1, result.size());
+    handleJsonResponse(new ArrayList<>(result.values()).get(0), false);
+  }
+
+  @Tag("IntegrationTest")
+  @Test
+  void Integration_Test_End_To_End_Image_Analysis_Html() throws IOException {
+    var result = testImageAnalysis(i -> {
+      try {
+        return api.imageAnalysisHtml(i).get();
+      } catch (InterruptedException | ExecutionException | IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
+
+    handleHtmlResponseForImage(new String(result));
+  }
+
+  private static <T> T testImageAnalysis(Function<Set<ImageRef>, T> imageAnalysisFunction) throws IOException {
+    try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class);
+         var sbomIS = getResourceAsStreamDecision(ExhortApiIT.class, new String[]{"msc", "image", "image_sbom.json"})) {
+
+      var imageRef = new ImageRef("test.io/test/test-app:test-version@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165", "linux/amd64");
+
+      var jsonSbom = new BufferedReader(new InputStreamReader(sbomIS, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+      var output = new Operations.ProcessExecOutput(jsonSbom, "", 0);
+
+      mock.when(() -> Operations.getCustomPathOrElse(eq("syft")))
+        .thenReturn("syft");
+
+      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
+          aryEq(new String[]{"syft", imageRef.getImage().getFullName(),
+            "-s", "all-layers", "-o", "cyclonedx-json", "-q"}),
+          isNull()))
+        .thenReturn(output);
+
+      return imageAnalysisFunction.apply(Set.of(imageRef));
+    }
+  }
 
   private static void preparePythonEnvironment(Ecosystem.Type packageManager) {
     if(packageManager.equals(Ecosystem.Type.PYTHON)) {
@@ -192,6 +255,22 @@ class ExhortApiIT extends ExhortTest {
     assertTrue(status.get("ok").asBoolean(false));
 
   }
+
+  private void handleHtmlResponseForImage(String analysisReportHtml) throws JsonProcessingException {
+    ObjectMapper om = new ObjectMapper();
+    assertTrue(analysisReportHtml.contains("svg") && analysisReportHtml.contains("html"));
+    int jsonStart = analysisReportHtml.indexOf("\"report\":");
+    int jsonEnd = analysisReportHtml.indexOf("}}}}}}");
+    String embeddedJson = analysisReportHtml.substring(jsonStart + 9 ,jsonEnd + 6);
+    JsonNode jsonInHtml = om.readTree(embeddedJson);
+    JsonNode scannedNode = jsonInHtml.findValue("scanned");
+    assertTrue(scannedNode.get("total").asInt(0) > 0);
+    assertTrue(scannedNode.get("transitive").asInt(0) >= 0);
+    JsonNode status = jsonInHtml.findValue("providers").get("osv-nvd").get("status");
+    assertTrue(status.get("code").asInt(0) == 200);
+    assertTrue(status.get("ok").asBoolean(false));
+  }
+
   private void mockMavenDependencyTree(Ecosystem.Type packageManager) throws IOException {
     if(packageManager.equals(Ecosystem.Type.MAVEN)) {
       mockedOperations = mockStatic(Operations.class);

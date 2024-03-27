@@ -1,0 +1,47 @@
+{
+  "Name": "test",
+  "Digest": "sha256:9aa20fd4e4842854ec1c081d2dae77c686601a8640018d68782f36c60eb1a19e",
+  "RepoTags": [
+    "latest"
+  ],
+  "Created": "2022-03-15T20:36:42.128363945Z",
+  "DockerVersion": "20.10.13",
+  "Labels": null,
+  "Architecture": "amd64",
+  "Os": "linux",
+  "Layers": [
+    "sha256:e4d61adff2077d048c6372d73c41b0bd68f525ad41f5530af05098a876683055",
+    "sha256:4ff1945c672b08a1791df62afaaf8aff14d3047155365f9c3646902937f7ffe6",
+    "sha256:ffa98b8bfb18c6bd27d11b38486e81e0e613496974a8111dff694f2b2482e54a"
+  ],
+  "LayersData": [
+    {
+      "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+      "Digest": "sha256:e4d61adff2077d048c6372d73c41b0bd68f525ad41f5530af05098a876683055",
+      "Size": 54917063,
+      "Annotations": null
+    },
+    {
+      "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+      "Digest": "sha256:4ff1945c672b08a1791df62afaaf8aff14d3047155365f9c3646902937f7ffe6",
+      "Size": 5153034,
+      "Annotations": null
+    },
+    {
+      "MIMEType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+      "Digest": "sha256:ffa98b8bfb18c6bd27d11b38486e81e0e613496974a8111dff694f2b2482e54a",
+      "Size": 17608025,
+      "Annotations": null
+    }
+  ],
+  "Env": [
+    "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "LANG=C.UTF-8",
+    "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+    "PYTHON_VERSION=3.10.2",
+    "PYTHON_PIP_VERSION=21.2.4",
+    "PYTHON_SETUPTOOLS_VERSION=58.1.0",
+    "PYTHON_GET_PIP_URL=https://github.com/pypa/get-pip/raw/38e54e5de07c66e875c11a1ebbdb938854625dd8/public/get-pip.py",
+    "PYTHON_GET_PIP_SHA256=e235c437e5c7d7524fbce3880ca39b917a73dc565e0c813465b7a7a329bb279a"
+  ]
+}

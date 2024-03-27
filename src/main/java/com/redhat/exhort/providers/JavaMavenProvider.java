@@ -469,7 +469,7 @@ public final class JavaMavenProvider extends Provider {
     return deps;
   }
 
-  private Map<String, String> getMvnExecEnvs() {
+  Map<String, String> getMvnExecEnvs() {
     var javaHome = ExhortApi.getStringValueEnvironment("JAVA_HOME","");
     if (javaHome != null && !javaHome.isBlank()) {
       return Collections.singletonMap("JAVA_HOME", javaHome);

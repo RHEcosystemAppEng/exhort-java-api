@@ -1,0 +1,150 @@
+{
+  "bomFormat" : "CycloneDX",
+  "specVersion" : "1.4",
+  "version" : 1,
+  "metadata" : {
+    "timestamp" : "2024-03-25T17:41:54Z",
+    "component" : {
+      "group" : "org.acme.dbaas",
+      "name" : "postgresql-orm-quarkus",
+      "version" : "1.0.0-SNAPSHOT",
+      "purl" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT",
+      "type" : "application",
+      "bom-ref" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT"
+    }
+  },
+  "components" : [
+    {
+      "group" : "org.acme.dbaas",
+      "name" : "postgresql-orm-quarkus",
+      "version" : "1.0.0-SNAPSHOT",
+      "purl" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT",
+      "type" : "application",
+      "bom-ref" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-hibernate-orm",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-hibernate-orm@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-hibernate-orm@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-agroal",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-agroal@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-agroal@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-resteasy",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-resteasy-jackson",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-resteasy-jackson@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy-jackson@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-jdbc-postgresql",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-kubernetes-service-binding",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-kubernetes-service-binding@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-kubernetes-service-binding@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-container-image-docker",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-container-image-docker@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-container-image-docker@2.13.5.Final%20%28n%29"
+    },
+    {
+      "group" : "jakarta.validation",
+      "name" : "jakarta.validation-api",
+      "version" : "2.0.2 (n)",
+      "purl" : "pkg:maven/jakarta.validation/jakarta.validation-api@2.0.2%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/jakarta.validation/jakarta.validation-api@2.0.2%20%28n%29"
+    },
+    {
+      "group" : "io.quarkus",
+      "name" : "quarkus-vertx-http",
+      "version" : "2.13.5.Final (n)",
+      "purl" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final%20%28n%29",
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final%20%28n%29"
+    }
+  ],
+  "dependencies" : [
+    {
+      "ref" : "pkg:maven/org.acme.dbaas/postgresql-orm-quarkus@1.0.0-SNAPSHOT",
+      "dependsOn" : [
+        "pkg:maven/io.quarkus/quarkus-hibernate-orm@2.13.5.Final%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-agroal@2.13.5.Final%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-resteasy-jackson@2.13.5.Final%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.5.Final%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-kubernetes-service-binding@2.13.5.Final%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-container-image-docker@2.13.5.Final%20%28n%29",
+        "pkg:maven/jakarta.validation/jakarta.validation-api@2.0.2%20%28n%29",
+        "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final%20%28n%29"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-hibernate-orm@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-agroal@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-resteasy-jackson@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-kubernetes-service-binding@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-container-image-docker@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/jakarta.validation/jakarta.validation-api@2.0.2%20%28n%29",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final%20%28n%29",
+      "dependsOn" : [ ]
+    }
+  ]
+}

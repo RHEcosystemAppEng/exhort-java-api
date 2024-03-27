@@ -23,6 +23,7 @@ import com.redhat.exhort.providers.GoModulesProvider;
 import com.redhat.exhort.providers.JavaMavenProvider;
 import com.redhat.exhort.providers.JavaScriptNpmProvider;
 import com.redhat.exhort.providers.PythonPipProvider;
+import com.redhat.exhort.providers.GradleProvider;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {
@@ -32,7 +33,8 @@ public final class Ecosystem {
     MAVEN ("maven"),
     NPM ("npm"),
     GOLANG ("golang"),
-    PYTHON ("pypi");
+    PYTHON ("pypi"),
+    GRADLE ("gradle");
 
     String type;
 
@@ -75,6 +77,8 @@ public final class Ecosystem {
         return new GoModulesProvider();
       case "requirements.txt":
         return new PythonPipProvider();
+      case "build.gradle":
+        return new GradleProvider();
 
       default:
         throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)

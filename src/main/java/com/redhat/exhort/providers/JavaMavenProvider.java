@@ -22,10 +22,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -51,7 +48,7 @@ import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
  * for Java Maven projects (pom.xml) into a content Dot Graphs for Stack analysis or Json for
  * Component analysis.
  **/
-public final class JavaMavenProvider extends Provider {
+public final class JavaMavenProvider extends BaseJavaProvider {
 
   private Logger log = LoggersFactory.getLogger(this.getClass().getName());
   public static void main(String[] args) throws IOException {
@@ -109,8 +106,8 @@ public final class JavaMavenProvider extends Provider {
       String stackAnalysisDependencyTree = Files.readString(tmpFile);
       log.info(String.format("Package Manager Maven Stack Analysis Dependency Tree Output: %s %s",System.lineSeparator(),stackAnalysisDependencyTree));
     }
+
     var sbom = buildSbomFromTextFormat(tmpFile);
-    // build and return content for constructing request to the backend
     // build and return content for constructing request to the backend
     return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
@@ -127,155 +124,6 @@ public final class JavaMavenProvider extends Provider {
 //    createSbomIteratively(lines,sbom);
     parseDependencyTree(root, 0 , array, sbom);
     return sbom;
-  }
-
-  private void parseDependencyTree(String src, int srcDepth, String [] lines, Sbom sbom) {
-    if(lines.length == 0) {
-      return;
-    }
-    if(lines.length == 1 && lines[0].trim().equals("")){
-      return;
-    }
-    int index = 0;
-    String target = lines[index];
-    int targetDepth = getDepth(target);
-    while(targetDepth > srcDepth && index < lines.length )
-    {
-     if(targetDepth == srcDepth + 1) {
-       PackageURL from = parseDep(src);
-       PackageURL to = parseDep(target);
-       if(dependencyIsNotTestScope(from) && dependencyIsNotTestScope(to)) {
-         sbom.addDependency(from, to);
-       }
-     }
-     else {
-       String[] modifiedLines = Arrays.copyOfRange(lines, index, lines.length);
-       parseDependencyTree(lines[index-1],getDepth(lines[index-1]),modifiedLines,sbom);
-     }
-     if(index< lines.length - 1) {
-       target = lines[++index];
-       targetDepth = getDepth(target);
-     }
-     else
-     {
-       index++;
-     }
-    }
-  }
-
-  private static boolean dependencyIsNotTestScope(PackageURL artifact) {
-    return (Objects.nonNull(artifact.getQualifiers()) && !artifact.getQualifiers().get("scope").equals("test")) || Objects.isNull(artifact.getQualifiers());
-  }
-//  private void createSbomIteratively(List<String> lines,Sbom sbom)
-//  {
-//    String[] rows = new String[lines.size()];
-//    lines.toArray(rows);
-//    for (String line : lines) {
-//
-//        int depth = getDepth(line);
-//        PackageURL packageURL = parseDep(line);
-//        int startSearchExcluding = lines.indexOf(line);
-//        String[] theLines = Arrays.copyOfRange(rows, startSearchExcluding + 1, lines.size());
-//        boolean notCollectedAll= true;
-//        for (int i = 0; i < theLines.length && notCollectedAll ; i++) {
-//          int targetDepth = getDepth(theLines[i]);
-//          PackageURL target;
-//          if(targetDepth == depth + 1)
-//          {
-//            target = parseDep(theLines[i]);
-//            sbom.addDependency(packageURL,target);
-//          }
-//          else if(targetDepth <= depth)
-//          {
-//            notCollectedAll = false;
-//          }
-//        }
-//      }
-//  }
-
-  private int getDepth(String line) {
-    if(line == null || line.trim().equals("")){
-      return -1;
-    }
-
-    if(line.matches("^\\w.*"))
-    {
-      return 0;
-    }
-
-    return  ( (line.indexOf('-') -1 ) / 3) + 1;
-  }
-
-  public PackageURL parseDep(String dep) {
-    //root package
-    DependencyAggregator dependencyAggregator = new DependencyAggregator();
-    // in case line in dependency tree text starts with a letter ( for root artifact).
-    if(dep.matches("^\\w.*"))
-    {
-      dependencyAggregator = new DependencyAggregator();
-      String[] parts = dep.split(":");
-      dependencyAggregator.groupId = parts[0];
-      dependencyAggregator.artifactId = parts[1];
-      dependencyAggregator.version = parts[3];
-
-      return dependencyAggregator.toPurl();
-
-    }
-    int firstDash = dep.indexOf("-");
-    String dependency = dep.substring(++firstDash).trim();
-    if(dependency.startsWith("("))
-    {
-      dependency = dependency.substring(1);
-    }
-     dependency = dependency.replace(":runtime", ":compile").replace(":provided", ":compile");
-     int endIndex = Math.max(dependency.indexOf(":compile"),dependency.indexOf(":test"));
-     int scopeLength;
-     if(dependency.indexOf(":compile") > -1) {
-       scopeLength =   ":compile".length();
-     }
-     else {
-       scopeLength =   ":test".length();
-     }
-     dependency = dependency.substring(0,endIndex + scopeLength);
-    String[] parts = dependency.split(":");
-  // contains only GAV + packaging + scope
-    if(parts.length == 5)
-    {
-      dependencyAggregator.groupId = parts[0];
-      dependencyAggregator.artifactId= parts[1];
-      dependencyAggregator.version = parts[3];
-
-      String conflictMessage = "omitted for conflict with";
-      if (dep.contains(conflictMessage))
-      {
-        dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
-      }
-    }
-    // In case there are 6 parts, there is also a classifier for artifact (version suffix)
-    // contains GAV + packaging + classifier + scope
-    else if(parts.length == 6)
-    {
-      dependencyAggregator.groupId = parts[0];
-      dependencyAggregator.artifactId= parts[1];
-      dependencyAggregator.version = String.format("%s-%s",parts[4],parts[3]);
-      String conflictMessage = "omitted for conflict with";
-      if (dep.contains(conflictMessage))
-      {
-        dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
-      }
-
-    }
-    else{
-      throw new RuntimeException(String.format("Cannot parse dependency into PackageUrl from line = \"%s\"",dep));
-    }
-    if(parts[parts.length - 1].matches(".*[a-z]$")) {
-      dependencyAggregator.scope = parts[parts.length - 1];
-    }
-    else {
-      int endOfLine = Integer.min(parts[parts.length - 1].indexOf(""), parts[parts.length - 1].indexOf("-"));
-      dependencyAggregator.scope = parts[parts.length - 1].substring(0, endOfLine).trim();
-    }
-    return dependencyAggregator.toPurl();
   }
 
   private PackageURL txtPkgToPurl(String dotPkg) {
@@ -506,14 +354,9 @@ public final class JavaMavenProvider extends Provider {
       return scope.trim().equals("test");
     }
 
-    /**
-     * Convert the {@link DependencyAggregator} object to a {@link PackageAggregator}
-     * @return a new instance of {@link PackageAggregator}
-     * @throws MalformedPackageURLException
-     */
     public PackageURL toPurl() {
       try {
-        return new PackageURL(Ecosystem.Type.MAVEN.getType(), groupId, artifactId, version, this.scope == "*" ? null :new TreeMap<>(Map.of("scope",this.scope)), null);
+        return new PackageURL(Type.MAVEN.getType(), groupId, artifactId, version, this.scope == "*" ? null :new TreeMap<>(Map.of("scope",this.scope)), null);
       } catch (MalformedPackageURLException e) {
         throw new IllegalArgumentException("Unable to parse PackageURL", e);
       }

@@ -69,7 +69,7 @@ public final class GradleProvider extends BaseJavaProvider {
     String gradleCommand = gradle + " dependencies";
 
     String[] cmdList = gradleCommand.split("\\s+");
-    String gradleOutput = Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), cmdList, null);
+    String gradleOutput = Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), cmdList);
     Files.writeString(tempFile, gradleOutput);
 
     return tempFile;
@@ -80,7 +80,7 @@ public final class GradleProvider extends BaseJavaProvider {
     var gradle = Operations.getCustomPathOrElse("gradle");
     String propCmd = gradle + " properties";
     String[] propCmdList = propCmd.split("\\s+");
-    String properties = Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), propCmdList, null);
+    String properties = Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), propCmdList);
     // Create a temporary file
     Files.writeString(propsTempFile, properties);
 

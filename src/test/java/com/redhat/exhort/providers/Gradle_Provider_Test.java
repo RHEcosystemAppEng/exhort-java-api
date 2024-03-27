@@ -82,10 +82,18 @@ class Gradle_Provider_Test extends ExhortTest {
     try (var is = getClass().getClassLoader().getResourceAsStream(String.join("/","tst_manifests", "gradle", testFolder, "depTree.txt"))) {
       depTree = new String(is.readAllBytes());
     }
+    String gradleProperties;
+    try (var is = getClass().getClassLoader().getResourceAsStream(String.join("/","tst_manifests", "gradle", testFolder, "gradle.properties"))) {
+      gradleProperties = new String(is.readAllBytes());
+    }
 
-    MockedStatic<Operations> mockedOperations = mockStatic(Operations.class, Mockito.CALLS_REAL_METHODS);
-    ArgumentMatcher<Path> matchPath = path -> path == null;
-    mockedOperations.when(() -> Operations.runProcessGetOutput(argThat(matchPath),any(String[].class), any(String[].class))).thenReturn(depTree);
+    MockedStatic<Operations> mockedOperations = mockStatic(Operations.class);
+    ArgumentMatcher<String> gradle = string -> string.equals("gradle");
+    ArgumentMatcher<String> dependencies = string -> string.equals("dependencies");
+    ArgumentMatcher<String> properties = string -> string.equals("properties");
+    mockedOperations.when(() -> Operations.getCustomPathOrElse("gradle")).thenReturn("gradle");
+    mockedOperations.when(() -> Operations.runProcessGetOutput(any(Path.class),  argThat(gradle),argThat(dependencies))).thenReturn(depTree);
+    mockedOperations.when(() -> Operations.runProcessGetOutput(any(Path.class), argThat(gradle), argThat(properties))).thenReturn(gradleProperties);
 
     // when providing stack content for our pom
     var content = new GradleProvider().provideStack(tmpGradleFile);
@@ -117,8 +125,6 @@ class Gradle_Provider_Test extends ExhortTest {
   @ParameterizedTest
   @MethodSource("testFolders")
   void test_the_provideComponent_With_Path(String testFolder) throws IOException, InterruptedException {
-    System.setProperty("EXHORT_GRADLE_PATH", "/opt/homebrew/bin/gradle");
-
     // create temp file hosting our sut build.gradle
     var tmpGradleDir = Files.createTempDirectory("exhort_test_");
     var tmpGradleFile = Files.createFile(tmpGradleDir.resolve("build.gradle"));
@@ -144,11 +150,18 @@ class Gradle_Provider_Test extends ExhortTest {
     try (var is = getClass().getClassLoader().getResourceAsStream(String.join("/","tst_manifests", "gradle", testFolder, "depTree.txt"))) {
       depTree = new String(is.readAllBytes());
     }
+    String gradleProperties;
+    try (var is = getClass().getClassLoader().getResourceAsStream(String.join("/","tst_manifests", "gradle", testFolder, "gradle.properties"))) {
+      gradleProperties = new String(is.readAllBytes());
+    }
 
-    MockedStatic<Operations> mockedOperations = mockStatic(Operations.class, Mockito.CALLS_REAL_METHODS);
-    ArgumentMatcher<Path> matchPath = path -> path == null;
-    mockedOperations.when(() -> Operations.runProcessGetOutput(argThat(matchPath),any(String[].class), any(String[].class))).thenReturn(depTree);
-
+    MockedStatic<Operations> mockedOperations = mockStatic(Operations.class);
+    ArgumentMatcher<String> gradle = string -> string.equals("gradle");
+    ArgumentMatcher<String> dependencies = string -> string.equals("dependencies");
+    ArgumentMatcher<String> properties = string -> string.equals("properties");
+    mockedOperations.when(() -> Operations.getCustomPathOrElse("gradle")).thenReturn("gradle");
+    mockedOperations.when(() -> Operations.runProcessGetOutput(any(Path.class),  argThat(gradle),argThat(dependencies))).thenReturn(depTree);
+    mockedOperations.when(() -> Operations.runProcessGetOutput(any(Path.class), argThat(gradle), argThat(properties))).thenReturn(gradleProperties);
 
     // when providing component content for our pom
     var content = new GradleProvider().provideComponent(tmpGradleFile);
@@ -159,7 +172,6 @@ class Gradle_Provider_Test extends ExhortTest {
     assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
     assertThat(dropIgnored(new String(content.buffer)))
       .isEqualTo(dropIgnored(expectedSbom));
-
   }
 
   private String dropIgnored(String s) {

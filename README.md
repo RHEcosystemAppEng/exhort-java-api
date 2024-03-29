@@ -456,7 +456,72 @@ This increasing the chances and the probability a lot that the automatic install
 A New setting is introduced - `EXHORT_PYTHON_INSTALL_BEST_EFFORTS` (as both env variable/key in `options` object)
 1. `EXHORT_PYTHON_INSTALL_BEST_EFFORTS`="false" - install requirements.txt while respecting declared versions for all packages.
 2. `EXHORT_PYTHON_INSTALL_BEST_EFFORTS`="true" - install all packages from requirements.txt, not respecting the declared version, but trying to install a version tailored for the used python version, when using this setting,you must set setting `MATCH_MANIFEST_VERSIONS`="false"
- 
+
+### Image Support 
+
+Generate vulnerability analysis report for container images.
+
+#### Code Example
+```java
+package com.redhat.exhort;
+
+import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.image.ImageRef;
+import com.redhat.exhort.impl.ExhortApi;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
+public class ExhortImageExample {
+
+    public static void main(String[] args) throws Exception {
+        // instantiate the Exhort API implementation
+        var exhortApi = new ExhortApi();
+
+        // create a reference to image test1 by specifying image name and its platform when applicable
+        var imageRef1 = new ImageRef("quay.io/test/test1:latest", "linux/amd64");
+
+        // create a reference to image test2 by specifying image name
+        var imageRef2 = new ImageRef("quay.io/test/test2:latest", null);
+
+        // get a byte array future holding a html Image Analysis reports
+        CompletableFuture<byte[]> htmlImageReport = exhortApi.imageAnalysisHtml(Set.of(imageRef1, imageRef2));
+
+        // get a map of AnalysisReport future holding a deserialized Image Analysis reports
+        CompletableFuture<Map<ImageRef, AnalysisReport>> imageReport = exhortApi.imageAnalysis(Set.of(imageRef1, imageRef2));
+    }
+}
+```
+
+#### Prerequisites
+Installation of the tools/cli for analyzing image vulnerability.
+
+| Tool   | CLI Installation                                                        | Required |
+|--------|-------------------------------------------------------------------------|----------|
+| Syft   | [syft](https://github.com/anchore/syft?tab=readme-ov-file#installation) | True     |
+| Skopeo | [skopeo](https://github.com/containers/skopeo/blob/main/install.md)     | True     |
+| Docker | [docker](https://docs.docker.com/get-docker/)                           | False    |
+| Podman | [podman](https://podman.io/docs/installation)                           | False    |
+
+#### Customization
+Customize image analysis optionally by using *Environment Variables* or *Java Properties*.
+
+| Env / Property                | Description                                                                                                                                                     | Default Value                                                                                                                                 |
+|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| EXHORT_SYFT_PATH              | Custom path to the `syft` executable                                                                                                                            | syft                                                                                                                                          |
+| EXHORT_SYFT_CONFIG_PATH       | Custom path to the `syft` [configuration file](https://github.com/anchore/syft?tab=readme-ov-file#configuration)                                                | .syft.yaml, .syft/config.yaml, $HOME/.syft.yaml                                                                                               |
+| EXHORT_SYFT_IMAGE_SOURCE      | [Source](https://github.com/anchore/syft?tab=readme-ov-file#supported-sources) from which `syft` looks for the images (e.g. docker, podman, registry)           | (By default, Syft attempts to resolve it using: the Docker, Podman, and Containerd daemons followed by direct registry access, in that order) |
+| EXHORT_SKOPEO_PATH            | Custom path to the `skopeo` executable                                                                                                                          | skopeo                                                                                                                                        |
+| EXHORT_SKOPEO_CONFIG_PATH     | Custom path to the [authentication file](https://github.com/containers/skopeo/blob/main/docs/skopeo-inspect.1.md#options) used by `skopeo inspect`              | $HOME/.docker/config.json                                                                                                                     |
+| EXHORT_IMAGE_SERVICE_ENDPOINT | [Host endpoint](https://github.com/containers/skopeo/blob/main/docs/skopeo-inspect.1.md#options) of the container runtime daemon / service                      |                                                                                                                                               |
+| EXHORT_DOCKER_PATH            | Custom path to the `docker` executable                                                                                                                          | docker                                                                                                                                        |
+| EXHORT_PODMAN_PATH            | Custom path to the `podman` executable                                                                                                                          | podman                                                                                                                                        |
+| EXHORT_IMAGE_PLATFORM         | Default platform used for multi-arch images                                                                                                                     |                                                                                                                                               |
+| EXHORT_IMAGE_OS               | Default OS used for multi-arch images when `EXHORT_IMAGE_PLATFORM` is not set                                                                                   |                                                                                                                                               |
+| EXHORT_IMAGE_ARCH             | Default Architecture used for multi-arch images when `EXHORT_IMAGE_PLATFORM` is not set                                                                         |                                                                                                                                               |
+| EXHORT_IMAGE_VARIANT          | Default Variant used for multi-arch images when `EXHORT_IMAGE_PLATFORM` is not set                                                                              |                                                                                                                                               |
+
 ### Known Issues
 
 - For pip requirements.txt - It's been observed that for python versions 3.11.x, there might be slowness for invoking the analysis.

@@ -22,25 +22,38 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.image.ImageRef;
+import com.redhat.exhort.image.ImageUtils;
 import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.tools.Ecosystem;
 
@@ -389,6 +402,113 @@ public final class ExhortApi implements Api {
     commonHookAfterProviderCreatedSbomAndBeforeExhort();
 
     return buildRequest(content, uri, acceptType, "Stack Analysis");
+  }
+
+  @Override
+  public CompletableFuture<Map<ImageRef, AnalysisReport>> imageAnalysis(final Set<ImageRef> imageRefs) throws IOException {
+    return this.performBatchAnalysis(
+      () -> getBatchImageSboms(imageRefs),
+      MediaType.APPLICATION_JSON,
+      HttpResponse.BodyHandlers.ofString(),
+      this::getBatchImageAnalysisReports,
+      Collections::emptyMap,
+      "Image Analysis");
+  }
+
+  @Override
+  public CompletableFuture<byte[]> imageAnalysisHtml(Set<ImageRef> imageRefs) throws IOException {
+    return this.performBatchAnalysis(
+      () -> getBatchImageSboms(imageRefs),
+      MediaType.TEXT_HTML,
+      HttpResponse.BodyHandlers.ofByteArray(),
+      HttpResponse::body,
+      () -> new byte[0],
+      "Image Analysis");
+  }
+
+  Map<String, JsonNode> getBatchImageSboms(final Set<ImageRef> imageRefs) {
+    return imageRefs.parallelStream().map(imageRef -> {
+      try {
+        return new AbstractMap.SimpleEntry<>(
+          imageRef.getPackageURL().canonicalize(),
+          ImageUtils.generateImageSBOM(imageRef));
+      } catch (IOException | MalformedPackageURLException ex) {
+        throw new RuntimeException(ex);
+      }
+    }).collect(Collectors.toMap(
+      AbstractMap.SimpleEntry::getKey,
+      AbstractMap.SimpleEntry::getValue
+    ));
+  }
+
+  Map<ImageRef, AnalysisReport> getBatchImageAnalysisReports(final HttpResponse<String> httpResponse) {
+    if (httpResponse.statusCode() == 200) {
+      try {
+        Map<?, ?> reports = this.mapper.readValue(httpResponse.body(), Map.class);
+        return reports.entrySet().stream().collect(Collectors.toMap(
+          e -> {
+            try {
+              return new ImageRef(new PackageURL(e.getKey().toString()));
+            } catch (MalformedPackageURLException ex) {
+              throw new RuntimeException(ex);
+            }
+          },
+          e -> mapper.convertValue(e.getValue(), AnalysisReport.class)
+        ));
+      } catch (JsonProcessingException e) {
+        throw new CompletionException(e);
+      }
+    } else {
+      return Collections.emptyMap();
+    }
+  }
+
+  <H, T> CompletableFuture<T> performBatchAnalysis(final Supplier<Map<String, JsonNode>> sbomsGenerator,
+                                                   final MediaType mediaType,
+                                                   final HttpResponse.BodyHandler<H> responseBodyHandler,
+                                                   final Function<HttpResponse<H>, T> responseGenerator,
+                                                   final Supplier<T> exceptionResponseGenerator,
+                                                   final String analysisName) throws IOException {
+    String exClientTraceId = commonHookBeginning(false);
+    var uri = URI.create(String.format("%s/api/v4/batch-analysis", this.endpoint));
+    var sboms = sbomsGenerator.get();
+    var content = new Provider.Content(
+      mapper.writeValueAsString(sboms).getBytes(StandardCharsets.UTF_8),
+      Api.CYCLONEDX_MEDIA_TYPE);
+    commonHookAfterProviderCreatedSbomAndBeforeExhort();
+    return this.client
+      .sendAsync(
+        this.buildRequest(content, uri, mediaType, analysisName), responseBodyHandler)
+      .thenApply(
+        response -> getBatchAnalysisReportsFromResponse(response, responseGenerator, analysisName,
+          "json", exClientTraceId)
+      ).exceptionally(exception -> {
+        LOG.severe(String.format("failed to invoke %s for getting the json report, received message= %s ",
+          analysisName, exception.getMessage()));
+        commonHookAfterExhortResponse();
+        return exceptionResponseGenerator.get();
+      });
+  }
+
+  <H, T> T getBatchAnalysisReportsFromResponse(final HttpResponse<H> response,
+                                               final Function<HttpResponse<H>, T> responseGenerator,
+                                               final String operation, final String reportName,
+                                               final String exClientTraceId) {
+    RequestManager.getInstance().addClientTraceIdToRequest(exClientTraceId);
+    if (debugLoggingIsNeeded()) {
+      logExhortRequestId(response);
+    }
+    if (response.statusCode() == 200) {
+      if (debugLoggingIsNeeded()) {
+        LOG.info(String.format("Response body received from exhort server : %s %s",
+          System.lineSeparator(), response.body()));
+      }
+    } else {
+      LOG.severe(String.format("failed to invoke %s for getting the %s report, Http Response Status=%s , " +
+        "received message from server= %s ", operation, reportName, response.statusCode(), response.body()));
+    }
+    commonHookAfterExhortResponse();
+    return responseGenerator.apply(response);
   }
 
   /**

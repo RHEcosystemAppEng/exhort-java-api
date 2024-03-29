@@ -200,7 +200,7 @@ public final class JavaScriptNpmProvider extends Provider {
     return ignored;
   }
 
-  private Map<String, String> getNpmExecEnv() {
+  Map<String, String> getNpmExecEnv() {
     String nodeHome = System.getProperty("NODE_HOME");
     if (nodeHome != null && !nodeHome.isBlank()) {
       String path = System.getenv("PATH");

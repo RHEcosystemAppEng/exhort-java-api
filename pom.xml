@@ -97,6 +97,11 @@
     <dependencies>
       <!-- Dependencies -->
       <dependency>
+        <groupId>org.tomlj</groupId>
+        <artifactId>tomlj</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+      <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson.version}</version>
@@ -167,6 +172,10 @@
 
   <dependencies>
     <!-- Dependencies -->
+    <dependency>
+      <groupId>org.tomlj</groupId>
+      <artifactId>tomlj</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>

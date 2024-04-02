@@ -15,6 +15,8 @@
  */
 package com.redhat.exhort.providers;
 
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.logging.LoggersFactory;
@@ -22,16 +24,23 @@ import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
+import org.tomlj.Toml;
+import org.tomlj.TomlParseResult;
+import org.tomlj.TomlTable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 
@@ -43,6 +52,7 @@ import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 public final class GradleProvider extends BaseJavaProvider {
 
   private Logger log = LoggersFactory.getLogger(this.getClass().getName());
+
   public GradleProvider() {
     super(Type.GRADLE);
   }
@@ -57,8 +67,131 @@ public final class GradleProvider extends BaseJavaProvider {
     Map<String, String> propertiesMap = extractProperties(manifestPath);
 
     var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, "runtimeClasspath");
-    return new Content(sbom.getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
+    var ignored = getIgnoredDeps(manifestPath);
+
+    return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
+
+  private List<String> getIgnoredDeps(Path manifestPath) throws IOException {
+    List<String> buildGradleLines = Files.readAllLines(manifestPath);
+    List<String> ignored = new ArrayList<>();
+
+    var ignoredLines = buildGradleLines.stream()
+      .filter(this::isIgnoredLine)
+      .map(this::extractPackageName)
+      .collect(Collectors.toList());
+
+    // Process each ignored dependency
+    for (String dependency : ignoredLines) {
+      String ignoredDepInfo;
+      if (isNotation(dependency)) {
+        ignoredDepInfo = getDepFromNotation(dependency, manifestPath);
+      } else {
+        ignoredDepInfo = getDepInfo(dependency);
+      }
+
+      if (ignoredDepInfo != null) {
+        ignored.add(ignoredDepInfo);
+      }
+    }
+
+    return ignored;
+  }
+
+  private String getDepInfo(String dependencyLine) {
+    if (dependencyLine.contains("group: ")) {
+      // Process line with group: syntax
+      String[] parts = dependencyLine.split("'");
+      String groupId = parts[1].trim();
+      String artifactId = parts[3].trim();
+      String version = parts[5].trim();
+
+      PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
+      return ignoredPackageUrl.getCoordinates();
+    } else if (dependencyLine.contains("\"")) {
+      String[] parts = dependencyLine.split("\"");
+      String dependency = parts[1];
+      String[] dependencyParts = dependency.split(":");
+      if (dependencyParts.length != 3) {
+        return null;
+      }
+      // Extract groupId, artifactId, and version
+      String groupId = dependencyParts[0];
+      String artifactId = dependencyParts[1];
+      String version = dependencyParts[2];
+
+      PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
+      return ignoredPackageUrl.getCoordinates();
+    } else {
+      // Handle lines that don't match either format (optional)
+      return null;
+    }
+  }
+
+  private String getDepFromNotation(String dependency, Path manifestPath) throws IOException {
+    // Extract everything after "libs."
+    String alias = dependency.substring(dependency.indexOf("libs.") + "libs.".length());
+    alias = alias.replace(".", "-");
+    // Read and parse the TOML file
+    TomlParseResult toml = Toml.parse(getLibsVersionsTomlPath(manifestPath));
+    TomlTable librariesTable = toml.getTable("libraries");
+    TomlTable dependencyTable = librariesTable.getTable(alias);
+    if (dependencyTable != null) {
+      String groupId = dependencyTable.getString("module").split(":")[0];
+      String artifactId = dependencyTable.getString("module").split(":")[1];
+      String version = toml.getTable("versions").getString(dependencyTable.getString("version.ref"));
+      PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
+      return ignoredPackageUrl.getCoordinates();
+    }
+
+    return null;
+
+  }
+
+  private Path getLibsVersionsTomlPath(Path manifestPath) {
+    return manifestPath.getParent().resolve("gradle/libs.versions.toml");
+  }
+
+  public PackageURL toPurl(String groupId, String artifactId, String version) {
+    try {
+      return new PackageURL(Type.MAVEN.getType(), groupId, artifactId, version, null, null);
+    } catch (MalformedPackageURLException e) {
+      throw new IllegalArgumentException("Unable to parse PackageURL", e);
+    }
+  }
+
+  public static boolean isNotation(String line) {
+    int colonCount = 0;
+    for (char c : line.toCharArray()) {
+      if (c == ':') {
+        colonCount++;
+        if (colonCount > 1) {
+          return false; // Likely full dependency with group and artifact
+        }
+      }
+    }
+    return true; // Potentially a notation
+  }
+
+  private boolean isIgnoredLine(String line) {
+    return line.contains("exhortignore");
+  }
+
+  private String extractPackageName(String line) {
+    String packageName = line.trim();
+    // Extract the package name before the comment
+    int commentIndex = packageName.indexOf("//");
+    if (commentIndex != -1) {
+      packageName = packageName.substring(0, commentIndex).trim();
+    }
+    // Remove any other trailing comments or spaces
+    commentIndex = packageName.indexOf("/*");
+    if (commentIndex != -1) {
+      packageName = packageName.substring(0, commentIndex).trim();
+    }
+    return packageName;
+  }
+
 
   private static Path getDependencies(Path manifestPath) throws IOException {
     // check for custom gradle executable
@@ -100,6 +233,7 @@ public final class GradleProvider extends BaseJavaProvider {
       line = line.replaceAll("---", "-").replaceAll("    ", "  ");
       line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
       line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
+      line = line.replaceAll(" \\(n\\)$", "");
       line = line.replaceAll("$", ":compile");
       array[index] = line;
     }
@@ -200,6 +334,8 @@ public final class GradleProvider extends BaseJavaProvider {
     }
 
     var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, configName);
-    return new Content(sbom.getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
+    var ignored = getIgnoredDeps(manifestPath);
+
+    return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 }

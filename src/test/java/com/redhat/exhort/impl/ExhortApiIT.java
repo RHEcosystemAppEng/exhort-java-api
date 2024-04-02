@@ -76,7 +76,7 @@ class ExhortApiIT extends ExhortTest {
     api = new ExhortApi();
     System.setProperty("RHDA_SOURCE","exhort-java-api-it");
     System.setProperty("EXHORT_DEV_MODE","false");
-    ecoSystemsManifestNames = Map.of("golang", "go.mod","maven","pom.xml","npm","package.json","pypi","requirements.txt");
+    ecoSystemsManifestNames = Map.of("golang", "go.mod","maven","pom.xml","npm","package.json","pypi","requirements.txt", "gradle", "build.gradle");
 
   }
 
@@ -89,7 +89,7 @@ class ExhortApiIT extends ExhortTest {
   }
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
+  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE" })
   void Integration_Test_End_To_End_Stack_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
@@ -111,7 +111,7 @@ class ExhortApiIT extends ExhortTest {
 
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
+  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE" })
   void Integration_Test_End_To_End_Stack_Analysis_Mixed(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
@@ -128,7 +128,7 @@ class ExhortApiIT extends ExhortTest {
 
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
+  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE" })
   void Integration_Test_End_To_End_Stack_Analysis_Html(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
     String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);

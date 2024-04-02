@@ -50,6 +50,9 @@ class Gradle_Provider_Test extends ExhortTest {
   // - expected_sbom.json: the SBOM expected to be provided
   static Stream<String> testFolders() {
     return Stream.of(
+      "deps_with_ignore_full_specification",
+      "deps_with_ignore_named_params",
+      "deps_with_ignore_notations",
       "deps_with_no_ignore_common_paths"
     );
   }

@@ -9,6 +9,7 @@ module com.redhat.exhort {
   requires jakarta.mail;
   requires cyclonedx.core.java;
   requires transitive packageurl.java;
+  requires org.tomlj;
 
   opens com.redhat.exhort.api to com.fasterxml.jackson.databind;
   opens com.redhat.exhort.providers to com.fasterxml.jackson.databind;

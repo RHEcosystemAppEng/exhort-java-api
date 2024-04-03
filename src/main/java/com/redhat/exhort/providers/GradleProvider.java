@@ -62,7 +62,7 @@ public final class GradleProvider extends BaseJavaProvider {
     Path tempFile = getDependencies(manifestPath);
     if (debugLoggingIsNeeded()) {
       String stackAnalysisDependencyTree = Files.readString(tempFile);
-      log.info(String.format("Package Manager Maven Stack Analysis Dependency Tree Output: %s %s", System.lineSeparator(), stackAnalysisDependencyTree));
+      log.info(String.format("Package Manager Gradle Stack Analysis Dependency Tree Output: %s %s", System.lineSeparator(), stackAnalysisDependencyTree));
     }
     Map<String, String> propertiesMap = extractProperties(manifestPath);
 
@@ -99,33 +99,53 @@ public final class GradleProvider extends BaseJavaProvider {
   }
 
   private String getDepInfo(String dependencyLine) {
-    if (dependencyLine.contains("group: ")) {
-      // Process line with group: syntax
-      String[] parts = dependencyLine.split("'");
-      String groupId = parts[1].trim();
-      String artifactId = parts[3].trim();
-      String version = parts[5].trim();
+    // Check if the line contains "group:", "name:", and "version:"
+    if (dependencyLine.contains("group:") && dependencyLine.contains("name:") && dependencyLine.contains("version:")) {
+      Pattern pattern = Pattern.compile("(group|name|version):\\s*['\"](.*?)['\"]");
+      Matcher matcher = pattern.matcher(dependencyLine);
+      String groupId = null, artifactId = null, version = null;
 
-      PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
-      return ignoredPackageUrl.getCoordinates();
-    } else if (dependencyLine.contains("\"")) {
-      String[] parts = dependencyLine.split("\"");
-      String dependency = parts[1];
-      String[] dependencyParts = dependency.split(":");
-      if (dependencyParts.length != 3) {
-        return null;
+      while (matcher.find()) {
+        String key = matcher.group(1);
+        String value = matcher.group(2);
+
+        switch (key) {
+          case "group":
+            groupId = value;
+            break;
+          case "name":
+            artifactId = value;
+            break;
+          case "version":
+            version = value;
+            break;
+        }
       }
-      // Extract groupId, artifactId, and version
-      String groupId = dependencyParts[0];
-      String artifactId = dependencyParts[1];
-      String version = dependencyParts[2];
-
-      PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
-      return ignoredPackageUrl.getCoordinates();
+        if (groupId != null && artifactId != null && version != null) {
+          PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
+          return ignoredPackageUrl.getCoordinates();
+        }
     } else {
-      // Handle lines that don't match either format (optional)
-      return null;
+      // Regular expression pattern to capture content inside single or double quotes
+      Pattern pattern = Pattern.compile("['\"](.*?)['\"]");
+      Matcher matcher = pattern.matcher(dependencyLine);
+      // Check if the matcher finds a match
+      if (matcher.find()) {
+        // Get the matched string inside single or double quotes
+        String dependency = matcher.group(1);
+        String[] dependencyParts = dependency.split(":");
+        if (dependencyParts.length == 3) {
+          // Extract groupId, artifactId, and version
+          String groupId = dependencyParts[0];
+          String artifactId = dependencyParts[1];
+          String version = dependencyParts[2];
+
+          PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
+          return ignoredPackageUrl.getCoordinates();
+        }
+      }
     }
+    return null;
   }
 
   private String getDepFromNotation(String dependency, Path manifestPath) throws IOException {

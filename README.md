@@ -315,7 +315,6 @@ There are 2 approaches for customizing <em>Exhort Java API</em>. Using <em>Envir
 <em>Java Properties</em>:
 
 ```java
-System.setProperty("EXHORT_SNYK_TOKEN", "my-private-snyk-token");
 System.setProperty("EXHORT_MVN_PATH", "/path/to/custom/mvn");
 System.setProperty("EXHORT_NPM_PATH", "/path/to/custom/npm");
 System.setProperty("EXHORT_GO_PATH", "/path/to/custom/go");
@@ -330,23 +329,6 @@ System.setProperty("EXHORT_PIP_PATH", "/path/to/pip");
 > Environment variables takes precedence.
 </p>
 
-<h4>Customizing Tokens</h4>
-<p>
-For including extra vulnerability data and resolutions, otherwise only available only for vendor registered users. You
-can use the following keys for setting various vendor tokens.
-</p>
-
-<table>
-<tr>
-<th>Vendor</th>
-<th>Token Key</th>
-</tr>
-<tr>
-<td><a href="https://app.snyk.io/redhat/snyk-token">Snyk</a></td>
-<td>EXHORT_SNYK_TOKEN</td>
-</tr>
-
-</table>
 <h4>Customizing HTTP Version</h4>
 <p>
 The HTTP Client Library can be configured to use HTTP Protocol version through environment variables, so if there is a problem with one of the HTTP Versions, the other can be configured through a dedicated environment variable.  

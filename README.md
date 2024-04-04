@@ -171,6 +171,7 @@ public class ExhortExample {
 <li><a href="https://www.javascript.com//">JavaScript</a> - <a href="https://www.npmjs.com//">Npm</a></li>
 <li><a href="https://go.dev//">Golang</a> - <a href="https://go.dev/blog/using-go-modules//">Go Modules</a></li>
 <li><a href="https://go.dev//">Python</a> - <a href="https://pypi.org/project/pip//">pip Installer</a></li>
+<li><a href="https://gradle.org//">Gradle</a> - <a href="https://gradle.org/install//">Gradle Installation</a></li>
 
 </ul>
 
@@ -274,7 +275,28 @@ Werkzeug==2.0.3
 zipp==3.6.0
 
 ```
-All of the 4 above examples are valid for marking a package to be ignored 
+<em>Gradle</em> users can add in build.gradle a comment with //exhortignore next to the package to be ignored:
+```build.gradle
+plugins {
+id 'java'
+}
+
+group = 'groupName'
+version = 'version'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "groupId:artifactId:version" // exhortignore
+}
+test {
+    useJUnitPlatform()
+}
+```
+</ul>
+All of the 5 above examples are valid for marking a package to be ignored 
 
 #### Ignore Strategies - experimental
  You can specify the method to ignore dependencies in manifest (globally), by setting the environment variable `EXHORT_IGNORE_METHOD` to one of the following values: \
@@ -297,6 +319,7 @@ System.setProperty("EXHORT_SNYK_TOKEN", "my-private-snyk-token");
 System.setProperty("EXHORT_MVN_PATH", "/path/to/custom/mvn");
 System.setProperty("EXHORT_NPM_PATH", "/path/to/custom/npm");
 System.setProperty("EXHORT_GO_PATH", "/path/to/custom/go");
+System.setProperty("EXHORT_GRADLE_PATH", "/path/to/custom/gradle");
 //python - python3, pip3 take precedence if python version > 3 installed
 System.setProperty("EXHORT_PYTHON3_PATH", "/path/to/python3");
 System.setProperty("EXHORT_PIP3_PATH", "/path/to/pip3");
@@ -371,6 +394,11 @@ following keys for setting custom paths for the said executables.
 <td><a href="https://go.dev/blog/using-go-modules/">Go Modules</a></td>
 <td><em>go</em></td>
 <td>EXHORT_GO_PATH</td>
+</tr>
+<tr>
+<td><a href="https://gradle.org/">Gradle</a></td>
+<td><em>gradle</em></td>
+<td>EXHORT_GRADLE_PATH</td>
 </tr>
 <tr>
 <td><a href="https://www.python.org/">Python programming language</a></td>

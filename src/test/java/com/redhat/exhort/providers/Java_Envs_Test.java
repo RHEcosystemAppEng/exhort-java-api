@@ -15,35 +15,34 @@
  */
 package com.redhat.exhort.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearEnvironmentVariable;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 public class Java_Envs_Test {
 
-  @Test
-  @SetEnvironmentVariable(key = "JAVA_HOME", value = "test-java-home")
-  void test_java_get_envs() {
-    var envs = new JavaMavenProvider().getMvnExecEnvs();
-    assertEquals(Collections.singletonMap("JAVA_HOME", "test-java-home"), envs);
-  }
+    @Test
+    @SetEnvironmentVariable(key = "JAVA_HOME", value = "test-java-home")
+    void test_java_get_envs() {
+        var envs = new JavaMavenProvider().getMvnExecEnvs();
+        assertEquals(Collections.singletonMap("JAVA_HOME", "test-java-home"), envs);
+    }
 
-  @Test
-  @SetEnvironmentVariable(key = "JAVA_HOME", value = "")
-  void test_java_get_envs_empty_java_home() {
-    var envs = new JavaMavenProvider().getMvnExecEnvs();
-    assertNull(envs);
-  }
+    @Test
+    @SetEnvironmentVariable(key = "JAVA_HOME", value = "")
+    void test_java_get_envs_empty_java_home() {
+        var envs = new JavaMavenProvider().getMvnExecEnvs();
+        assertNull(envs);
+    }
 
-  @Test
-  @ClearEnvironmentVariable(key = "JAVA_HOME")
-  void test_java_get_envs_no_java_home() {
-    var envs = new JavaMavenProvider().getMvnExecEnvs();
-    assertNull(envs);
-  }
+    @Test
+    @ClearEnvironmentVariable(key = "JAVA_HOME")
+    void test_java_get_envs_no_java_home() {
+        var envs = new JavaMavenProvider().getMvnExecEnvs();
+        assertNull(envs);
+    }
 }

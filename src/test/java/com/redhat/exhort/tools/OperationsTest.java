@@ -15,32 +15,34 @@
  */
 package com.redhat.exhort.tools;
 
-import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
+import java.nio.file.Path;
+import org.junit.jupiter.api.Test;
+
 class OperationsTest {
 
-  @Test
-  void when_running_process_for_existing_command_should_not_throw_exception() {
-    assertThatNoException().isThrownBy(() -> Operations.runProcess("ls", "."));
-  }
+    @Test
+    void when_running_process_for_existing_command_should_not_throw_exception() {
+        assertThatNoException().isThrownBy(() -> Operations.runProcess("ls", "."));
+    }
 
-  @Test
-  void when_running_process_for_non_existing_command_should_throw_runtime_exception() {
-    assertThatRuntimeException().isThrownBy(() -> Operations.runProcess("unknown", "--command"));
-  }
+    @Test
+    void when_running_process_for_non_existing_command_should_throw_runtime_exception() {
+        assertThatRuntimeException().isThrownBy(() -> Operations.runProcess("unknown", "--command"));
+    }
 
-  @Test
-  void when_running_process_get_full_output_for_existing_command_should_not_throw_exception() {
-    assertThatNoException().isThrownBy(() -> Operations.runProcessGetFullOutput(null, new String[]{"ls", "."}, null));
-  }
+    @Test
+    void when_running_process_get_full_output_for_existing_command_should_not_throw_exception() {
+        assertThatNoException()
+                .isThrownBy(() -> Operations.runProcessGetFullOutput(null, new String[] {"ls", "."}, null));
+    }
 
-  @Test
-  void when_running_process_get_full_output_for_non_existing_command_should_throw_runtime_exception() {
-    assertThatRuntimeException().isThrownBy(() -> Operations.runProcessGetFullOutput(Path.of("."), new String[]{"unknown", "--command"}, new String[]{"PATH=123"}));
-  }
+    @Test
+    void when_running_process_get_full_output_for_non_existing_command_should_throw_runtime_exception() {
+        assertThatRuntimeException()
+                .isThrownBy(() -> Operations.runProcessGetFullOutput(
+                        Path.of("."), new String[] {"unknown", "--command"}, new String[] {"PATH=123"}));
+    }
 }

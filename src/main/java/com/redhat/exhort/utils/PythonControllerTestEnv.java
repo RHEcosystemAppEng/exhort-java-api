@@ -16,31 +16,29 @@
 package com.redhat.exhort.utils;
 
 import com.redhat.exhort.tools.Operations;
-
 import java.nio.file.Path;
 
-public class PythonControllerTestEnv extends PythonControllerRealEnv{
-//  private System.Logger log = System.getLogger("name");
-  public PythonControllerTestEnv(String pathToPythonBin,String pathToPip) {
-    super(pathToPythonBin,pathToPip);
-  }
+public class PythonControllerTestEnv extends PythonControllerRealEnv {
+    //  private System.Logger log = System.getLogger("name");
+    public PythonControllerTestEnv(String pathToPythonBin, String pathToPip) {
+        super(pathToPythonBin, pathToPip);
+    }
 
-  @Override
-  public void prepareEnvironment(String pathToPythonBin)
-  {
-    super.prepareEnvironment(pathToPythonBin);
-    String output = Operations.runProcessGetOutput(Path.of("."), new String[]{this.pathToPythonBin, "-m", "pip", "install", "--upgrade", "pip"});
-//    log.log(System.Logger.Level.INFO,"Output from upgrading pip = " + System.lineSeparator() + output);
-  }
+    @Override
+    public void prepareEnvironment(String pathToPythonBin) {
+        super.prepareEnvironment(pathToPythonBin);
+        String output = Operations.runProcessGetOutput(
+                Path.of("."), new String[] {this.pathToPythonBin, "-m", "pip", "install", "--upgrade", "pip"});
+        //    log.log(System.Logger.Level.INFO,"Output from upgrading pip = " + System.lineSeparator() + output);
+    }
 
-  @Override
-  public boolean automaticallyInstallPackageOnEnvironment() {
-    return true;
-  }
-  @Override
-  public boolean isVirtualEnv()
-  {
-    return false;
-  }
+    @Override
+    public boolean automaticallyInstallPackageOnEnvironment() {
+        return true;
+    }
 
+    @Override
+    public boolean isVirtualEnv() {
+        return false;
+    }
 }

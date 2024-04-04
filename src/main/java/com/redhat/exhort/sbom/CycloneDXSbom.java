@@ -15,14 +15,16 @@
  */
 package com.redhat.exhort.sbom;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+
+import com.github.packageurl.MalformedPackageURLException;
+import com.github.packageurl.PackageURL;
+import com.redhat.exhort.logging.LoggersFactory;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import com.github.packageurl.MalformedPackageURLException;
-import com.redhat.exhort.logging.LoggersFactory;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema.Version;
 import org.cyclonedx.model.Bom;
@@ -31,23 +33,18 @@ import org.cyclonedx.model.Component.Type;
 import org.cyclonedx.model.Dependency;
 import org.cyclonedx.model.Metadata;
 
-import com.github.packageurl.PackageURL;
-
-import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
-
 public class CycloneDXSbom implements Sbom {
 
-  private Logger log = LoggersFactory.getLogger(this.getClass().getName());
-  private static final Version VERSION = Version.VERSION_14;
-  private String exhortIgnoreMethod;
-  private Bom bom;
+    private Logger log = LoggersFactory.getLogger(this.getClass().getName());
+    private static final Version VERSION = Version.VERSION_14;
+    private String exhortIgnoreMethod;
+    private Bom bom;
     private PackageURL root;
 
-    private BiPredicate<Collection,Component> belongingCriteriaBinaryAlgorithm;
+    private BiPredicate<Collection, Component> belongingCriteriaBinaryAlgorithm;
 
-    private <X,Y> Predicate<Y> genericComparator(BiPredicate<X,Y> binaryBelongingCriteriaAlgorithm, X container)
-    {
-      return dep -> binaryBelongingCriteriaAlgorithm.test(container, dep);
+    private <X, Y> Predicate<Y> genericComparator(BiPredicate<X, Y> binaryBelongingCriteriaAlgorithm, X container) {
+        return dep -> binaryBelongingCriteriaAlgorithm.test(container, dep);
     }
 
     public CycloneDXSbom() {
@@ -60,35 +57,32 @@ public class CycloneDXSbom implements Sbom {
         bom.setDependencies(new ArrayList<>());
         belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
         this.exhortIgnoreMethod = "insensitive";
-
     }
 
-  private static BiPredicate<Collection, Component> getBelongingConditionByName() {
-    return (collection, component) -> collection.contains(component.getName());
-  }
-
-  public CycloneDXSbom(BelongingCondition belongingCondition,String exhortIgnoreMethod) {
-      this();
-      if(belongingCondition.equals(BelongingCondition.NAME))
-      {
-        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
-      }
-      else if (belongingCondition.equals(BelongingCondition.PURL)){
-        belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
-      }
-      else
-      {
-        // fallback to belonging condition by name ( default) - this one in case the enum type will be extended and new BelongingType won't be implemented right away.
-        belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
-      }
-      this.exhortIgnoreMethod = exhortIgnoreMethod;
+    private static BiPredicate<Collection, Component> getBelongingConditionByName() {
+        return (collection, component) -> collection.contains(component.getName());
     }
 
-  private BiPredicate<Collection, Component> getBelongingConditionByPurl() {
-    return (collection, component) -> collection.contains(componentToPurl(component).getCoordinates());
-  }
+    public CycloneDXSbom(BelongingCondition belongingCondition, String exhortIgnoreMethod) {
+        this();
+        if (belongingCondition.equals(BelongingCondition.NAME)) {
+            belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+        } else if (belongingCondition.equals(BelongingCondition.PURL)) {
+            belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
+        } else {
+            // fallback to belonging condition by name ( default) - this one in case the enum type will be extended and
+            // new BelongingType won't be implemented right away.
+            belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+        }
+        this.exhortIgnoreMethod = exhortIgnoreMethod;
+    }
 
-  public Sbom addRoot(PackageURL rootRef) {
+    private BiPredicate<Collection, Component> getBelongingConditionByPurl() {
+        return (collection, component) ->
+                collection.contains(componentToPurl(component).getCoordinates());
+    }
+
+    public Sbom addRoot(PackageURL rootRef) {
         this.root = rootRef;
         Component rootComponent = newRootComponent(rootRef);
         bom.getMetadata().setComponent(rootComponent);
@@ -101,30 +95,30 @@ public class CycloneDXSbom implements Sbom {
         return root;
     }
 
-  @Override
-  public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps) {
-    String exhortIgnoreMethod = Objects.requireNonNullElse(getExhortIgnoreMethod(),this.exhortIgnoreMethod );
-    if(exhortIgnoreMethod.equals("insensitive"))
-    {
-      return filterIgnoredDepsInsensitive(ignoredDeps);
+    @Override
+    public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps) {
+        String exhortIgnoreMethod = Objects.requireNonNullElse(getExhortIgnoreMethod(), this.exhortIgnoreMethod);
+        if (exhortIgnoreMethod.equals("insensitive")) {
+            return filterIgnoredDepsInsensitive(ignoredDeps);
+        } else {
+            return filterIgnoredDepsSensitive(ignoredDeps);
+        }
     }
-    else {
-      return filterIgnoredDepsSensitive(ignoredDeps);
+
+    private String getExhortIgnoreMethod() {
+        boolean result;
+        return System.getenv("EXHORT_IGNORE_METHOD") != null
+                ? System.getenv("EXHORT_IGNORE_METHOD").trim().toLowerCase()
+                : getExhortIgnoreProperty();
     }
 
+    private String getExhortIgnoreProperty() {
+        return System.getProperty("EXHORT_IGNORE_METHOD") != null
+                ? System.getProperty("EXHORT_IGNORE_METHOD").trim().toLowerCase()
+                : null;
+    }
 
-  }
-
-  private String getExhortIgnoreMethod() {
-      boolean result;
-      return System.getenv("EXHORT_IGNORE_METHOD") != null ? System.getenv("EXHORT_IGNORE_METHOD").trim().toLowerCase() : getExhortIgnoreProperty();
-  }
-
-  private String getExhortIgnoreProperty() {
-      return System.getProperty("EXHORT_IGNORE_METHOD") != null ? System.getProperty("EXHORT_IGNORE_METHOD").trim().toLowerCase() : null ;
-  }
-
-  private Component newRootComponent(PackageURL ref) {
+    private Component newRootComponent(PackageURL ref) {
         Component c = new Component();
         c.setBomRef(ref.getCoordinates());
         c.setName(ref.getName());
@@ -146,13 +140,13 @@ public class CycloneDXSbom implements Sbom {
         return c;
     }
 
-  private PackageURL componentToPurl(Component component)  {
-    try {
-      return new PackageURL(component.getPurl());
-    } catch (MalformedPackageURLException e) {
-      throw new RuntimeException(e);
+    private PackageURL componentToPurl(Component component) {
+        try {
+            return new PackageURL(component.getPurl());
+        } catch (MalformedPackageURLException e) {
+            throw new RuntimeException(e);
+        }
     }
-  }
 
     private Dependency newDependency(PackageURL ref) {
         return new Dependency(ref.getCoordinates());
@@ -160,60 +154,57 @@ public class CycloneDXSbom implements Sbom {
 
     private <T> Sbom filterIgnoredDepsInsensitive(Collection<T> ignoredDeps) {
 
-        List<String> initialIgnoreRefs = bom.getComponents()
-                .stream()
-                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm,ignoredDeps).test(c))
-                .map(Component::getBomRef).collect(Collectors.toList());
-        List<String> refsToIgnore = createIgnoreFilter(bom.getDependencies(),
-                initialIgnoreRefs);
-      return removeIgnoredDepsFromSbom(refsToIgnore);
+        List<String> initialIgnoreRefs = bom.getComponents().stream()
+                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm, ignoredDeps)
+                        .test(c))
+                .map(Component::getBomRef)
+                .collect(Collectors.toList());
+        List<String> refsToIgnore = createIgnoreFilter(bom.getDependencies(), initialIgnoreRefs);
+        return removeIgnoredDepsFromSbom(refsToIgnore);
     }
 
-  private Sbom removeIgnoredDepsFromSbom(List<String> refsToIgnore) {
-    bom.setComponents(bom.getComponents()
-            .stream()
-            .filter(c -> !refsToIgnore.contains(c.getBomRef()))
-            .collect(Collectors.toList()));
-    var newDeps = bom.getDependencies()
-            .stream()
-            .filter(d -> !refsToIgnore.contains(d.getRef()))
-            .collect(Collectors.toList());
-    bom.setDependencies(newDeps);
-    bom.getDependencies().stream().forEach(d -> {
-        if (d.getDependencies() != null) {
-            var filteredDeps = d.getDependencies()
-                    .stream()
-                    .filter(td -> !refsToIgnore.contains(td.getRef()))
-                    .collect(Collectors.toList());
-            d.setDependencies(filteredDeps);
-        }
-    });
-    return this;
-  }
+    private Sbom removeIgnoredDepsFromSbom(List<String> refsToIgnore) {
+        bom.setComponents(bom.getComponents().stream()
+                .filter(c -> !refsToIgnore.contains(c.getBomRef()))
+                .collect(Collectors.toList()));
+        var newDeps = bom.getDependencies().stream()
+                .filter(d -> !refsToIgnore.contains(d.getRef()))
+                .collect(Collectors.toList());
+        bom.setDependencies(newDeps);
+        bom.getDependencies().stream().forEach(d -> {
+            if (d.getDependencies() != null) {
+                var filteredDeps = d.getDependencies().stream()
+                        .filter(td -> !refsToIgnore.contains(td.getRef()))
+                        .collect(Collectors.toList());
+                d.setDependencies(filteredDeps);
+            }
+        });
+        return this;
+    }
 
-  private <T> Sbom filterIgnoredDepsSensitive(Collection<T> ignoredDeps) {
+    private <T> Sbom filterIgnoredDepsSensitive(Collection<T> ignoredDeps) {
 
-        List<String> refsToIgnore = bom.getComponents()
-                .stream()
-                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm,ignoredDeps).test(c))
-                .map(Component::getBomRef).collect(Collectors.toList());
-    return removeIgnoredDepsFromSbom(refsToIgnore);
-  }
+        List<String> refsToIgnore = bom.getComponents().stream()
+                .filter(c -> genericComparator(this.belongingCriteriaBinaryAlgorithm, ignoredDeps)
+                        .test(c))
+                .map(Component::getBomRef)
+                .collect(Collectors.toList());
+        return removeIgnoredDepsFromSbom(refsToIgnore);
+    }
 
     private List<String> createIgnoreFilter(List<Dependency> deps, Collection<String> toIgnore) {
-      List<String> result = new ArrayList<>(toIgnore);
-      for (Dependency dep : deps) {
-        if (toIgnore.contains(dep.getRef()) && dep.getDependencies() != null) {
-          List collected = dep.getDependencies().stream().map(p -> p.getRef()).collect(Collectors.toList());
-          result.addAll(collected);
-          if (dep.getDependencies().stream().filter(p -> p != null).count() > 0) {
-            result= createIgnoreFilter(dep.getDependencies(), result);
-          }
-
+        List<String> result = new ArrayList<>(toIgnore);
+        for (Dependency dep : deps) {
+            if (toIgnore.contains(dep.getRef()) && dep.getDependencies() != null) {
+                List collected =
+                        dep.getDependencies().stream().map(p -> p.getRef()).collect(Collectors.toList());
+                result.addAll(collected);
+                if (dep.getDependencies().stream().filter(p -> p != null).count() > 0) {
+                    result = createIgnoreFilter(dep.getDependencies(), result);
+                }
+            }
         }
-
-      }
-      return result;
+        return result;
     }
 
     @Override
@@ -226,7 +217,8 @@ public class CycloneDXSbom implements Sbom {
             bom.addDependency(srcDep);
         } else {
             Optional<Dependency> existingDep = bom.getDependencies().stream()
-                    .filter(d -> d.getRef().equals(srcComp.getBomRef())).findFirst();
+                    .filter(d -> d.getRef().equals(srcComp.getBomRef()))
+                    .findFirst();
             if (existingDep.isPresent()) {
                 srcDep = existingDep.get();
             } else {
@@ -247,54 +239,53 @@ public class CycloneDXSbom implements Sbom {
 
     @Override
     public String getAsJsonString() {
-      String jsonString = BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
-      if(debugLoggingIsNeeded())
-      {
-        log.info("Generated Sbom Json:" + System.lineSeparator() + jsonString);
-      }
-      return jsonString;
-    }
-
-  @Override
-  public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition) {
-    if(belongingCondition.equals(BelongingCondition.NAME))
-    {
-      belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
-    }
-    else if (belongingCondition.equals(BelongingCondition.PURL)){
-      belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
-    }
-
-  }
-
-  @Override
-  public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name) {
-    boolean result = false;
-    Optional<Dependency> comp = this.bom.getDependencies().stream().filter(c -> c.getRef().equals(component.getCoordinates())).findFirst();
-    if(comp.isPresent())
-    {
-      Dependency targetComponent = comp.get();
-      List<Dependency> deps = targetComponent.getDependencies();
-      List<PackageURL> allDirectDeps = deps.stream().map(dep -> {
-        try {
-          return new PackageURL(dep.getRef());
-        } catch (MalformedPackageURLException e) {
-          throw new RuntimeException(e);
+        String jsonString = BomGeneratorFactory.createJson(VERSION, bom).toJsonString();
+        if (debugLoggingIsNeeded()) {
+            log.info("Generated Sbom Json:" + System.lineSeparator() + jsonString);
         }
-      }).collect(Collectors.toList());
-
-      result = allDirectDeps.stream().filter(dep -> dep.getName().equals(name)).count() > 0;
-
+        return jsonString;
     }
-    return result;
-  }
 
-  @Override
-  public void removeRootComponent()
-  {
-    bom.getComponents().removeIf( (component) -> component.getBomRef().equals(this.root.getCoordinates()));
-    bom.getDependencies().removeIf( (dependency) -> dependency.getRef().equals(this.root.getCoordinates()));
-    bom.getMetadata().setComponent(null);
-  }
+    @Override
+    public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition) {
+        if (belongingCondition.equals(BelongingCondition.NAME)) {
+            belongingCriteriaBinaryAlgorithm = getBelongingConditionByName();
+        } else if (belongingCondition.equals(BelongingCondition.PURL)) {
+            belongingCriteriaBinaryAlgorithm = getBelongingConditionByPurl();
+        }
+    }
 
+    @Override
+    public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name) {
+        boolean result = false;
+        Optional<Dependency> comp = this.bom.getDependencies().stream()
+                .filter(c -> c.getRef().equals(component.getCoordinates()))
+                .findFirst();
+        if (comp.isPresent()) {
+            Dependency targetComponent = comp.get();
+            List<Dependency> deps = targetComponent.getDependencies();
+            List<PackageURL> allDirectDeps = deps.stream()
+                    .map(dep -> {
+                        try {
+                            return new PackageURL(dep.getRef());
+                        } catch (MalformedPackageURLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            result = allDirectDeps.stream()
+                            .filter(dep -> dep.getName().equals(name))
+                            .count()
+                    > 0;
+        }
+        return result;
+    }
+
+    @Override
+    public void removeRootComponent() {
+        bom.getComponents().removeIf((component) -> component.getBomRef().equals(this.root.getCoordinates()));
+        bom.getDependencies().removeIf((dependency) -> dependency.getRef().equals(this.root.getCoordinates()));
+        bom.getMetadata().setComponent(null);
+    }
 }

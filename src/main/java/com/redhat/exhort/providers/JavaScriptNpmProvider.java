@@ -15,17 +15,7 @@
  */
 package com.redhat.exhort.providers;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -40,8 +30,17 @@ import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
-
-import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Concrete implementation of the {@link Provider} used for converting
@@ -51,165 +50,190 @@ import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
  **/
 public final class JavaScriptNpmProvider extends Provider {
 
-  private System.Logger log = System.getLogger(this.getClass().getName());
-  public JavaScriptNpmProvider() {
-    super(Type.NPM);
-  }
+    private System.Logger log = System.getLogger(this.getClass().getName());
 
-  @Override
-  public Content provideStack(final Path manifestPath) throws IOException {
-    // check for custom npm executable
-    Sbom sbom = getDependencySbom(manifestPath, true, false);
-    return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
-  }
-
-  @Override
-  public Content provideComponent(byte[] manifestContent) throws IOException {
-    // check for custom npm executable
-    return new Content(getDependencyTree(manifestContent).getAsJsonString().getBytes(StandardCharsets.UTF_8),
-      Api.CYCLONEDX_MEDIA_TYPE);
-  }
-
-  @Override
-  public Content provideComponent(Path manifestPath) throws IOException {
-    return new Content(getDependencySbom(manifestPath, false,false).getAsJsonString().getBytes(StandardCharsets.UTF_8),
-      Api.CYCLONEDX_MEDIA_TYPE);
-  }
-
-  private Sbom getDependencyTree(byte[] manifestContent) {
-    Sbom sbom;
-    try {
-      Path tempDir = Files.createTempDirectory("exhort_npm");
-      Path path = Files.createFile(Path.of(tempDir.toString(),"package.json"));
-      Files.write(path, manifestContent);
-      sbom = getDependencySbom(path, false, true);
-      Files.delete(path);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    public JavaScriptNpmProvider() {
+        super(Type.NPM);
     }
-    return sbom;
-  }
 
-  private PackageURL getRoot(JsonNode jsonDependenciesNpm) throws MalformedPackageURLException {
-    return toPurl(jsonDependenciesNpm.get("name").asText(), jsonDependenciesNpm.get("version").asText());
-  }
+    @Override
+    public Content provideStack(final Path manifestPath) throws IOException {
+        // check for custom npm executable
+        Sbom sbom = getDependencySbom(manifestPath, true, false);
+        return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
+    }
 
-  private PackageURL toPurl(String name, String version) throws MalformedPackageURLException {
-    String[] parts = name.split("/");
-    if (parts.length == 2) {
-      return new PackageURL(Ecosystem.Type.NPM.getType(), parts[0], parts[1], version, null, null);
+    @Override
+    public Content provideComponent(byte[] manifestContent) throws IOException {
+        // check for custom npm executable
+        return new Content(
+                getDependencyTree(manifestContent).getAsJsonString().getBytes(StandardCharsets.UTF_8),
+                Api.CYCLONEDX_MEDIA_TYPE);
     }
-    return new PackageURL(Ecosystem.Type.NPM.getType(), null, parts[0], version, null, null);
-  }
 
-  private void addDependenciesOf(Sbom sbom, PackageURL from, JsonNode dependencies)
-      throws MalformedPackageURLException {
-    Iterator<Entry<String, JsonNode>> fields = dependencies.fields();
-    while (fields.hasNext()) {
-      Entry<String, JsonNode> e = fields.next();
-      String name = e.getKey();
-      JsonNode versionNode = e.getValue().get("version");
-      if (versionNode == null) {
-        continue; //ignore optional dependencies
-      }
-      String version = versionNode.asText();
-      PackageURL purl = toPurl(name, version);
-      sbom.addDependency(from, purl);
-      JsonNode transitiveDeps = e.getValue().findValue("dependencies");
-      if (transitiveDeps != null) {
-        addDependenciesOf(sbom, purl, transitiveDeps);
-      }
+    @Override
+    public Content provideComponent(Path manifestPath) throws IOException {
+        return new Content(
+                getDependencySbom(manifestPath, false, false).getAsJsonString().getBytes(StandardCharsets.UTF_8),
+                Api.CYCLONEDX_MEDIA_TYPE);
     }
-  }
 
-  private Sbom getDependencySbom(Path manifestPath, boolean includeTransitive, boolean deletePackageLock) throws IOException {
-    var npmListResult = buildNpmDependencyTree(manifestPath, includeTransitive,deletePackageLock);
-    var sbom = buildSbom(npmListResult);
-    sbom.filterIgnoredDeps(getIgnoredDeps(manifestPath));
-    return sbom;
-  }
-
-  private JsonNode buildNpmDependencyTree(Path manifestPath, boolean includeTransitive, boolean deletePackageLock)
-      throws JsonMappingException, JsonProcessingException {
-    var npm = Operations.getCustomPathOrElse("npm");
-    var npmEnvs = getNpmExecEnv();
-    // clean command used to clean build target
-    Path packageLockJson = Path.of(manifestPath.getParent().toString(), "package-lock.json");
-    var createPackageLock = new String[] { npm, "i", "--package-lock-only", "--prefix",
-        manifestPath.getParent().toString() };
-    // execute the clean command
-    Operations.runProcess(createPackageLock, npmEnvs);
-    String[] npmAllDeps;
-    Path workDir=null;
-    if(!manifestPath.getParent().toString().trim().contains(" ")) {
-
-      npmAllDeps = new String[]{npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
-        "--json", "--prefix", manifestPath.getParent().toString()};
-    }
-    else {
-      npmAllDeps = new String[]{npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
-        "--json"};
-      workDir = manifestPath.getParent();
-    }
-    // execute the clean command
-    String npmOutput;
-    if (npmEnvs != null) {
-      npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps,
-        npmEnvs.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).toArray(String[]::new));
-    } else {
-      npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps);
-    }
-    if(debugLoggingIsNeeded()) {
-      log.log(System.Logger.Level.INFO,String.format("Npm Listed Install Pacakges in Json : %s %s",System.lineSeparator(),npmOutput));
-    }
-    if(!includeTransitive) {
-      if (deletePackageLock) {
+    private Sbom getDependencyTree(byte[] manifestContent) {
+        Sbom sbom;
         try {
-          Files.delete(packageLockJson);
+            Path tempDir = Files.createTempDirectory("exhort_npm");
+            Path path = Files.createFile(Path.of(tempDir.toString(), "package.json"));
+            Files.write(path, manifestContent);
+            sbom = getDependencySbom(path, false, true);
+            Files.delete(path);
         } catch (IOException e) {
-          throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
-      }
+        return sbom;
     }
-    return objectMapper.readTree(npmOutput);
-  }
 
-  private Sbom buildSbom(JsonNode npmListResult) {
-    Sbom sbom = SbomFactory.newInstance();
-    try {
-      PackageURL root = getRoot(npmListResult);
-      sbom.addRoot(root);
-      JsonNode dependencies = npmListResult.get("dependencies");
-      addDependenciesOf(sbom, root, dependencies);
-    } catch (MalformedPackageURLException e) {
-      throw new IllegalArgumentException("Unable to parse NPM Json", e);
+    private PackageURL getRoot(JsonNode jsonDependenciesNpm) throws MalformedPackageURLException {
+        return toPurl(
+                jsonDependenciesNpm.get("name").asText(),
+                jsonDependenciesNpm.get("version").asText());
     }
-    return sbom;
-  }
 
-  private List<String> getIgnoredDeps(Path manifestPath) throws IOException {
-    var ignored = new ArrayList<String>();
-    var root = new ObjectMapper().readTree(Files.newInputStream(manifestPath));
-    var ignoredNode = root.withArray("exhortignore");
-    if (ignoredNode == null) {
-      return ignored;
+    private PackageURL toPurl(String name, String version) throws MalformedPackageURLException {
+        String[] parts = name.split("/");
+        if (parts.length == 2) {
+            return new PackageURL(Ecosystem.Type.NPM.getType(), parts[0], parts[1], version, null, null);
+        }
+        return new PackageURL(Ecosystem.Type.NPM.getType(), null, parts[0], version, null, null);
     }
-    for (JsonNode n : ignoredNode) {
-      ignored.add(n.asText());
-    }
-    return ignored;
-  }
 
-  Map<String, String> getNpmExecEnv() {
-    String nodeHome = System.getProperty("NODE_HOME");
-    if (nodeHome != null && !nodeHome.isBlank()) {
-      String path = System.getenv("PATH");
-      if (path != null) {
-        return Collections.singletonMap("PATH", path + File.pathSeparator + nodeHome);
-      } else {
-        return Collections.singletonMap("PATH", nodeHome);
-      }
+    private void addDependenciesOf(Sbom sbom, PackageURL from, JsonNode dependencies)
+            throws MalformedPackageURLException {
+        Iterator<Entry<String, JsonNode>> fields = dependencies.fields();
+        while (fields.hasNext()) {
+            Entry<String, JsonNode> e = fields.next();
+            String name = e.getKey();
+            JsonNode versionNode = e.getValue().get("version");
+            if (versionNode == null) {
+                continue; // ignore optional dependencies
+            }
+            String version = versionNode.asText();
+            PackageURL purl = toPurl(name, version);
+            sbom.addDependency(from, purl);
+            JsonNode transitiveDeps = e.getValue().findValue("dependencies");
+            if (transitiveDeps != null) {
+                addDependenciesOf(sbom, purl, transitiveDeps);
+            }
+        }
     }
-    return null;
-  }
+
+    private Sbom getDependencySbom(Path manifestPath, boolean includeTransitive, boolean deletePackageLock)
+            throws IOException {
+        var npmListResult = buildNpmDependencyTree(manifestPath, includeTransitive, deletePackageLock);
+        var sbom = buildSbom(npmListResult);
+        sbom.filterIgnoredDeps(getIgnoredDeps(manifestPath));
+        return sbom;
+    }
+
+    private JsonNode buildNpmDependencyTree(Path manifestPath, boolean includeTransitive, boolean deletePackageLock)
+            throws JsonMappingException, JsonProcessingException {
+        var npm = Operations.getCustomPathOrElse("npm");
+        var npmEnvs = getNpmExecEnv();
+        // clean command used to clean build target
+        Path packageLockJson = Path.of(manifestPath.getParent().toString(), "package-lock.json");
+        var createPackageLock = new String[] {
+            npm,
+            "i",
+            "--package-lock-only",
+            "--prefix",
+            manifestPath.getParent().toString()
+        };
+        // execute the clean command
+        Operations.runProcess(createPackageLock, npmEnvs);
+        String[] npmAllDeps;
+        Path workDir = null;
+        if (!manifestPath.getParent().toString().trim().contains(" ")) {
+
+            npmAllDeps = new String[] {
+                npm,
+                "ls",
+                includeTransitive ? "--all" : "",
+                "--omit=dev",
+                "--package-lock-only",
+                "--json",
+                "--prefix",
+                manifestPath.getParent().toString()
+            };
+        } else {
+            npmAllDeps = new String[] {
+                npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only", "--json"
+            };
+            workDir = manifestPath.getParent();
+        }
+        // execute the clean command
+        String npmOutput;
+        if (npmEnvs != null) {
+            npmOutput = Operations.runProcessGetOutput(
+                    workDir,
+                    npmAllDeps,
+                    npmEnvs.entrySet().stream()
+                            .map(e -> e.getKey() + "=" + e.getValue())
+                            .toArray(String[]::new));
+        } else {
+            npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps);
+        }
+        if (debugLoggingIsNeeded()) {
+            log.log(
+                    System.Logger.Level.INFO,
+                    String.format("Npm Listed Install Pacakges in Json : %s %s", System.lineSeparator(), npmOutput));
+        }
+        if (!includeTransitive) {
+            if (deletePackageLock) {
+                try {
+                    Files.delete(packageLockJson);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return objectMapper.readTree(npmOutput);
+    }
+
+    private Sbom buildSbom(JsonNode npmListResult) {
+        Sbom sbom = SbomFactory.newInstance();
+        try {
+            PackageURL root = getRoot(npmListResult);
+            sbom.addRoot(root);
+            JsonNode dependencies = npmListResult.get("dependencies");
+            addDependenciesOf(sbom, root, dependencies);
+        } catch (MalformedPackageURLException e) {
+            throw new IllegalArgumentException("Unable to parse NPM Json", e);
+        }
+        return sbom;
+    }
+
+    private List<String> getIgnoredDeps(Path manifestPath) throws IOException {
+        var ignored = new ArrayList<String>();
+        var root = new ObjectMapper().readTree(Files.newInputStream(manifestPath));
+        var ignoredNode = root.withArray("exhortignore");
+        if (ignoredNode == null) {
+            return ignored;
+        }
+        for (JsonNode n : ignoredNode) {
+            ignored.add(n.asText());
+        }
+        return ignored;
+    }
+
+    Map<String, String> getNpmExecEnv() {
+        String nodeHome = System.getProperty("NODE_HOME");
+        if (nodeHome != null && !nodeHome.isBlank()) {
+            String path = System.getenv("PATH");
+            if (path != null) {
+                return Collections.singletonMap("PATH", path + File.pathSeparator + nodeHome);
+            } else {
+                return Collections.singletonMap("PATH", nodeHome);
+            }
+        }
+        return null;
+    }
 }

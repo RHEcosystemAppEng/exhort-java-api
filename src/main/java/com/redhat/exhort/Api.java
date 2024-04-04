@@ -15,6 +15,8 @@
  */
 package com.redhat.exhort;
 
+import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.image.ImageRef;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -22,93 +24,91 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import com.redhat.exhort.api.AnalysisReport;
-import com.redhat.exhort.image.ImageRef;
-
 /** The Api interface is used for contracting API implementations. **/
 public interface Api {
 
-  public static final String CYCLONEDX_MEDIA_TYPE = "application/vnd.cyclonedx+json";
+    public static final String CYCLONEDX_MEDIA_TYPE = "application/vnd.cyclonedx+json";
 
-  enum MediaType {
-    APPLICATION_JSON,
-    TEXT_HTML,
-    MULTIPART_MIXED;
+    enum MediaType {
+        APPLICATION_JSON,
+        TEXT_HTML,
+        MULTIPART_MIXED;
 
-    @Override
-    public String toString() {
-      return this.name().toLowerCase().replace("_", "/");
-    }
-  }
-
-  /** POJO class used for aggregating multipart/mixed analysis requests. */
-  class MixedReport {
-    final public byte[] html;
-    final public AnalysisReport json;
-
-    public MixedReport(final byte[] html, final AnalysisReport json) {
-      this.html = html;
-      this.json = json;
-    }
-    public MixedReport()
-    {
-      this.html = new byte[0];
-      this.json = new AnalysisReport();
-    }
-    @Override
-    public boolean equals(final Object o) {
-      if (this == o) return true;
-      if (o == null || this.getClass() != o.getClass()) return false;
-      var that = (MixedReport) o;
-      return Arrays.equals(this.html, that.html) && Objects.equals(this.json, that.json);
+        @Override
+        public String toString() {
+            return this.name().toLowerCase().replace("_", "/");
+        }
     }
 
-    @Override
-    public int hashCode() {
-      return 31 * Objects.hash(json) + Arrays.hashCode(html);
+    /** POJO class used for aggregating multipart/mixed analysis requests. */
+    class MixedReport {
+        public final byte[] html;
+        public final AnalysisReport json;
+
+        public MixedReport(final byte[] html, final AnalysisReport json) {
+            this.html = html;
+            this.json = json;
+        }
+
+        public MixedReport() {
+            this.html = new byte[0];
+            this.json = new AnalysisReport();
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || this.getClass() != o.getClass()) return false;
+            var that = (MixedReport) o;
+            return Arrays.equals(this.html, that.html) && Objects.equals(this.json, that.json);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Objects.hash(json) + Arrays.hashCode(html);
+        }
     }
-  }
 
-  /**
-   * Use for creating a stack analysis HTML report for a given manifest file.
-   *
-   * @param manifestFile the path for the manifest file
-   * @return a mixed reports for both HTML and JSON wrapped in a CompletableFuture
-   * @throws IOException when failed to load the manifest file
-   */
-  CompletableFuture<MixedReport> stackAnalysisMixed(String manifestFile) throws IOException;
+    /**
+     * Use for creating a stack analysis HTML report for a given manifest file.
+     *
+     * @param manifestFile the path for the manifest file
+     * @return a mixed reports for both HTML and JSON wrapped in a CompletableFuture
+     * @throws IOException when failed to load the manifest file
+     */
+    CompletableFuture<MixedReport> stackAnalysisMixed(String manifestFile) throws IOException;
 
-  /**
-   * Use for creating a stack analysis HTML report for a given manifest file.
-   *
-   * @param manifestFile the path for the manifest file
-   * @return the HTML report as a String wrapped in a CompletableFuture
-   * @throws IOException when failed to load the manifest file
-   */
-  CompletableFuture<byte[]> stackAnalysisHtml(String manifestFile) throws IOException;
+    /**
+     * Use for creating a stack analysis HTML report for a given manifest file.
+     *
+     * @param manifestFile the path for the manifest file
+     * @return the HTML report as a String wrapped in a CompletableFuture
+     * @throws IOException when failed to load the manifest file
+     */
+    CompletableFuture<byte[]> stackAnalysisHtml(String manifestFile) throws IOException;
 
-  /**
-   * Use for creating a stack analysis deserialized Json report for a given manifest file.
-   *
-   * @param manifestFile the path for the manifest file
-   * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
-   * @throws IOException when failed to load the manifest file
-   */
-  CompletableFuture<AnalysisReport> stackAnalysis(String manifestFile) throws IOException;
+    /**
+     * Use for creating a stack analysis deserialized Json report for a given manifest file.
+     *
+     * @param manifestFile the path for the manifest file
+     * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
+     * @throws IOException when failed to load the manifest file
+     */
+    CompletableFuture<AnalysisReport> stackAnalysis(String manifestFile) throws IOException;
 
-  /**
-   * Use for creating a component analysis deserialized Json report for a given type and content.
-   *
-   * @param manifestType the type of the manifest, i.e. {@code pom.xml}
-   * @param manifestContent a byte array of the manifest's content
-   * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
-   * @throws IOException when failed to load the manifest content
-   */
-  CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent) throws IOException;
+    /**
+     * Use for creating a component analysis deserialized Json report for a given type and content.
+     *
+     * @param manifestType the type of the manifest, i.e. {@code pom.xml}
+     * @param manifestContent a byte array of the manifest's content
+     * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
+     * @throws IOException when failed to load the manifest content
+     */
+    CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent) throws IOException;
 
-  CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException;
+    CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException;
 
-  CompletableFuture<Map<ImageRef, AnalysisReport>> imageAnalysis(Set<ImageRef> imageRefs) throws IOException;
+    CompletableFuture<Map<ImageRef, AnalysisReport>> imageAnalysis(Set<ImageRef> imageRefs) throws IOException;
 
-  CompletableFuture<byte[]> imageAnalysisHtml(Set<ImageRef> imageRefs) throws IOException;
+    CompletableFuture<byte[]> imageAnalysisHtml(Set<ImageRef> imageRefs) throws IOException;
 }

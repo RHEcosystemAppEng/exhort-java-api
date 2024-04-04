@@ -15,14 +15,13 @@
  */
 package com.redhat.exhort.api.serialization;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.redhat.exhort.api.PackageRef;
+import java.io.IOException;
 
 public class PackageRefDeserializer extends StdDeserializer<PackageRef> {
 
@@ -43,5 +42,4 @@ public class PackageRefDeserializer extends StdDeserializer<PackageRef> {
         }
         return new PackageRef(purl);
     }
-
 }

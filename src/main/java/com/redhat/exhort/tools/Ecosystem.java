@@ -15,74 +15,70 @@
  */
 package com.redhat.exhort.tools;
 
-import java.nio.file.Path;
-
-
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.providers.GoModulesProvider;
+import com.redhat.exhort.providers.GradleProvider;
 import com.redhat.exhort.providers.JavaMavenProvider;
 import com.redhat.exhort.providers.JavaScriptNpmProvider;
 import com.redhat.exhort.providers.PythonPipProvider;
-import com.redhat.exhort.providers.GradleProvider;
+import java.nio.file.Path;
 
 /** Utility class used for instantiating providers. **/
 public final class Ecosystem {
 
-  public enum Type {
+    public enum Type {
+        MAVEN("maven"),
+        NPM("npm"),
+        GOLANG("golang"),
+        PYTHON("pypi"),
+        GRADLE("gradle");
 
-    MAVEN ("maven"),
-    NPM ("npm"),
-    GOLANG ("golang"),
-    PYTHON ("pypi"),
-    GRADLE ("gradle");
+        String type;
 
-    String type;
+        public String getType() {
+            return type;
+        }
 
-    public String getType() {
-      return type;
+        Type(String type) {
+            this.type = type;
+        }
     }
 
-    Type(String type) {
-      this.type = type;
+    private Ecosystem() {
+        // constructor not required for a utility class
     }
 
-  }
-  private Ecosystem(){
-    // constructor not required for a utility class
-  }
-
-  /**
-   * Utility function for instantiating {@link Provider} implementations.
-   *
-   * @param manifestPath the manifest Path
-   * @return a Manifest record
-   */
-  public static Provider getProvider(final Path manifestPath) {
-    return Ecosystem.getProvider(manifestPath.getFileName().toString());
-  }
-
-  /**
-   * Utility function for instantiating {@link Provider} implementations.
-   *
-   * @param manifestType the type (filename + type) of the manifest
-   * @return a Manifest record
-   */
-  public static Provider getProvider(final String manifestType) {
-    switch (manifestType) {
-      case "pom.xml":
-        return new JavaMavenProvider();
-      case "package.json":
-        return new JavaScriptNpmProvider();
-      case "go.mod":
-        return new GoModulesProvider();
-      case "requirements.txt":
-        return new PythonPipProvider();
-      case "build.gradle":
-        return new GradleProvider();
-
-      default:
-        throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
-        );
+    /**
+     * Utility function for instantiating {@link Provider} implementations.
+     *
+     * @param manifestPath the manifest Path
+     * @return a Manifest record
+     */
+    public static Provider getProvider(final Path manifestPath) {
+        return Ecosystem.getProvider(manifestPath.getFileName().toString());
     }
-  }
+
+    /**
+     * Utility function for instantiating {@link Provider} implementations.
+     *
+     * @param manifestType the type (filename + type) of the manifest
+     * @return a Manifest record
+     */
+    public static Provider getProvider(final String manifestType) {
+        switch (manifestType) {
+            case "pom.xml":
+                return new JavaMavenProvider();
+            case "package.json":
+                return new JavaScriptNpmProvider();
+            case "go.mod":
+                return new GoModulesProvider();
+            case "requirements.txt":
+                return new PythonPipProvider();
+            case "build.gradle":
+                return new GradleProvider();
+
+            default:
+                throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType));
+        }
+    }
 }

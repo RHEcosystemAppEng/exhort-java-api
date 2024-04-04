@@ -23,61 +23,61 @@ import java.util.Objects;
 
 public class ExhortTest {
 
-  protected String getStringFromFile(String... list) {
-    byte[] bytes = new byte[0];
-    try {
-      InputStream resourceAsStream = getResourceAsStreamDecision(this.getClass(), list);
-      bytes = resourceAsStream.readAllBytes();
-      resourceAsStream.close();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    return new String(bytes);
-  }
-
-  public static InputStream getResourceAsStreamDecision(Class<? extends ExhortTest> theClass, String[] list) throws IOException {
-    InputStream resourceAsStreamFromModule = theClass.getModule().getResourceAsStream(String.join("/", list));
-    if (Objects.isNull(resourceAsStreamFromModule)) {
-      return theClass.getClassLoader().getResourceAsStream(String.join("/", list));
-    }
-    return resourceAsStreamFromModule;
-  }
-
-  protected String getFileFromResource(String fileName, String... pathList) {
-    Path tmpFile;
-    try {
-      var tmpDir = Files.createTempDirectory("exhort_test_");
-      tmpFile = Files.createFile(tmpDir.resolve(fileName));
-      try (var is = getResourceAsStreamDecision(this.getClass(), pathList)) {
-        if(Objects.nonNull(is)) {
-          Files.write(tmpFile, is.readAllBytes());
+    protected String getStringFromFile(String... list) {
+        byte[] bytes = new byte[0];
+        try {
+            InputStream resourceAsStream = getResourceAsStreamDecision(this.getClass(), list);
+            bytes = resourceAsStream.readAllBytes();
+            resourceAsStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        else
-        {
-          InputStream resourceIs = getClass().getClassLoader().getResourceAsStream(String.join("/", pathList));
-          Files.write(tmpFile, resourceIs.readAllBytes());
-          resourceIs.close();
+
+        return new String(bytes);
+    }
+
+    public static InputStream getResourceAsStreamDecision(Class<? extends ExhortTest> theClass, String[] list)
+            throws IOException {
+        InputStream resourceAsStreamFromModule = theClass.getModule().getResourceAsStream(String.join("/", list));
+        if (Objects.isNull(resourceAsStreamFromModule)) {
+            return theClass.getClassLoader().getResourceAsStream(String.join("/", list));
         }
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+        return resourceAsStreamFromModule;
     }
-    return tmpFile.toString();
-  }
-protected String getFileFromString(String fileName, String content) {
-    Path tmpFile;
-    try {
-      var tmpDir = Files.createTempDirectory("exhort_test_");
-      tmpFile = Files.createFile(tmpDir.resolve(fileName));
-        Files.write(tmpFile, content.getBytes());
 
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    protected String getFileFromResource(String fileName, String... pathList) {
+        Path tmpFile;
+        try {
+            var tmpDir = Files.createTempDirectory("exhort_test_");
+            tmpFile = Files.createFile(tmpDir.resolve(fileName));
+            try (var is = getResourceAsStreamDecision(this.getClass(), pathList)) {
+                if (Objects.nonNull(is)) {
+                    Files.write(tmpFile, is.readAllBytes());
+                } else {
+                    InputStream resourceIs =
+                            getClass().getClassLoader().getResourceAsStream(String.join("/", pathList));
+                    Files.write(tmpFile, resourceIs.readAllBytes());
+                    resourceIs.close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return tmpFile.toString();
     }
-    return tmpFile.toString();
-  }
 
+    protected String getFileFromString(String fileName, String content) {
+        Path tmpFile;
+        try {
+            var tmpDir = Files.createTempDirectory("exhort_test_");
+            tmpFile = Files.createFile(tmpDir.resolve(fileName));
+            Files.write(tmpFile, content.getBytes());
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return tmpFile.toString();
+    }
 }

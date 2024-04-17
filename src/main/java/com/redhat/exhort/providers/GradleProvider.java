@@ -31,8 +31,6 @@ import org.tomlj.TomlTable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -254,6 +252,7 @@ public final class GradleProvider extends BaseJavaProvider {
       line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
       line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
       line = line.replaceAll(" \\(n\\)$", "");
+      line = line.replaceAll(" \\(\\*\\)", "");
       line = line.replaceAll("$", ":compile");
       array[index] = line;
     }

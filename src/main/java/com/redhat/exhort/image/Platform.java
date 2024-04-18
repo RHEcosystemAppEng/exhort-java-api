@@ -20,138 +20,140 @@ import java.util.Set;
 
 public class Platform {
 
-    // $GOOS and $GOARCH
-    // https://github.com/docker-library/bashbrew/blob/v0.1.2/architecture/oci-platform.go#L14-L27
-    private static final Set<Platform> SUPPORTED_PLATFORMS = Set.of(
-            new Platform().os("linux").arch("amd64"),
-            new Platform().os("linux").arch("arm").variant("v5"),
-            new Platform().os("linux").arch("arm").variant("v6"),
-            new Platform().os("linux").arch("arm").variant("v7"),
-            new Platform().os("linux").arch("arm64").variant("v8"),
-            new Platform().os("linux").arch("386"),
-            new Platform().os("linux").arch("mips64le"),
-            new Platform().os("linux").arch("ppc64le"),
-            new Platform().os("linux").arch("riscv64"),
-            new Platform().os("linux").arch("s390x"),
-            new Platform().os("windows").arch("arm64"));
+  // $GOOS and $GOARCH
+  // https://github.com/docker-library/bashbrew/blob/v0.1.2/architecture/oci-platform.go#L14-L27
+  private static final Set<Platform> SUPPORTED_PLATFORMS =
+      Set.of(
+          new Platform().os("linux").arch("amd64"),
+          new Platform().os("linux").arch("arm").variant("v5"),
+          new Platform().os("linux").arch("arm").variant("v6"),
+          new Platform().os("linux").arch("arm").variant("v7"),
+          new Platform().os("linux").arch("arm64").variant("v8"),
+          new Platform().os("linux").arch("386"),
+          new Platform().os("linux").arch("mips64le"),
+          new Platform().os("linux").arch("ppc64le"),
+          new Platform().os("linux").arch("riscv64"),
+          new Platform().os("linux").arch("s390x"),
+          new Platform().os("windows").arch("arm64"));
 
-    public static final Platform EMPTY_PLATFORM = new Platform();
+  public static final Platform EMPTY_PLATFORM = new Platform();
 
-    private String os;
-    private String architecture;
-    private String variant;
+  private String os;
+  private String architecture;
+  private String variant;
 
-    private Platform() {}
+  private Platform() {}
 
-    public Platform(String platform) {
-        if (platform == null) {
-            throw new IllegalArgumentException("Invalid platform: null");
-        }
-
-        String[] parts = platform.split("/");
-        if (parts.length == 1) {
-            this.os = "linux";
-            this.architecture = parts[0];
-        } else if (parts.length == 2) {
-            this.os = parts[0];
-            this.architecture = parts[1];
-            this.variant = getVariant(this.os, this.architecture);
-        } else if (parts.length == 3) {
-            this.os = parts[0];
-            this.architecture = parts[1];
-            this.variant = parts[2];
-        } else {
-            throw new IllegalArgumentException(String.format("Invalid platform: %s", platform));
-        }
-
-        if (!SUPPORTED_PLATFORMS.contains(this)) {
-            throw new IllegalArgumentException(String.format("Image platform is not supported: %s", platform));
-        }
+  public Platform(String platform) {
+    if (platform == null) {
+      throw new IllegalArgumentException("Invalid platform: null");
     }
 
-    public Platform(String os, String arch, String variant) {
-        if (arch == null) {
-            throw new IllegalArgumentException("Invalid platform arch: null");
-        }
-        this.architecture = arch;
-
-        if (os == null) {
-            this.os = "linux";
-        } else {
-            this.os = os;
-        }
-
-        if (variant != null) {
-            this.variant = variant;
-        } else {
-            this.variant = getVariant(this.os, this.architecture);
-        }
-
-        if (!SUPPORTED_PLATFORMS.contains(this)) {
-            throw new IllegalArgumentException(
-                    String.format("Image platform is not supported: %s/%s/%s", os, arch, variant));
-        }
+    String[] parts = platform.split("/");
+    if (parts.length == 1) {
+      this.os = "linux";
+      this.architecture = parts[0];
+    } else if (parts.length == 2) {
+      this.os = parts[0];
+      this.architecture = parts[1];
+      this.variant = getVariant(this.os, this.architecture);
+    } else if (parts.length == 3) {
+      this.os = parts[0];
+      this.architecture = parts[1];
+      this.variant = parts[2];
+    } else {
+      throw new IllegalArgumentException(String.format("Invalid platform: %s", platform));
     }
 
-    static String getVariant(String os, String arch) {
-        if ("linux".equals(os) && "arm64".equals(arch)) { // in case variant "v8" is not specified
-            return "v8";
-        }
-        return null;
+    if (!SUPPORTED_PLATFORMS.contains(this)) {
+      throw new IllegalArgumentException(
+          String.format("Image platform is not supported: %s", platform));
+    }
+  }
+
+  public Platform(String os, String arch, String variant) {
+    if (arch == null) {
+      throw new IllegalArgumentException("Invalid platform arch: null");
+    }
+    this.architecture = arch;
+
+    if (os == null) {
+      this.os = "linux";
+    } else {
+      this.os = os;
     }
 
-    public static boolean isVariantRequired(String os, String arch) {
-        return "linux".equals(os) && "arm".equals(arch);
+    if (variant != null) {
+      this.variant = variant;
+    } else {
+      this.variant = getVariant(this.os, this.architecture);
     }
 
-    private Platform os(String os) {
-        this.os = os;
-        return this;
+    if (!SUPPORTED_PLATFORMS.contains(this)) {
+      throw new IllegalArgumentException(
+          String.format("Image platform is not supported: %s/%s/%s", os, arch, variant));
     }
+  }
 
-    private Platform arch(String arch) {
-        this.architecture = arch;
-        return this;
+  static String getVariant(String os, String arch) {
+    if ("linux".equals(os) && "arm64".equals(arch)) { // in case variant "v8" is not specified
+      return "v8";
     }
+    return null;
+  }
 
-    private Platform variant(String variant) {
-        this.variant = variant;
-        return this;
-    }
+  public static boolean isVariantRequired(String os, String arch) {
+    return "linux".equals(os) && "arm".equals(arch);
+  }
 
-    public String getOs() {
-        return os;
-    }
+  private Platform os(String os) {
+    this.os = os;
+    return this;
+  }
 
-    public String getArchitecture() {
-        return architecture;
-    }
+  private Platform arch(String arch) {
+    this.architecture = arch;
+    return this;
+  }
 
-    public String getVariant() {
-        return variant;
-    }
+  private Platform variant(String variant) {
+    this.variant = variant;
+    return this;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Platform platform = (Platform) o;
-        return Objects.equals(os, platform.os)
-                && Objects.equals(architecture, platform.architecture)
-                && Objects.equals(variant, platform.variant);
-    }
+  public String getOs() {
+    return os;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(os, architecture, variant);
-    }
+  public String getArchitecture() {
+    return architecture;
+  }
 
-    @Override
-    public String toString() {
-        if (this.variant == null) {
-            return String.format("%s/%s", this.os, this.architecture);
-        } else {
-            return String.format("%s/%s/%s", this.os, this.architecture, this.variant);
-        }
+  public String getVariant() {
+    return variant;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Platform platform = (Platform) o;
+    return Objects.equals(os, platform.os)
+        && Objects.equals(architecture, platform.architecture)
+        && Objects.equals(variant, platform.variant);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(os, architecture, variant);
+  }
+
+  @Override
+  public String toString() {
+    if (this.variant == null) {
+      return String.format("%s/%s", this.os, this.architecture);
+    } else {
+      return String.format("%s/%s/%s", this.os, this.architecture, this.variant);
     }
+  }
 }

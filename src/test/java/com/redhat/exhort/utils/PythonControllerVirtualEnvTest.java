@@ -32,67 +32,73 @@ import org.mockito.Mockito;
 
 class PythonControllerVirtualEnvTest extends ExhortTest {
 
-    private static PythonControllerVirtualEnv pythonControllerVirtualEnv;
-    private static PythonControllerVirtualEnv spiedPythonControllerVirtualEnv;
+  private static PythonControllerVirtualEnv pythonControllerVirtualEnv;
+  private static PythonControllerVirtualEnv spiedPythonControllerVirtualEnv;
 
-    private ObjectMapper om = new ObjectMapper();
+  private ObjectMapper om = new ObjectMapper();
 
-    @BeforeAll
-    static void setUp() {
+  @BeforeAll
+  static void setUp() {
 
-        pythonControllerVirtualEnv = new PythonControllerVirtualEnv("python3");
-        spiedPythonControllerVirtualEnv = Mockito.spy(pythonControllerVirtualEnv);
-    }
+    pythonControllerVirtualEnv = new PythonControllerVirtualEnv("python3");
+    spiedPythonControllerVirtualEnv = Mockito.spy(pythonControllerVirtualEnv);
+  }
 
-    @Test
-    void test_Virtual_Environment_Install_Best_Efforts() throws JsonProcessingException {
-        System.setProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "true");
-        System.setProperty("MATCH_MANIFEST_VERSIONS", "false");
-        String requirementsTxt = getFileFromString("requirements.txt", "flask==9.9.9\ndeprecated==15.15.99\n");
-        List<Map<String, Object>> dependencies = spiedPythonControllerVirtualEnv.getDependencies(requirementsTxt, true);
+  @Test
+  void test_Virtual_Environment_Install_Best_Efforts() throws JsonProcessingException {
+    System.setProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "true");
+    System.setProperty("MATCH_MANIFEST_VERSIONS", "false");
+    String requirementsTxt =
+        getFileFromString("requirements.txt", "flask==9.9.9\ndeprecated==15.15.99\n");
+    List<Map<String, Object>> dependencies =
+        spiedPythonControllerVirtualEnv.getDependencies(requirementsTxt, true);
 
-        System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(dependencies));
-        System.clearProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS");
-        System.clearProperty("MATCH_MANIFEST_VERSIONS");
-    }
+    System.out.println(om.writerWithDefaultPrettyPrinter().writeValueAsString(dependencies));
+    System.clearProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS");
+    System.clearProperty("MATCH_MANIFEST_VERSIONS");
+  }
 
-    @Test
-    void test_Virtual_Environment_Install_Best_Efforts_Conflict_MMV_Should_Throw_Runtime_Exception() {
-        System.setProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "true");
-        String requirementsTxt = getFileFromString("requirements.txt", "flask==9.9.9\ndeprecated==15.15.99\n");
-        RuntimeException runtimeException = assertThrows(
-                RuntimeException.class, () -> spiedPythonControllerVirtualEnv.getDependencies(requirementsTxt, true));
-        assertTrue(runtimeException.getMessage().contains("Conflicting settings"));
-        System.clearProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS");
-    }
+  @Test
+  void test_Virtual_Environment_Install_Best_Efforts_Conflict_MMV_Should_Throw_Runtime_Exception() {
+    System.setProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "true");
+    String requirementsTxt =
+        getFileFromString("requirements.txt", "flask==9.9.9\ndeprecated==15.15.99\n");
+    RuntimeException runtimeException =
+        assertThrows(
+            RuntimeException.class,
+            () -> spiedPythonControllerVirtualEnv.getDependencies(requirementsTxt, true));
+    assertTrue(runtimeException.getMessage().contains("Conflicting settings"));
+    System.clearProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS");
+  }
 
-    @Test
-    void test_Virtual_Environment_Flow() throws IOException {
-        //    Mockito
-        String requirementsTxt = "Jinja2==3.0.3";
-        Path requirementsFilePath = Path.of(System.getProperty("user.dir").toString(), "requirements.txt");
-        Files.write(requirementsFilePath, requirementsTxt.getBytes());
-        //    MockedStatic<Operations> operationsMockedStatic = mockStatic(Operations.class);
-        //    when(spiedPythonControllerVirtualEnv.)
-        List<Map<String, Object>> dependencies =
-                spiedPythonControllerVirtualEnv.getDependencies(requirementsFilePath.toString(), true);
-        verify(spiedPythonControllerVirtualEnv).prepareEnvironment(anyString());
-        verify(spiedPythonControllerVirtualEnv).installPackages(anyString());
-        verify(spiedPythonControllerVirtualEnv).cleanEnvironment(anyBoolean());
-        verify(spiedPythonControllerVirtualEnv).cleanEnvironment(anyBoolean());
-        verify(spiedPythonControllerVirtualEnv).automaticallyInstallPackageOnEnvironment();
-        verify(spiedPythonControllerVirtualEnv, never()).isRealEnv();
-        verify(spiedPythonControllerVirtualEnv, times(2)).isVirtualEnv();
-    }
+  @Test
+  void test_Virtual_Environment_Flow() throws IOException {
+    //    Mockito
+    String requirementsTxt = "Jinja2==3.0.3";
+    Path requirementsFilePath =
+        Path.of(System.getProperty("user.dir").toString(), "requirements.txt");
+    Files.write(requirementsFilePath, requirementsTxt.getBytes());
+    //    MockedStatic<Operations> operationsMockedStatic = mockStatic(Operations.class);
+    //    when(spiedPythonControllerVirtualEnv.)
+    List<Map<String, Object>> dependencies =
+        spiedPythonControllerVirtualEnv.getDependencies(requirementsFilePath.toString(), true);
+    verify(spiedPythonControllerVirtualEnv).prepareEnvironment(anyString());
+    verify(spiedPythonControllerVirtualEnv).installPackages(anyString());
+    verify(spiedPythonControllerVirtualEnv).cleanEnvironment(anyBoolean());
+    verify(spiedPythonControllerVirtualEnv).cleanEnvironment(anyBoolean());
+    verify(spiedPythonControllerVirtualEnv).automaticallyInstallPackageOnEnvironment();
+    verify(spiedPythonControllerVirtualEnv, never()).isRealEnv();
+    verify(spiedPythonControllerVirtualEnv, times(2)).isVirtualEnv();
+  }
 
-    @Test
-    void isRealEnv() {
+  @Test
+  void isRealEnv() {
 
-        assertFalse(this.spiedPythonControllerVirtualEnv.isRealEnv());
-    }
+    assertFalse(this.spiedPythonControllerVirtualEnv.isRealEnv());
+  }
 
-    @Test
-    void isVirtualEnv() {
-        assertTrue(this.spiedPythonControllerVirtualEnv.isVirtualEnv());
-    }
+  @Test
+  void isVirtualEnv() {
+    assertTrue(this.spiedPythonControllerVirtualEnv.isVirtualEnv());
+  }
 }

@@ -24,156 +24,156 @@ import java.util.Objects;
 
 public class PackageRef {
 
-    private static final String MAVEN_TYPE = "maven";
+  private static final String MAVEN_TYPE = "maven";
 
-    @JsonSerialize(using = PackageURLSerializer.class)
-    @JsonValue
-    private final PackageURL purl;
+  @JsonSerialize(using = PackageURLSerializer.class)
+  @JsonValue
+  private final PackageURL purl;
 
-    public PackageRef(String purl) {
-        Objects.requireNonNull(purl);
-        try {
-            this.purl = new PackageURL(purl);
-        } catch (MalformedPackageURLException e) {
-            throw new IllegalArgumentException("Unable to parse PackageURL. " + e.getMessage());
+  public PackageRef(String purl) {
+    Objects.requireNonNull(purl);
+    try {
+      this.purl = new PackageURL(purl);
+    } catch (MalformedPackageURLException e) {
+      throw new IllegalArgumentException("Unable to parse PackageURL. " + e.getMessage());
+    }
+  }
+
+  public PackageRef(PackageURL purl) {
+    Objects.requireNonNull(purl);
+    this.purl = purl;
+  }
+
+  public PackageURL purl() {
+    return purl;
+  }
+
+  public String ref() {
+    return purl.toString();
+  }
+
+  public String name() {
+    if (purl.getNamespace() == null) {
+      return purl.getName();
+    }
+    return purl.getNamespace() + ":" + purl.getName();
+  }
+
+  public String version() {
+    return purl.getVersion();
+  }
+
+  @Override
+  public int hashCode() {
+    return purl.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == null) {
+      return false;
+    }
+    if (!(other instanceof PackageRef)) {
+      return false;
+    }
+    return Objects.equals(purl, ((PackageRef) other).purl());
+  }
+
+  public static PackageRef parse(String gav, String pkgManager) {
+    var parts = gav.split(":");
+    if (parts.length < 4 || parts.length > 6) {
+      throw new IllegalArgumentException("Unexpected GAV format. " + gav);
+    }
+    if (parts.length < 6) {
+      return builder()
+          .namespace(parts[0])
+          .name(parts[1])
+          .version(parts[3])
+          .pkgManager(pkgManager)
+          .build();
+    }
+    return builder()
+        .namespace(parts[0])
+        .name(parts[1])
+        .version(parts[4])
+        .pkgManager(pkgManager)
+        .build();
+  }
+
+  /**
+   * Convert the instance into URL query string.
+   *
+   * @param prefix prefix of the query string
+   * @return URL query string
+   */
+  public String toUrlQueryString(String prefix) {
+    if (prefix == null) {
+      prefix = "";
+    }
+
+    return String.format("%s=%s", prefix, this.toString());
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    String namespace;
+    String name;
+    String version;
+    String pkgManager;
+    String purl;
+
+    public Builder purl(String purl) {
+      this.purl = purl;
+      return this;
+    }
+
+    public Builder pkgManager(String pkgManager) {
+      this.pkgManager = pkgManager;
+      return this;
+    }
+
+    public Builder version(String version) {
+      this.version = version;
+      return this;
+    }
+
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder namespace(String namespace) {
+      this.namespace = namespace;
+      return this;
+    }
+
+    private Builder() {}
+
+    public PackageRef build() {
+      try {
+        if (Objects.isNull(purl)) {
+          Objects.requireNonNull(pkgManager);
+          Objects.requireNonNull(name);
+          Objects.requireNonNull(version);
+          return new PackageRef(new PackageURL(pkgManager, namespace, name, version, null, null));
         }
+        return new PackageRef(new PackageURL(purl));
+      } catch (MalformedPackageURLException e) {
+        throw new IllegalArgumentException("Unable to parse PackageURL. " + e.getMessage());
+      }
     }
+  }
 
-    public PackageRef(PackageURL purl) {
-        Objects.requireNonNull(purl);
-        this.purl = purl;
-    }
+  public String toGav() {
+    return String.format("%s:%s", name(), purl.getVersion());
+  }
 
-    public PackageURL purl() {
-        return purl;
-    }
-
-    public String ref() {
-        return purl.toString();
-    }
-
-    public String name() {
-        if (purl.getNamespace() == null) {
-            return purl.getName();
-        }
-        return purl.getNamespace() + ":" + purl.getName();
-    }
-
-    public String version() {
-        return purl.getVersion();
-    }
-
-    @Override
-    public int hashCode() {
-        return purl.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null) {
-            return false;
-        }
-        if (!(other instanceof PackageRef)) {
-            return false;
-        }
-        return Objects.equals(purl, ((PackageRef) other).purl());
-    }
-
-    public static PackageRef parse(String gav, String pkgManager) {
-        var parts = gav.split(":");
-        if (parts.length < 4 || parts.length > 6) {
-            throw new IllegalArgumentException("Unexpected GAV format. " + gav);
-        }
-        if (parts.length < 6) {
-            return builder()
-                    .namespace(parts[0])
-                    .name(parts[1])
-                    .version(parts[3])
-                    .pkgManager(pkgManager)
-                    .build();
-        }
-        return builder()
-                .namespace(parts[0])
-                .name(parts[1])
-                .version(parts[4])
-                .pkgManager(pkgManager)
-                .build();
-    }
-
-    /**
-     * Convert the instance into URL query string.
-     *
-     * @param prefix prefix of the query string
-     * @return URL query string
-     */
-    public String toUrlQueryString(String prefix) {
-        if (prefix == null) {
-            prefix = "";
-        }
-
-        return String.format("%s=%s", prefix, this.toString());
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        String namespace;
-        String name;
-        String version;
-        String pkgManager;
-        String purl;
-
-        public Builder purl(String purl) {
-            this.purl = purl;
-            return this;
-        }
-
-        public Builder pkgManager(String pkgManager) {
-            this.pkgManager = pkgManager;
-            return this;
-        }
-
-        public Builder version(String version) {
-            this.version = version;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder namespace(String namespace) {
-            this.namespace = namespace;
-            return this;
-        }
-
-        private Builder() {}
-
-        public PackageRef build() {
-            try {
-                if (Objects.isNull(purl)) {
-                    Objects.requireNonNull(pkgManager);
-                    Objects.requireNonNull(name);
-                    Objects.requireNonNull(version);
-                    return new PackageRef(new PackageURL(pkgManager, namespace, name, version, null, null));
-                }
-                return new PackageRef(new PackageURL(purl));
-            } catch (MalformedPackageURLException e) {
-                throw new IllegalArgumentException("Unable to parse PackageURL. " + e.getMessage());
-            }
-        }
-    }
-
-    public String toGav() {
-        return String.format("%s:%s", name(), purl.getVersion());
-    }
-
-    @Override
-    public String toString() {
-        return purl.toString();
-    }
+  @Override
+  public String toString() {
+    return purl.toString();
+  }
 }

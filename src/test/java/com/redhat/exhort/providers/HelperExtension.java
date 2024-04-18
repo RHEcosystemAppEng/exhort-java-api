@@ -18,42 +18,43 @@ package com.redhat.exhort.providers;
 import java.util.List;
 import org.junit.jupiter.api.extension.*;
 
-public class HelperExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
+public class HelperExtension
+    implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
 
-    private System.Logger log = System.getLogger(this.getClass().getName());
+  private System.Logger log = System.getLogger(this.getClass().getName());
 
-    //  public PythonEnvironmentExtension(List<String> requirementsFiles) {
-    //    this.requirementsFiles = requirementsFiles;
-    //  }
+  //  public PythonEnvironmentExtension(List<String> requirementsFiles) {
+  //    this.requirementsFiles = requirementsFiles;
+  //  }
 
-    private List<String> requirementsFiles;
+  private List<String> requirementsFiles;
 
-    @Override
-    public void afterAll(ExtensionContext extensionContext) throws Exception {
-        log.log(System.Logger.Level.INFO, "Finished all tests!!");
-    }
+  @Override
+  public void afterAll(ExtensionContext extensionContext) throws Exception {
+    log.log(System.Logger.Level.INFO, "Finished all tests!!");
+  }
 
-    @Override
-    public void afterEach(ExtensionContext extensionContext) throws Exception {
-        log.log(
-                System.Logger.Level.INFO,
-                String.format(
-                        "Finished Test Method: %s_%s",
-                        extensionContext.getRequiredTestMethod().getName(), extensionContext.getDisplayName()));
-    }
+  @Override
+  public void afterEach(ExtensionContext extensionContext) throws Exception {
+    log.log(
+        System.Logger.Level.INFO,
+        String.format(
+            "Finished Test Method: %s_%s",
+            extensionContext.getRequiredTestMethod().getName(), extensionContext.getDisplayName()));
+  }
 
-    @Override
-    public void beforeAll(ExtensionContext extensionContext) throws Exception {
+  @Override
+  public void beforeAll(ExtensionContext extensionContext) throws Exception {
 
-        log.log(System.Logger.Level.INFO, "Before all tests");
-    }
+    log.log(System.Logger.Level.INFO, "Before all tests");
+  }
 
-    @Override
-    public void beforeEach(ExtensionContext extensionContext) throws Exception {
-        log.log(
-                System.Logger.Level.INFO,
-                String.format(
-                        "Started Test Method: %s_%s",
-                        extensionContext.getRequiredTestMethod().getName(), extensionContext.getDisplayName()));
-    }
+  @Override
+  public void beforeEach(ExtensionContext extensionContext) throws Exception {
+    log.log(
+        System.Logger.Level.INFO,
+        String.format(
+            "Started Test Method: %s_%s",
+            extensionContext.getRequiredTestMethod().getName(), extensionContext.getDisplayName()));
+  }
 }

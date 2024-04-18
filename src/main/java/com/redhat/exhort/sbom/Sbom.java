@@ -20,34 +20,34 @@ import java.util.Collection;
 
 public interface Sbom {
 
-    public Sbom addRoot(PackageURL root);
+  public Sbom addRoot(PackageURL root);
 
-    public PackageURL getRoot();
+  public PackageURL getRoot();
 
-    public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps);
+  public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps);
 
-    public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
+  public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
 
-    public String getAsJsonString();
+  public String getAsJsonString();
 
-    public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition);
+  public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition);
 
-    public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name);
+  public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name);
 
-    void removeRootComponent();
+  void removeRootComponent();
 
-    public enum BelongingCondition {
-        NAME("name"),
-        PURL("purl");
+  public enum BelongingCondition {
+    NAME("name"),
+    PURL("purl");
 
-        String belongingCondition;
+    String belongingCondition;
 
-        BelongingCondition(String belongingCondition) {
-            this.belongingCondition = belongingCondition;
-        }
-
-        public String getBelongingCondition() {
-            return belongingCondition;
-        }
+    BelongingCondition(String belongingCondition) {
+      this.belongingCondition = belongingCondition;
     }
+
+    public String getBelongingCondition() {
+      return belongingCondition;
+    }
+  }
 }

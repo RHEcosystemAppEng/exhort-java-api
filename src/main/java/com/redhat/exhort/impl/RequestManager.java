@@ -21,35 +21,33 @@ import java.util.Objects;
 
 public class RequestManager {
 
-    private static RequestManager requestManager;
-    private Map<String, String> requests;
+  private static RequestManager requestManager;
+  private Map<String, String> requests;
 
-    public static RequestManager getInstance() {
-        if (Objects.isNull(requestManager)) {
-            requestManager = new RequestManager();
-        }
-        return requestManager;
+  public static RequestManager getInstance() {
+    if (Objects.isNull(requestManager)) {
+      requestManager = new RequestManager();
     }
+    return requestManager;
+  }
 
-    private RequestManager() {
-        requests = new HashMap<>();
-    }
+  private RequestManager() {
+    requests = new HashMap<>();
+  }
 
-    public synchronized void addClientTraceIdToRequest(String requestId) {
-        requests.put(concatenatedThreadId(), requestId);
-    }
+  public synchronized void addClientTraceIdToRequest(String requestId) {
+    requests.put(concatenatedThreadId(), requestId);
+  }
 
-    public synchronized void removeClientTraceIdFromRequest() {
-        requests.remove(concatenatedThreadId());
-    }
+  public synchronized void removeClientTraceIdFromRequest() {
+    requests.remove(concatenatedThreadId());
+  }
 
-    public String getTraceIdOfRequest() {
-        return requests.get(concatenatedThreadId());
-    }
+  public String getTraceIdOfRequest() {
+    return requests.get(concatenatedThreadId());
+  }
 
-    private static String concatenatedThreadId() {
-        return String.format(
-                "%s-%s",
-                Thread.currentThread().getName(), Thread.currentThread().getId());
-    }
+  private static String concatenatedThreadId() {
+    return String.format("%s-%s", Thread.currentThread().getName(), Thread.currentThread().getId());
+  }
 }

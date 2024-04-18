@@ -25,21 +25,22 @@ import java.io.IOException;
 
 public class PackageRefDeserializer extends StdDeserializer<PackageRef> {
 
-    public PackageRefDeserializer() {
-        this(null);
-    }
+  public PackageRefDeserializer() {
+    this(null);
+  }
 
-    public PackageRefDeserializer(Class<PackageRef> c) {
-        super(c);
-    }
+  public PackageRefDeserializer(Class<PackageRef> c) {
+    super(c);
+  }
 
-    @Override
-    public PackageRef deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        JsonNode n = p.getCodec().readTree(p);
-        String purl = n.asText();
-        if (purl == null) {
-            return null;
-        }
-        return new PackageRef(purl);
+  @Override
+  public PackageRef deserialize(JsonParser p, DeserializationContext ctxt)
+      throws IOException, JacksonException {
+    JsonNode n = p.getCodec().readTree(p);
+    String purl = n.asText();
+    if (purl == null) {
+      return null;
     }
+    return new PackageRef(purl);
+  }
 }

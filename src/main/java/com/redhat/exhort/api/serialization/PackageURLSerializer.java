@@ -23,16 +23,17 @@ import java.io.IOException;
 
 public class PackageURLSerializer extends StdSerializer<PackageURL> {
 
-    public PackageURLSerializer() {
-        this(null);
-    }
+  public PackageURLSerializer() {
+    this(null);
+  }
 
-    public PackageURLSerializer(Class<PackageURL> c) {
-        super(c);
-    }
+  public PackageURLSerializer(Class<PackageURL> c) {
+    super(c);
+  }
 
-    @Override
-    public void serialize(PackageURL value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        gen.writeString(value.toString());
-    }
+  @Override
+  public void serialize(PackageURL value, JsonGenerator gen, SerializerProvider provider)
+      throws IOException {
+    gen.writeString(value.toString());
+  }
 }

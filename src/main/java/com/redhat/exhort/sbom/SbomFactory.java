@@ -17,11 +17,12 @@ package com.redhat.exhort.sbom;
 
 public class SbomFactory {
 
-    public static Sbom newInstance() {
-        return new CycloneDXSbom();
-    }
+  public static Sbom newInstance() {
+    return new CycloneDXSbom();
+  }
 
-    public static Sbom newInstance(Sbom.BelongingCondition belongingCondition, String exhortIgnoreMethod) {
-        return new CycloneDXSbom(belongingCondition, exhortIgnoreMethod);
-    }
+  public static Sbom newInstance(
+      Sbom.BelongingCondition belongingCondition, String exhortIgnoreMethod) {
+    return new CycloneDXSbom(belongingCondition, exhortIgnoreMethod);
+  }
 }

@@ -702,13 +702,15 @@ limitations under the License.]]>
             </format>
           </formats>
           <java>
-            <palantirJavaFormat>
-              <version>2.39.0</version>                     <!-- optional -->
-              <style>PALANTIR</style>                       <!-- or AOSP/GOOGLE (optional) -->
-            </palantirJavaFormat>
+            <googleJavaFormat>
+              <style>GOOGLE</style>                       <!-- or AOSP (optional) -->
+              <reflowLongStrings>true</reflowLongStrings> <!-- optional -->
+            </googleJavaFormat>
             <licenseHeader>
               <file>${project.basedir}/license-header</file> -->
             </licenseHeader>
+            <removeUnusedImports />
+            <formatAnnotations />
           </java>
         </configuration>
         <executions>

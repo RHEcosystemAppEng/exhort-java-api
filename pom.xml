@@ -685,6 +685,43 @@ limitations under the License.]]>
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <configuration>
+          <formats>
+            <format>
+              <includes><include>src/*</include></includes>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <tabs>true</tabs>
+                <spacesPerTab>4</spacesPerTab>
+              </indent>
+            </format>
+          </formats>
+          <java>
+            <googleJavaFormat>
+              <style>GOOGLE</style>                       <!-- or AOSP (optional) -->
+              <reflowLongStrings>true</reflowLongStrings> <!-- optional -->
+            </googleJavaFormat>
+            <licenseHeader>
+              <file>${project.basedir}/license-header</file> -->
+            </licenseHeader>
+            <removeUnusedImports />
+            <formatAnnotations />
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

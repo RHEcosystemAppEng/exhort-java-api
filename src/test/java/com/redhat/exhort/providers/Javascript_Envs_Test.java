@@ -15,17 +15,16 @@
  */
 package com.redhat.exhort.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.io.File;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearEnvironmentVariable;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.junitpioneer.jupiter.SetSystemProperty;
-
-import java.io.File;
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Javascript_Envs_Test {
   @Test
@@ -33,7 +32,9 @@ public class Javascript_Envs_Test {
   @SetEnvironmentVariable(key = "PATH", value = "test-path")
   void test_javascript_get_envs() {
     var envs = new JavaScriptNpmProvider().getNpmExecEnv();
-    assertEquals(Collections.singletonMap("PATH", "test-path" + File.pathSeparator + "test-node-home"), envs);
+    assertEquals(
+        Collections.singletonMap("PATH", "test-path" + File.pathSeparator + "test-node-home"),
+        envs);
   }
 
   @Test

@@ -19,7 +19,6 @@ package com.redhat.exhort.image;
  * Contents in this file are from:
  * https://github.com/fabric8io/docker-maven-plugin/blob/6eeb78a9b074328ef5817c1c91392d8d8350984e/src/main/java/io/fabric8/maven/docker/util/ImageName.java
  */
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,18 +29,19 @@ import java.util.regex.Pattern;
  * Helper class for parsing docker repository/image names:
  *
  * <ul>
- *     <li>If the first part before the slash contains a "." or a ":" it is considered to be a registry URL</li>
- *     <li>A last part starting with a ":" is considered to be a tag</li>
- *     <li>The rest is considered the repository name (which might be separated via slashes)</li>
+ *   <li>If the first part before the slash contains a "." or a ":" it is considered to be a
+ *       registry URL
+ *   <li>A last part starting with a ":" is considered to be a tag
+ *   <li>The rest is considered the repository name (which might be separated via slashes)
  * </ul>
- * <p>
- * Example of valid names:
+ *
+ * <p>Example of valid names:
  *
  * <ul>
- *     <li>consol/tomcat-8.0</li>
- *     <li>consol/tomcat-8.0:8.0.9</li>
- *     <li>docker.consol.de:5000/tomcat-8.0</li>
- *     <li>docker.consol.de:5000/jolokia/tomcat-8.0:8.0.9</li>
+ *   <li>consol/tomcat-8.0
+ *   <li>consol/tomcat-8.0:8.0.9
+ *   <li>docker.consol.de:5000/tomcat-8.0
+ *   <li>docker.consol.de:5000/jolokia/tomcat-8.0:8.0.9
  * </ul>
  *
  * @author roland
@@ -53,13 +53,17 @@ public class Image {
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/regexp.go#L18
   private final String nameComponentRegexp = "[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?";
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/regexp.go#L25
-  private final String domainComponentRegexp = "(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])";
+  private final String domainComponentRegexp =
+      "(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])";
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/regexp.go#L18
   private final Pattern NAME_COMP_REGEXP = Pattern.compile(nameComponentRegexp);
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/regexp.go#L53
-  private final Pattern IMAGE_NAME_REGEXP = Pattern.compile(nameComponentRegexp + "(?:(?:/" + nameComponentRegexp + ")+)?");
+  private final Pattern IMAGE_NAME_REGEXP =
+      Pattern.compile(nameComponentRegexp + "(?:(?:/" + nameComponentRegexp + ")+)?");
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/regexp.go#L31
-  private final Pattern DOMAIN_REGEXP = Pattern.compile("^" + domainComponentRegexp + "(?:\\." + domainComponentRegexp + ")*(?::[0-9]+)?$");
+  private final Pattern DOMAIN_REGEXP =
+      Pattern.compile(
+          "^" + domainComponentRegexp + "(?:\\." + domainComponentRegexp + ")*(?::[0-9]+)?$");
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/regexp.go#L37
   private final Pattern TAG_REGEXP = Pattern.compile("^[\\w][\\w.-]{0,127}$");
   private final Pattern DIGEST_REGEXP = Pattern.compile("^sha256:[a-z0-9]{32,}$");
@@ -108,7 +112,8 @@ public class Image {
     Pattern tagPattern = Pattern.compile("^(.+?)(?::([^:/]+))?$");
     Matcher matcher = tagPattern.matcher(fullName);
     if (!matcher.matches()) {
-      throw new IllegalArgumentException(fullName + " is not a proper image name ([registry/][repo][:port]");
+      throw new IllegalArgumentException(
+          fullName + " is not a proper image name ([registry/][repo][:port]");
     }
     // extract tag if it exists
     tag = givenTag != null ? givenTag : matcher.group(2);
@@ -130,10 +135,10 @@ public class Image {
   }
 
   /**
-   * Check whether the given name validates agains the Docker rules for names
+   * Check whether the given name validates against the Docker rules for names
    *
-   * @param image image name to validate
-   *              d@throws IllegalArgumentException if the name doesnt validate
+   * @param image image name to validate d@throws IllegalArgumentException if the name doesnt
+   *     validate
    */
   public static void validate(String image) {
     // Validation will be triggered during construction
@@ -167,11 +172,11 @@ public class Image {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Image image = (Image) o;
-    return Objects.equals(repository, image.repository) &&
-      Objects.equals(registry, image.registry) &&
-      Objects.equals(tag, image.tag) &&
-      Objects.equals(digest, image.digest) &&
-      Objects.equals(user, image.user);
+    return Objects.equals(repository, image.repository)
+        && Objects.equals(registry, image.registry)
+        && Objects.equals(tag, image.tag)
+        && Objects.equals(digest, image.digest)
+        && Objects.equals(user, image.user);
   }
 
   @Override
@@ -204,8 +209,8 @@ public class Image {
   }
 
   /**
-   * Get the full name of this image, including the registry but without
-   * any tag (e.g. <code>privateregistry:fabric8io/java</code>)
+   * Get the full name of this image, including the registry but without any tag (e.g. <code>
+   * privateregistry:fabric8io/java</code>)
    *
    * @return full name with the original registry
    */
@@ -214,13 +219,13 @@ public class Image {
   }
 
   /**
-   * Get the full name of this image like {@link #getNameWithoutTag()} does, but allow
-   * an optional registry. This registry is used when this image does not already
-   * contain a registry.
+   * Get the full name of this image like {@link #getNameWithoutTag()} does, but allow an optional
+   * registry. This registry is used when this image does not already contain a registry.
    *
-   * @param optionalRegistry optional registry to use when this image does not provide
-   *                         a registry. Can be null in which case no optional registry is used*
-   * @return full name with original registry (if set) or optional registry (if not <code>null</code>)
+   * @param optionalRegistry optional registry to use when this image does not provide a registry.
+   *     Can be null in which case no optional registry is used*
+   * @return full name with original registry (if set) or optional registry (if not <code>null
+   *     </code>)
    */
   public String getNameWithoutTag(String optionalRegistry) {
     StringBuilder ret = new StringBuilder();
@@ -238,8 +243,8 @@ public class Image {
   // https://github.com/docker/docker/blob/04da4041757370fb6f85510c8977c5a18ddae380/vendor/github.com/docker/distribution/reference/reference.go
 
   /**
-   * Get the full name of this image, including the registry and tag
-   * (e.g. <code>privateregistry:fabric8io/java:7u53</code>)
+   * Get the full name of this image, including the registry and tag (e.g. <code>
+   * privateregistry:fabric8io/java:7u53</code>)
    *
    * @return full name with the original registry and the original tag given (if any).
    */
@@ -248,13 +253,14 @@ public class Image {
   }
 
   /**
-   * Get the full name of this image like {@link #getFullName(String)} does, but allow
-   * an optional registry. This registry is used when this image does not already
-   * contain a registry. If no tag was provided in the initial name, <code>latest</code> is used.
+   * Get the full name of this image like {@link #getFullName(String)} does, but allow an optional
+   * registry. This registry is used when this image does not already contain a registry. If no tag
+   * was provided in the initial name, <code>latest</code> is used.
    *
-   * @param optionalRegistry optional registry to use when this image does not provide
-   *                         a registry. Can be null in which case no optional registry is used*
-   * @return full name with original registry (if set) or optional registry (if not <code>null</code>).
+   * @param optionalRegistry optional registry to use when this image does not provide a registry.
+   *     Can be null in which case no optional registry is used*
+   * @return full name with original registry (if set) or optional registry (if not <code>null
+   *     </code>).
    */
   public String getFullName(String optionalRegistry) {
     String fullName = getNameWithoutTag(optionalRegistry);
@@ -270,8 +276,8 @@ public class Image {
   // ==========================================================
 
   /**
-   * Get the user (or "project") part of the image name. This is the part after the registry and before
-   * the image name
+   * Get the user (or "project") part of the image name. This is the part after the registry and
+   * before the image name
    *
    * @return user part or <code>null</code> if no user is present in the name
    */
@@ -305,20 +311,22 @@ public class Image {
     List<String> errors = new ArrayList<>();
     // Strip off user from repository name
     String image = user != null ? repository.substring(user.length() + 1) : repository;
-    Object[] checks = new Object[]{
-      "registry", DOMAIN_REGEXP, registry,
-      "image", IMAGE_NAME_REGEXP, image,
-      "user", NAME_COMP_REGEXP, user,
-      "tag", TAG_REGEXP, tag,
-      "digest", DIGEST_REGEXP, digest
-    };
+    Object[] checks =
+        new Object[] {
+          "registry", DOMAIN_REGEXP, registry,
+          "image", IMAGE_NAME_REGEXP, image,
+          "user", NAME_COMP_REGEXP, user,
+          "tag", TAG_REGEXP, tag,
+          "digest", DIGEST_REGEXP, digest
+        };
     for (int i = 0; i < checks.length; i += 3) {
       String value = (String) checks[i + 2];
       Pattern checkPattern = (Pattern) checks[i + 1];
-      if (value != null &&
-        !checkPattern.matcher(value).matches()) {
-        errors.add(String.format("%s part '%s' doesn't match allowed pattern '%s'",
-          checks[i], value, checkPattern.pattern()));
+      if (value != null && !checkPattern.matcher(value).matches()) {
+        errors.add(
+            String.format(
+                "%s part '%s' doesn't match allowed pattern '%s'",
+                checks[i], value, checkPattern.pattern()));
       }
     }
     if (errors.size() > 0) {

@@ -15,36 +15,39 @@
  */
 package com.redhat.exhort.sbom;
 
-import java.util.Collection;
 import com.github.packageurl.PackageURL;
+import java.util.Collection;
 
 public interface Sbom {
 
-    public Sbom addRoot(PackageURL root);
-    public PackageURL getRoot();
-    public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps);
-    public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
-    public String getAsJsonString();
-    public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition);
+  public Sbom addRoot(PackageURL root);
 
-    public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name);
+  public PackageURL getRoot();
 
-    void removeRootComponent();
+  public <T> Sbom filterIgnoredDeps(Collection<T> ignoredDeps);
 
-  public enum BelongingCondition
-    {
-      NAME("name"),
-      PURL("purl");
+  public Sbom addDependency(PackageURL sourceRef, PackageURL targetRef);
 
-      String belongingCondition;
+  public String getAsJsonString();
 
-      BelongingCondition(String belongingCondition) {
-        this.belongingCondition = belongingCondition;
-      }
+  public void setBelongingCriteriaBinaryAlgorithm(BelongingCondition belongingCondition);
 
-      public String getBelongingCondition() {
-        return belongingCondition;
-      }
+  public boolean checkIfPackageInsideDependsOnList(PackageURL component, String name);
+
+  void removeRootComponent();
+
+  public enum BelongingCondition {
+    NAME("name"),
+    PURL("purl");
+
+    String belongingCondition;
+
+    BelongingCondition(String belongingCondition) {
+      this.belongingCondition = belongingCondition;
     }
 
+    public String getBelongingCondition() {
+      return belongingCondition;
+    }
+  }
 }

@@ -15,26 +15,23 @@
  */
 package com.redhat.exhort.tools;
 
-import java.nio.file.Path;
-
-
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.providers.GoModulesProvider;
+import com.redhat.exhort.providers.GradleProvider;
 import com.redhat.exhort.providers.JavaMavenProvider;
 import com.redhat.exhort.providers.JavaScriptNpmProvider;
 import com.redhat.exhort.providers.PythonPipProvider;
-import com.redhat.exhort.providers.GradleProvider;
+import java.nio.file.Path;
 
-/** Utility class used for instantiating providers. **/
+/** Utility class used for instantiating providers. * */
 public final class Ecosystem {
 
   public enum Type {
-
-    MAVEN ("maven"),
-    NPM ("npm"),
-    GOLANG ("golang"),
-    PYTHON ("pypi"),
-    GRADLE ("gradle");
+    MAVEN("maven"),
+    NPM("npm"),
+    GOLANG("golang"),
+    PYTHON("pypi"),
+    GRADLE("gradle");
 
     String type;
 
@@ -45,9 +42,9 @@ public final class Ecosystem {
     Type(String type) {
       this.type = type;
     }
-
   }
-  private Ecosystem(){
+
+  private Ecosystem() {
     // constructor not required for a utility class
   }
 
@@ -81,8 +78,7 @@ public final class Ecosystem {
         return new GradleProvider();
 
       default:
-        throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType)
-        );
+        throw new IllegalStateException(String.format("Unknown manifest file %s", manifestType));
     }
   }
 }

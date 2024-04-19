@@ -36,8 +36,10 @@ public class ExhortTest {
     return new String(bytes);
   }
 
-  public static InputStream getResourceAsStreamDecision(Class<? extends ExhortTest> theClass, String[] list) throws IOException {
-    InputStream resourceAsStreamFromModule = theClass.getModule().getResourceAsStream(String.join("/", list));
+  public static InputStream getResourceAsStreamDecision(
+      Class<? extends ExhortTest> theClass, String[] list) throws IOException {
+    InputStream resourceAsStreamFromModule =
+        theClass.getModule().getResourceAsStream(String.join("/", list));
     if (Objects.isNull(resourceAsStreamFromModule)) {
       return theClass.getClassLoader().getResourceAsStream(String.join("/", list));
     }
@@ -50,12 +52,11 @@ public class ExhortTest {
       var tmpDir = Files.createTempDirectory("exhort_test_");
       tmpFile = Files.createFile(tmpDir.resolve(fileName));
       try (var is = getResourceAsStreamDecision(this.getClass(), pathList)) {
-        if(Objects.nonNull(is)) {
+        if (Objects.nonNull(is)) {
           Files.write(tmpFile, is.readAllBytes());
-        }
-        else
-        {
-          InputStream resourceIs = getClass().getClassLoader().getResourceAsStream(String.join("/", pathList));
+        } else {
+          InputStream resourceIs =
+              getClass().getClassLoader().getResourceAsStream(String.join("/", pathList));
           Files.write(tmpFile, resourceIs.readAllBytes());
           resourceIs.close();
         }
@@ -67,17 +68,17 @@ public class ExhortTest {
     }
     return tmpFile.toString();
   }
-protected String getFileFromString(String fileName, String content) {
+
+  protected String getFileFromString(String fileName, String content) {
     Path tmpFile;
     try {
       var tmpDir = Files.createTempDirectory("exhort_test_");
       tmpFile = Files.createFile(tmpDir.resolve(fileName));
-        Files.write(tmpFile, content.getBytes());
+      Files.write(tmpFile, content.getBytes());
 
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
     return tmpFile.toString();
   }
-
 }

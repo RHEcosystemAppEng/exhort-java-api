@@ -15,6 +15,13 @@
  */
 package com.redhat.exhort.impl;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mockStatic;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,18 +33,6 @@ import com.redhat.exhort.image.ImageRef;
 import com.redhat.exhort.providers.HelperExtension;
 import com.redhat.exhort.tools.Ecosystem;
 import com.redhat.exhort.tools.Operations;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,13 +49,17 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalMatchers.aryEq;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mockStatic;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @Tag("IntegrationTest")
 @ExtendWith(HelperExtension.class)
@@ -68,16 +67,27 @@ import static org.mockito.Mockito.mockStatic;
 class ExhortApiIT extends ExhortTest {
 
   private static Api api;
-  private static Map<String,String> ecoSystemsManifestNames;
+  private static Map<String, String> ecoSystemsManifestNames;
 
   private MockedStatic<Operations> mockedOperations;
+
   @BeforeAll
   static void beforeAll() {
     api = new ExhortApi();
-    System.setProperty("RHDA_SOURCE","exhort-java-api-it");
-    System.setProperty("EXHORT_DEV_MODE","false");
-    ecoSystemsManifestNames = Map.of("golang", "go.mod","maven","pom.xml","npm","package.json","pypi","requirements.txt", "gradle", "build.gradle");
-
+    System.setProperty("RHDA_SOURCE", "exhort-java-api-it");
+    System.setProperty("EXHORT_DEV_MODE", "false");
+    ecoSystemsManifestNames =
+        Map.of(
+            "golang",
+            "go.mod",
+            "maven",
+            "pom.xml",
+            "npm",
+            "package.json",
+            "pypi",
+            "requirements.txt",
+            "gradle",
+            "build.gradle");
   }
 
   @Tag("IntegrationTest")
@@ -87,53 +97,74 @@ class ExhortApiIT extends ExhortTest {
     System.clearProperty("EXHORT_DEV_MODE");
     api = null;
   }
+
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE" })
-  void Integration_Test_End_To_End_Stack_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  @EnumSource(
+      value = Ecosystem.Type.class,
+      names = {"GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE"})
+  void Integration_Test_End_To_End_Stack_Analysis(Ecosystem.Type packageManager)
+      throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
-    String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
+    String pathToManifest =
+        getFileFromResource(
+            manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
-    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
+    // Github action runner with all maven and java versions seems to enter infinite loop in
+    // integration tests of
+    // MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
     AnalysisReport analysisReportResult = api.stackAnalysis(pathToManifest).get();
-    handleJsonResponse(analysisReportResult,true);
+    handleJsonResponse(analysisReportResult, true);
     releaseStaticMock(packageManager);
   }
 
   private void releaseStaticMock(Ecosystem.Type packageManager) {
-    if(packageManager.equals(Ecosystem.Type.MAVEN)) {
+    if (packageManager.equals(Ecosystem.Type.MAVEN)) {
       this.mockedOperations.close();
     }
   }
 
-
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE" })
-  void Integration_Test_End_To_End_Stack_Analysis_Mixed(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  @EnumSource(
+      value = Ecosystem.Type.class,
+      names = {"GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE"})
+  void Integration_Test_End_To_End_Stack_Analysis_Mixed(Ecosystem.Type packageManager)
+      throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
-    String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
+    String pathToManifest =
+        getFileFromResource(
+            manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
-    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
+    // Github action runner with all maven and java versions seems to enter infinite loop in
+    // integration tests of
+    // MAVEN when runnig dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
     AnalysisReport analysisReportJson = api.stackAnalysisMixed(pathToManifest).get().json;
     String analysisReportHtml = new String(api.stackAnalysisMixed(pathToManifest).get().html);
-    handleJsonResponse(analysisReportJson,true);
+    handleJsonResponse(analysisReportJson, true);
     handleHtmlResponse(analysisReportHtml);
     releaseStaticMock(packageManager);
   }
 
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE" })
-  void Integration_Test_End_To_End_Stack_Analysis_Html(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  @EnumSource(
+      value = Ecosystem.Type.class,
+      names = {"GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE"})
+  void Integration_Test_End_To_End_Stack_Analysis_Html(Ecosystem.Type packageManager)
+      throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
-    String pathToManifest = getFileFromResource(manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
+    String pathToManifest =
+        getFileFromResource(
+            manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
     preparePythonEnvironment(packageManager);
-    // Github action runner with all maven and java versions seems to enter infinite loop in integration tests of MAVEN when running dependency maven plugin to produce verbose text dependenct tree format.
+    // Github action runner with all maven and java versions seems to enter infinite loop in
+    // integration tests of
+    // MAVEN when running dependency maven plugin to produce verbose text dependenct tree format.
     // locally it's not recreated with same versions
     mockMavenDependencyTree(packageManager);
     String analysisReportHtml = new String(api.stackAnalysisHtml(pathToManifest).get());
@@ -141,28 +172,35 @@ class ExhortApiIT extends ExhortTest {
     handleHtmlResponse(analysisReportHtml);
   }
 
-
   @Tag("IntegrationTest")
   @ParameterizedTest
-  @EnumSource(value = Ecosystem.Type.class, names = { "GOLANG", "MAVEN", "NPM", "PYTHON" })
-  void Integration_Test_End_To_End_Component_Analysis(Ecosystem.Type packageManager) throws IOException, ExecutionException, InterruptedException {
+  @EnumSource(
+      value = Ecosystem.Type.class,
+      names = {"GOLANG", "MAVEN", "NPM", "PYTHON"})
+  void Integration_Test_End_To_End_Component_Analysis(Ecosystem.Type packageManager)
+      throws IOException, ExecutionException, InterruptedException {
     String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
-  byte[] manifestContent = getStringFromFile("tst_manifests", "it", packageManager.getType(), manifestFileName).getBytes();
+    byte[] manifestContent =
+        getStringFromFile("tst_manifests", "it", packageManager.getType(), manifestFileName)
+            .getBytes();
     preparePythonEnvironment(packageManager);
-    AnalysisReport analysisReportResult = api.componentAnalysis(manifestFileName,manifestContent).get();
-    handleJsonResponse(analysisReportResult,false);
+    AnalysisReport analysisReportResult =
+        api.componentAnalysis(manifestFileName, manifestContent).get();
+    handleJsonResponse(analysisReportResult, false);
   }
 
   @Tag("IntegrationTest")
   @Test
   void Integration_Test_End_To_End_Image_Analysis() throws IOException {
-    var result = testImageAnalysis(i -> {
-      try {
-        return api.imageAnalysis(i).get();
-      } catch (InterruptedException | ExecutionException | IOException e) {
-        throw new RuntimeException(e);
-      }
-    });
+    var result =
+        testImageAnalysis(
+            i -> {
+              try {
+                return api.imageAnalysis(i).get();
+              } catch (InterruptedException | ExecutionException | IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
 
     assertEquals(1, result.size());
     handleJsonResponse(new ArrayList<>(result.values()).get(0), false);
@@ -171,69 +209,92 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @Test
   void Integration_Test_End_To_End_Image_Analysis_Html() throws IOException {
-    var result = testImageAnalysis(i -> {
-      try {
-        return api.imageAnalysisHtml(i).get();
-      } catch (InterruptedException | ExecutionException | IOException e) {
-        throw new RuntimeException(e);
-      }
-    });
+    var result =
+        testImageAnalysis(
+            i -> {
+              try {
+                return api.imageAnalysisHtml(i).get();
+              } catch (InterruptedException | ExecutionException | IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
 
     handleHtmlResponseForImage(new String(result));
   }
 
-  private static <T> T testImageAnalysis(Function<Set<ImageRef>, T> imageAnalysisFunction) throws IOException {
+  private static <T> T testImageAnalysis(Function<Set<ImageRef>, T> imageAnalysisFunction)
+      throws IOException {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class);
-         var sbomIS = getResourceAsStreamDecision(ExhortApiIT.class, new String[]{"msc", "image", "image_sbom.json"})) {
+        var sbomIS =
+            getResourceAsStreamDecision(
+                ExhortApiIT.class, new String[] {"msc", "image", "image_sbom.json"})) {
 
-      var imageRef = new ImageRef("test.io/test/test-app:test-version@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165", "linux/amd64");
+      var imageRef =
+          new ImageRef(
+              "test.io/test/test-app:test-version@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165",
+              "linux/amd64");
 
-      var jsonSbom = new BufferedReader(new InputStreamReader(sbomIS, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+      var jsonSbom =
+          new BufferedReader(new InputStreamReader(sbomIS, StandardCharsets.UTF_8))
+              .lines()
+              .collect(Collectors.joining("\n"));
       var output = new Operations.ProcessExecOutput(jsonSbom, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("syft")))
-        .thenReturn("syft");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("syft"))).thenReturn("syft");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"syft", imageRef.getImage().getFullName(),
-            "-s", "all-layers", "-o", "cyclonedx-json", "-q"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "syft",
+                            imageRef.getImage().getFullName(),
+                            "-s",
+                            "all-layers",
+                            "-o",
+                            "cyclonedx-json",
+                            "-q"
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       return imageAnalysisFunction.apply(Set.of(imageRef));
     }
   }
 
   private static void preparePythonEnvironment(Ecosystem.Type packageManager) {
-    if(packageManager.equals(Ecosystem.Type.PYTHON)) {
-      System.setProperty("EXHORT_PYTHON_VIRTUAL_ENV","true");
-      System.setProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS","true");
-      System.setProperty("MATCH_MANIFEST_VERSIONS","false");
-    }
-    else {
+    if (packageManager.equals(Ecosystem.Type.PYTHON)) {
+      System.setProperty("EXHORT_PYTHON_VIRTUAL_ENV", "true");
+      System.setProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "true");
+      System.setProperty("MATCH_MANIFEST_VERSIONS", "false");
+    } else {
       System.clearProperty("EXHORT_PYTHON_VIRTUAL_ENV");
       System.clearProperty("EXHORT_PYTHON_INSTALL_BEST_EFFORTS");
       System.clearProperty("MATCH_MANIFEST_VERSIONS");
     }
   }
 
-  private static void handleJsonResponse(AnalysisReport analysisReportResult, boolean positiveNumberOfTransitives) {
-    analysisReportResult.getProviders().entrySet().stream().forEach(provider -> { assertTrue(provider.getValue().getStatus().getOk());
-      assertTrue(provider.getValue().getStatus().getCode() == HttpURLConnection.HTTP_OK);
-    });
+  private static void handleJsonResponse(
+      AnalysisReport analysisReportResult, boolean positiveNumberOfTransitives) {
     analysisReportResult.getProviders().entrySet().stream()
-                                                  .map(Map.Entry::getValue)
-                                                  .map(ProviderReport::getSources)
-                                                  .map(Map::entrySet)
-                                                  .flatMap(Collection::stream)
-                                                  .map(Map.Entry::getValue)
-                                                  .forEach( source -> assertTrue(source.getSummary().getTotal() > 0 ));
+        .forEach(
+            provider -> {
+              assertTrue(provider.getValue().getStatus().getOk());
+              assertTrue(provider.getValue().getStatus().getCode() == HttpURLConnection.HTTP_OK);
+            });
+    analysisReportResult.getProviders().entrySet().stream()
+        .map(Map.Entry::getValue)
+        .map(ProviderReport::getSources)
+        .map(Map::entrySet)
+        .flatMap(Collection::stream)
+        .map(Map.Entry::getValue)
+        .forEach(source -> assertTrue(source.getSummary().getTotal() > 0));
 
-    if(positiveNumberOfTransitives) {
+    if (positiveNumberOfTransitives) {
       assertTrue(analysisReportResult.getScanned().getTransitive() > 0);
-    }
-    else {
-      assertEquals(0,analysisReportResult.getScanned().getTransitive());
+    } else {
+      assertEquals(0, analysisReportResult.getScanned().getTransitive());
     }
   }
 
@@ -242,10 +303,10 @@ class ExhortApiIT extends ExhortTest {
     assertTrue(analysisReportHtml.contains("svg") && analysisReportHtml.contains("html"));
     int jsonStart = analysisReportHtml.indexOf("\"report\":");
     int jsonEnd = analysisReportHtml.indexOf("}}}}}");
-    if(jsonEnd == -1) {
+    if (jsonEnd == -1) {
       jsonEnd = analysisReportHtml.indexOf("}}}}");
     }
-    String embeddedJson = analysisReportHtml.substring(jsonStart + 9 ,jsonEnd + 5);
+    String embeddedJson = analysisReportHtml.substring(jsonStart + 9, jsonEnd + 5);
     JsonNode jsonInHtml = om.readTree(embeddedJson);
     JsonNode scannedNode = jsonInHtml.get("scanned");
     assertTrue(scannedNode.get("total").asInt(0) > 0);
@@ -253,15 +314,15 @@ class ExhortApiIT extends ExhortTest {
     JsonNode status = jsonInHtml.get("providers").get("osv-nvd").get("status");
     assertTrue(status.get("code").asInt(0) == 200);
     assertTrue(status.get("ok").asBoolean(false));
-
   }
 
-  private void handleHtmlResponseForImage(String analysisReportHtml) throws JsonProcessingException {
+  private void handleHtmlResponseForImage(String analysisReportHtml)
+      throws JsonProcessingException {
     ObjectMapper om = new ObjectMapper();
     assertTrue(analysisReportHtml.contains("svg") && analysisReportHtml.contains("html"));
     int jsonStart = analysisReportHtml.indexOf("\"report\":");
     int jsonEnd = analysisReportHtml.indexOf("}}}}}}");
-    String embeddedJson = analysisReportHtml.substring(jsonStart + 9 ,jsonEnd + 6);
+    String embeddedJson = analysisReportHtml.substring(jsonStart + 9, jsonEnd + 6);
     JsonNode jsonInHtml = om.readTree(embeddedJson);
     JsonNode scannedNode = jsonInHtml.findValue("scanned");
     assertTrue(scannedNode.get("total").asInt(0) > 0);
@@ -272,30 +333,38 @@ class ExhortApiIT extends ExhortTest {
   }
 
   private void mockMavenDependencyTree(Ecosystem.Type packageManager) throws IOException {
-    if(packageManager.equals(Ecosystem.Type.MAVEN)) {
+    if (packageManager.equals(Ecosystem.Type.MAVEN)) {
       mockedOperations = mockStatic(Operations.class);
       String depTree;
-      try (var is =  getResourceAsStreamDecision(getClass(), new String [] { "tst_manifests", "it","maven", "depTree.txt"})) {
+      try (var is =
+          getResourceAsStreamDecision(
+              getClass(), new String[] {"tst_manifests", "it", "maven", "depTree.txt"})) {
         depTree = new String(is.readAllBytes());
       }
-      mockedOperations.when(() -> Operations.runProcess(any(),any())).thenAnswer(invocationOnMock ->  { return getOutputFileAndOverwriteItWithMock(depTree, invocationOnMock, "-DoutputFile");});
+      mockedOperations
+          .when(() -> Operations.runProcess(any(), any()))
+          .thenAnswer(
+              invocationOnMock -> {
+                return getOutputFileAndOverwriteItWithMock(
+                    depTree, invocationOnMock, "-DoutputFile");
+              });
     }
   }
 
-  public static String getOutputFileAndOverwriteItWithMock(String outputFileContent, InvocationOnMock invocationOnMock, String parameterPrefix) throws IOException {
+  public static String getOutputFileAndOverwriteItWithMock(
+      String outputFileContent, InvocationOnMock invocationOnMock, String parameterPrefix)
+      throws IOException {
     String[] rawArguments = (String[]) invocationOnMock.getRawArguments()[0];
-    Optional<String> outputFileArg = Arrays.stream(rawArguments).filter(arg -> arg!= null && arg.startsWith(parameterPrefix)).findFirst();
-    String outputFilePath=null;
-    if(outputFileArg.isPresent())
-    {
+    Optional<String> outputFileArg =
+        Arrays.stream(rawArguments)
+            .filter(arg -> arg != null && arg.startsWith(parameterPrefix))
+            .findFirst();
+    String outputFilePath = null;
+    if (outputFileArg.isPresent()) {
       String outputFile = outputFileArg.get();
       outputFilePath = outputFile.substring(outputFile.indexOf("=") + 1);
       Files.writeString(Path.of(outputFilePath), outputFileContent);
     }
     return outputFilePath;
   }
-
 }
-
-
-

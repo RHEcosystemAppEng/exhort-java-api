@@ -22,7 +22,8 @@ public class Platform {
 
   // $GOOS and $GOARCH
   // https://github.com/docker-library/bashbrew/blob/v0.1.2/architecture/oci-platform.go#L14-L27
-  private static final Set<Platform> SUPPORTED_PLATFORMS = Set.of(
+  private static final Set<Platform> SUPPORTED_PLATFORMS =
+      Set.of(
           new Platform().os("linux").arch("amd64"),
           new Platform().os("linux").arch("arm").variant("v5"),
           new Platform().os("linux").arch("arm").variant("v6"),
@@ -33,9 +34,7 @@ public class Platform {
           new Platform().os("linux").arch("ppc64le"),
           new Platform().os("linux").arch("riscv64"),
           new Platform().os("linux").arch("s390x"),
-
-          new Platform().os("windows").arch("arm64")
-  );
+          new Platform().os("windows").arch("arm64"));
 
   public static final Platform EMPTY_PLATFORM = new Platform();
 
@@ -43,8 +42,7 @@ public class Platform {
   private String architecture;
   private String variant;
 
-  private Platform() {
-  }
+  private Platform() {}
 
   public Platform(String platform) {
     if (platform == null) {
@@ -68,7 +66,8 @@ public class Platform {
     }
 
     if (!SUPPORTED_PLATFORMS.contains(this)) {
-      throw new IllegalArgumentException(String.format("Image platform is not supported: %s", platform));
+      throw new IllegalArgumentException(
+          String.format("Image platform is not supported: %s", platform));
     }
   }
 
@@ -91,7 +90,8 @@ public class Platform {
     }
 
     if (!SUPPORTED_PLATFORMS.contains(this)) {
-      throw new IllegalArgumentException(String.format("Image platform is not supported: %s/%s/%s", os, arch, variant));
+      throw new IllegalArgumentException(
+          String.format("Image platform is not supported: %s/%s/%s", os, arch, variant));
     }
   }
 
@@ -138,7 +138,9 @@ public class Platform {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Platform platform = (Platform) o;
-    return Objects.equals(os, platform.os) && Objects.equals(architecture, platform.architecture) && Objects.equals(variant, platform.variant);
+    return Objects.equals(os, platform.os)
+        && Objects.equals(architecture, platform.architecture)
+        && Objects.equals(variant, platform.variant);
   }
 
   @Override

@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearEnvironmentVariable;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
@@ -41,7 +40,7 @@ class Operations_Test {
   }
 
   @Nested
-  @ClearEnvironmentVariable(key="EXHORT_MADE_UP_CMD_PATH")
+  @ClearEnvironmentVariable(key = "EXHORT_MADE_UP_CMD_PATH")
   class Test_getCustomPathOrElse {
     @AfterEach
     void cleanup() {
@@ -49,16 +48,18 @@ class Operations_Test {
     }
 
     @Test
-    @SetEnvironmentVariable(key="EXHORT_MADE_UP_CMD_PATH", value="/path/to/env/made_up_cmd")
+    @SetEnvironmentVariable(key = "EXHORT_MADE_UP_CMD_PATH", value = "/path/to/env/made_up_cmd")
     void when_custom_path_exists_in_env_vars_and_properties_should_return_from_env_vars() {
       System.setProperty("EXHORT_MADE_UP_CMD_PATH", "/path/to/property/made_up_cmd");
-      assertThat(Operations.getCustomPathOrElse("made-up cmd")).isEqualTo("/path/to/env/made_up_cmd");
+      assertThat(Operations.getCustomPathOrElse("made-up cmd"))
+          .isEqualTo("/path/to/env/made_up_cmd");
     }
 
     @Test
     void when_custom_path_not_in_env_var_but_exists_in_properties_should_return_from_properties() {
       System.setProperty("EXHORT_MADE_UP_CMD_PATH", "/path/to/property/made_up_cmd");
-      assertThat(Operations.getCustomPathOrElse("made-up_cmd")).isEqualTo("/path/to/property/made_up_cmd");
+      assertThat(Operations.getCustomPathOrElse("made-up_cmd"))
+          .isEqualTo("/path/to/property/made_up_cmd");
     }
 
     @Test

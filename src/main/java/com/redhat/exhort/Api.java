@@ -15,6 +15,8 @@
  */
 package com.redhat.exhort;
 
+import com.redhat.exhort.api.AnalysisReport;
+import com.redhat.exhort.image.ImageRef;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -22,10 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import com.redhat.exhort.api.AnalysisReport;
-import com.redhat.exhort.image.ImageRef;
-
-/** The Api interface is used for contracting API implementations. **/
+/** The Api interface is used for contracting API implementations. * */
 public interface Api {
 
   public static final String CYCLONEDX_MEDIA_TYPE = "application/vnd.cyclonedx+json";
@@ -43,18 +42,19 @@ public interface Api {
 
   /** POJO class used for aggregating multipart/mixed analysis requests. */
   class MixedReport {
-    final public byte[] html;
-    final public AnalysisReport json;
+    public final byte[] html;
+    public final AnalysisReport json;
 
     public MixedReport(final byte[] html, final AnalysisReport json) {
       this.html = html;
       this.json = json;
     }
-    public MixedReport()
-    {
+
+    public MixedReport() {
       this.html = new byte[0];
       this.json = new AnalysisReport();
     }
+
     @Override
     public boolean equals(final Object o) {
       if (this == o) return true;
@@ -104,11 +104,13 @@ public interface Api {
    * @return the deserialized Json report as an AnalysisReport wrapped in a CompletableFuture
    * @throws IOException when failed to load the manifest content
    */
-  CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent) throws IOException;
+  CompletableFuture<AnalysisReport> componentAnalysis(String manifestType, byte[] manifestContent)
+      throws IOException;
 
   CompletableFuture<AnalysisReport> componentAnalysis(String manifestFile) throws IOException;
 
-  CompletableFuture<Map<ImageRef, AnalysisReport>> imageAnalysis(Set<ImageRef> imageRefs) throws IOException;
+  CompletableFuture<Map<ImageRef, AnalysisReport>> imageAnalysis(Set<ImageRef> imageRefs)
+      throws IOException;
 
   CompletableFuture<byte[]> imageAnalysisHtml(Set<ImageRef> imageRefs) throws IOException;
 }

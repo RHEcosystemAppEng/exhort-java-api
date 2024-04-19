@@ -15,6 +15,8 @@
  */
 package com.redhat.exhort.providers;
 
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Api;
@@ -24,10 +26,6 @@ import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
-import org.tomlj.Toml;
-import org.tomlj.TomlParseResult;
-import org.tomlj.TomlTable;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,14 +37,15 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+import org.tomlj.Toml;
+import org.tomlj.TomlParseResult;
+import org.tomlj.TomlTable;
 
 /**
- * Concrete implementation of the {@link Provider} used for converting dependency trees
- * for Gradle projects (gradle.build) into a content Dot Graphs for Stack analysis or Json for
- * Component analysis.
- **/
+ * Concrete implementation of the {@link Provider} used for converting dependency trees for Gradle
+ * projects (gradle.build) into a content Dot Graphs for Stack analysis or Json for Component
+ * analysis.
+ */
 public final class GradleProvider extends BaseJavaProvider {
 
   private Logger log = LoggersFactory.getLogger(this.getClass().getName());
@@ -60,24 +59,29 @@ public final class GradleProvider extends BaseJavaProvider {
     Path tempFile = getDependencies(manifestPath);
     if (debugLoggingIsNeeded()) {
       String stackAnalysisDependencyTree = Files.readString(tempFile);
-      log.info(String.format("Package Manager Gradle Stack Analysis Dependency Tree Output: %s %s", System.lineSeparator(), stackAnalysisDependencyTree));
+      log.info(
+          String.format(
+              "Package Manager Gradle Stack Analysis Dependency Tree Output: %s %s",
+              System.lineSeparator(), stackAnalysisDependencyTree));
     }
     Map<String, String> propertiesMap = extractProperties(manifestPath);
 
     var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, "runtimeClasspath");
     var ignored = getIgnoredDeps(manifestPath);
 
-    return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
+    return new Content(
+        sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   private List<String> getIgnoredDeps(Path manifestPath) throws IOException {
     List<String> buildGradleLines = Files.readAllLines(manifestPath);
     List<String> ignored = new ArrayList<>();
 
-    var ignoredLines = buildGradleLines.stream()
-      .filter(this::isIgnoredLine)
-      .map(this::extractPackageName)
-      .collect(Collectors.toList());
+    var ignoredLines =
+        buildGradleLines.stream()
+            .filter(this::isIgnoredLine)
+            .map(this::extractPackageName)
+            .collect(Collectors.toList());
 
     // Process each ignored dependency
     for (String dependency : ignoredLines) {
@@ -98,7 +102,9 @@ public final class GradleProvider extends BaseJavaProvider {
 
   private String getDepInfo(String dependencyLine) {
     // Check if the line contains "group:", "name:", and "version:"
-    if (dependencyLine.contains("group:") && dependencyLine.contains("name:") && dependencyLine.contains("version:")) {
+    if (dependencyLine.contains("group:")
+        && dependencyLine.contains("name:")
+        && dependencyLine.contains("version:")) {
       Pattern pattern = Pattern.compile("(group|name|version):\\s*['\"](.*?)['\"]");
       Matcher matcher = pattern.matcher(dependencyLine);
       String groupId = null, artifactId = null, version = null;
@@ -119,10 +125,10 @@ public final class GradleProvider extends BaseJavaProvider {
             break;
         }
       }
-        if (groupId != null && artifactId != null && version != null) {
-          PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
-          return ignoredPackageUrl.getCoordinates();
-        }
+      if (groupId != null && artifactId != null && version != null) {
+        PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
+        return ignoredPackageUrl.getCoordinates();
+      }
     } else {
       // Regular expression pattern to capture content inside single or double quotes
       Pattern pattern = Pattern.compile("['\"](.*?)['\"]");
@@ -157,13 +163,13 @@ public final class GradleProvider extends BaseJavaProvider {
     if (dependencyTable != null) {
       String groupId = dependencyTable.getString("module").split(":")[0];
       String artifactId = dependencyTable.getString("module").split(":")[1];
-      String version = toml.getTable("versions").getString(dependencyTable.getString("version.ref"));
+      String version =
+          toml.getTable("versions").getString(dependencyTable.getString("version.ref"));
       PackageURL ignoredPackageUrl = toPurl(groupId, artifactId, version);
       return ignoredPackageUrl.getCoordinates();
     }
 
     return null;
-
   }
 
   private Path getLibsVersionsTomlPath(Path manifestPath) {
@@ -210,7 +216,6 @@ public final class GradleProvider extends BaseJavaProvider {
     return packageName;
   }
 
-
   private static Path getDependencies(Path manifestPath) throws IOException {
     // check for custom gradle executable
     var gradle = Operations.getCustomPathOrElse("gradle");
@@ -220,7 +225,8 @@ public final class GradleProvider extends BaseJavaProvider {
     String gradleCommand = gradle + " dependencies";
 
     String[] cmdList = gradleCommand.split("\\s+");
-    String gradleOutput = Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), cmdList);
+    String gradleOutput =
+        Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), cmdList);
     Files.writeString(tempFile, gradleOutput);
 
     return tempFile;
@@ -231,14 +237,17 @@ public final class GradleProvider extends BaseJavaProvider {
     var gradle = Operations.getCustomPathOrElse("gradle");
     String propCmd = gradle + " properties";
     String[] propCmdList = propCmd.split("\\s+");
-    String properties = Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), propCmdList);
+    String properties =
+        Operations.runProcessGetOutput(Path.of(manifestPath.getParent().toString()), propCmdList);
     // Create a temporary file
     Files.writeString(propsTempFile, properties);
 
     return propsTempFile;
   }
 
-  private Sbom buildSbomFromTextFormat(Path textFormatFile, Map<String, String> propertiesMap, String configName) throws IOException {
+  private Sbom buildSbomFromTextFormat(
+      Path textFormatFile, Map<String, String> propertiesMap, String configName)
+      throws IOException {
     var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL, "sensitive");
     String root = getRoot(textFormatFile, propertiesMap);
 
@@ -260,11 +269,12 @@ public final class GradleProvider extends BaseJavaProvider {
     return sbom;
   }
 
-  private String getRoot(Path textFormatFile, Map<String, String> propertiesMap) throws IOException {
+  private String getRoot(Path textFormatFile, Map<String, String> propertiesMap)
+      throws IOException {
     String group = propertiesMap.get("group");
     String version = propertiesMap.get("version");
     String rootName = extractRootProjectValue(textFormatFile);
-    String root = group + ':' + rootName + ':' + "jar" + ':' + version ;
+    String root = group + ':' + rootName + ':' + "jar" + ':' + version;
     return root;
   }
 
@@ -330,7 +340,10 @@ public final class GradleProvider extends BaseJavaProvider {
 
   @Override
   public Content provideComponent(byte[] manifestContent) throws IOException {
-    throw new IllegalArgumentException("Gradle Package Manager requires the full package directory, not just the manifest content, to generate the dependency tree. Please provide the complete package directory path.");
+    throw new IllegalArgumentException(
+        "Gradle Package Manager requires the full package directory, not just the manifest content,"
+            + " to generate the dependency tree. Please provide the complete package directory"
+            + " path.");
   }
 
   @Override
@@ -355,6 +368,7 @@ public final class GradleProvider extends BaseJavaProvider {
     var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, configName);
     var ignored = getIgnoredDeps(manifestPath);
 
-    return new Content(sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
+    return new Content(
+        sbom.filterIgnoredDeps(ignored).getAsJsonString().getBytes(), Api.CYCLONEDX_MEDIA_TYPE);
   }
 }

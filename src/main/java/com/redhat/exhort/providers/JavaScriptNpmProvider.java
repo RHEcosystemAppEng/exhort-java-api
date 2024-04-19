@@ -15,17 +15,7 @@
  */
 package com.redhat.exhort.providers;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -40,18 +30,26 @@ import com.redhat.exhort.sbom.SbomFactory;
 import com.redhat.exhort.tools.Ecosystem;
 import com.redhat.exhort.tools.Ecosystem.Type;
 import com.redhat.exhort.tools.Operations;
-
-import static com.redhat.exhort.impl.ExhortApi.debugLoggingIsNeeded;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
- * Concrete implementation of the {@link Provider} used for converting
- * dependency trees
- * for npm projects (package.json) into a SBOM content for Stack analysis or
- * Component analysis.
- **/
+ * Concrete implementation of the {@link Provider} used for converting dependency trees for npm
+ * projects (package.json) into a SBOM content for Stack analysis or Component analysis.
+ */
 public final class JavaScriptNpmProvider extends Provider {
 
   private System.Logger log = System.getLogger(this.getClass().getName());
+
   public JavaScriptNpmProvider() {
     super(Type.NPM);
   }
@@ -60,27 +58,32 @@ public final class JavaScriptNpmProvider extends Provider {
   public Content provideStack(final Path manifestPath) throws IOException {
     // check for custom npm executable
     Sbom sbom = getDependencySbom(manifestPath, true, false);
-    return new Content(sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
+    return new Content(
+        sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   @Override
   public Content provideComponent(byte[] manifestContent) throws IOException {
     // check for custom npm executable
-    return new Content(getDependencyTree(manifestContent).getAsJsonString().getBytes(StandardCharsets.UTF_8),
-      Api.CYCLONEDX_MEDIA_TYPE);
+    return new Content(
+        getDependencyTree(manifestContent).getAsJsonString().getBytes(StandardCharsets.UTF_8),
+        Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   @Override
   public Content provideComponent(Path manifestPath) throws IOException {
-    return new Content(getDependencySbom(manifestPath, false,false).getAsJsonString().getBytes(StandardCharsets.UTF_8),
-      Api.CYCLONEDX_MEDIA_TYPE);
+    return new Content(
+        getDependencySbom(manifestPath, false, false)
+            .getAsJsonString()
+            .getBytes(StandardCharsets.UTF_8),
+        Api.CYCLONEDX_MEDIA_TYPE);
   }
 
   private Sbom getDependencyTree(byte[] manifestContent) {
     Sbom sbom;
     try {
       Path tempDir = Files.createTempDirectory("exhort_npm");
-      Path path = Files.createFile(Path.of(tempDir.toString(),"package.json"));
+      Path path = Files.createFile(Path.of(tempDir.toString(), "package.json"));
       Files.write(path, manifestContent);
       sbom = getDependencySbom(path, false, true);
       Files.delete(path);
@@ -91,7 +94,8 @@ public final class JavaScriptNpmProvider extends Provider {
   }
 
   private PackageURL getRoot(JsonNode jsonDependenciesNpm) throws MalformedPackageURLException {
-    return toPurl(jsonDependenciesNpm.get("name").asText(), jsonDependenciesNpm.get("version").asText());
+    return toPurl(
+        jsonDependenciesNpm.get("name").asText(), jsonDependenciesNpm.get("version").asText());
   }
 
   private PackageURL toPurl(String name, String version) throws MalformedPackageURLException {
@@ -110,7 +114,7 @@ public final class JavaScriptNpmProvider extends Provider {
       String name = e.getKey();
       JsonNode versionNode = e.getValue().get("version");
       if (versionNode == null) {
-        continue; //ignore optional dependencies
+        continue; // ignore optional dependencies
       }
       String version = versionNode.asText();
       PackageURL purl = toPurl(name, version);
@@ -122,47 +126,74 @@ public final class JavaScriptNpmProvider extends Provider {
     }
   }
 
-  private Sbom getDependencySbom(Path manifestPath, boolean includeTransitive, boolean deletePackageLock) throws IOException {
-    var npmListResult = buildNpmDependencyTree(manifestPath, includeTransitive,deletePackageLock);
+  private Sbom getDependencySbom(
+      Path manifestPath, boolean includeTransitive, boolean deletePackageLock) throws IOException {
+    var npmListResult = buildNpmDependencyTree(manifestPath, includeTransitive, deletePackageLock);
     var sbom = buildSbom(npmListResult);
     sbom.filterIgnoredDeps(getIgnoredDeps(manifestPath));
     return sbom;
   }
 
-  private JsonNode buildNpmDependencyTree(Path manifestPath, boolean includeTransitive, boolean deletePackageLock)
+  private JsonNode buildNpmDependencyTree(
+      Path manifestPath, boolean includeTransitive, boolean deletePackageLock)
       throws JsonMappingException, JsonProcessingException {
     var npm = Operations.getCustomPathOrElse("npm");
     var npmEnvs = getNpmExecEnv();
     // clean command used to clean build target
     Path packageLockJson = Path.of(manifestPath.getParent().toString(), "package-lock.json");
-    var createPackageLock = new String[] { npm, "i", "--package-lock-only", "--prefix",
-        manifestPath.getParent().toString() };
+    var createPackageLock =
+        new String[] {
+          npm, "i", "--package-lock-only", "--prefix", manifestPath.getParent().toString()
+        };
     // execute the clean command
     Operations.runProcess(createPackageLock, npmEnvs);
     String[] npmAllDeps;
-    Path workDir=null;
-    if(!manifestPath.getParent().toString().trim().contains(" ")) {
+    Path workDir = null;
+    if (!manifestPath.getParent().toString().trim().contains(" ")) {
 
-      npmAllDeps = new String[]{npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
-        "--json", "--prefix", manifestPath.getParent().toString()};
-    }
-    else {
-      npmAllDeps = new String[]{npm, "ls", includeTransitive ? "--all" : "", "--omit=dev", "--package-lock-only",
-        "--json"};
+      npmAllDeps =
+          new String[] {
+            npm,
+            "ls",
+            includeTransitive ? "--all" : "",
+            "--omit=dev",
+            "--package-lock-only",
+            "--json",
+            "--prefix",
+            manifestPath.getParent().toString()
+          };
+    } else {
+      npmAllDeps =
+          new String[] {
+            npm,
+            "ls",
+            includeTransitive ? "--all" : "",
+            "--omit=dev",
+            "--package-lock-only",
+            "--json"
+          };
       workDir = manifestPath.getParent();
     }
     // execute the clean command
     String npmOutput;
     if (npmEnvs != null) {
-      npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps,
-        npmEnvs.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).toArray(String[]::new));
+      npmOutput =
+          Operations.runProcessGetOutput(
+              workDir,
+              npmAllDeps,
+              npmEnvs.entrySet().stream()
+                  .map(e -> e.getKey() + "=" + e.getValue())
+                  .toArray(String[]::new));
     } else {
       npmOutput = Operations.runProcessGetOutput(workDir, npmAllDeps);
     }
-    if(debugLoggingIsNeeded()) {
-      log.log(System.Logger.Level.INFO,String.format("Npm Listed Install Pacakges in Json : %s %s",System.lineSeparator(),npmOutput));
+    if (debugLoggingIsNeeded()) {
+      log.log(
+          System.Logger.Level.INFO,
+          String.format(
+              "Npm Listed Install Pacakges in Json : %s %s", System.lineSeparator(), npmOutput));
     }
-    if(!includeTransitive) {
+    if (!includeTransitive) {
       if (deletePackageLock) {
         try {
           Files.delete(packageLockJson);

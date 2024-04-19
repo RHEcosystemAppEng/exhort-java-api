@@ -15,13 +15,12 @@
  */
 package com.redhat.exhort.api;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
 import com.redhat.exhort.api.serialization.PackageURLSerializer;
+import java.util.Objects;
 
 public class PackageRef {
 
@@ -55,8 +54,8 @@ public class PackageRef {
 
   public String name() {
     if (purl.getNamespace() == null) {
-         return purl.getName();
-       }
+      return purl.getName();
+    }
     return purl.getNamespace() + ":" + purl.getName();
   }
 

@@ -15,25 +15,25 @@
  */
 package com.redhat.exhort;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redhat.exhort.tools.Ecosystem;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.exhort.tools.Ecosystem;
-
 /**
- * The Provider abstraction is used for contracting providers providing a {@link Content}
- * per manifest type for constructing backend requests.
- **/
+ * The Provider abstraction is used for contracting providers providing a {@link Content} per
+ * manifest type for constructing backend requests.
+ */
 public abstract class Provider {
   /**
-   * Content is used to aggregate a content buffer and a content type.
-   * These will be used to construct the backend API request.
-   **/
+   * Content is used to aggregate a content buffer and a content type. These will be used to
+   * construct the backend API request.
+   */
   public static class Content {
     public final byte[] buffer;
     public final String type;
-    public Content(byte[] buffer, String type){
+
+    public Content(byte[] buffer, String type) {
       this.buffer = buffer;
       this.type = type;
     }
@@ -41,6 +41,7 @@ public abstract class Provider {
 
   /** The ecosystem of this provider, i.e. maven. */
   public final Ecosystem.Type ecosystem;
+
   protected final ObjectMapper objectMapper = new ObjectMapper();
 
   protected Provider(Ecosystem.Type ecosystem) {
@@ -64,5 +65,6 @@ public abstract class Provider {
    * @throws IOException when failed to load the manifest content
    */
   public abstract Content provideComponent(byte[] manifestContent) throws IOException;
+
   public abstract Content provideComponent(Path manifestPath) throws IOException;
 }

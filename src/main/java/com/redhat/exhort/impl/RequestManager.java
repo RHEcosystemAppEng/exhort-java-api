@@ -21,20 +21,17 @@ import java.util.Objects;
 
 public class RequestManager {
 
-
   private static RequestManager requestManager;
-  private Map<String,String> requests;
+  private Map<String, String> requests;
 
-  public static RequestManager getInstance()
-  {
-    if(Objects.isNull(requestManager)) {
+  public static RequestManager getInstance() {
+    if (Objects.isNull(requestManager)) {
       requestManager = new RequestManager();
     }
     return requestManager;
   }
 
-  private RequestManager()
-  {
+  private RequestManager() {
     requests = new HashMap<>();
   }
 
@@ -51,7 +48,6 @@ public class RequestManager {
   }
 
   private static String concatenatedThreadId() {
-    return String.format("%s-%s",Thread.currentThread().getName(),Thread.currentThread().getId());
+    return String.format("%s-%s", Thread.currentThread().getName(), Thread.currentThread().getId());
   }
-
 }

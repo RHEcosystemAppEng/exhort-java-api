@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.redhat.exhort.image;
+
+import static com.redhat.exhort.image.Platform.EMPTY_PLATFORM;
+import static com.redhat.exhort.impl.ExhortApi.getStringValueEnvironment;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +26,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.packageurl.MalformedPackageURLException;
 import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.tools.Operations;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -39,9 +40,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.redhat.exhort.image.Platform.EMPTY_PLATFORM;
-import static com.redhat.exhort.impl.ExhortApi.getStringValueEnvironment;
-
 public class ImageUtils {
 
   static final String EXHORT_SYFT_CONFIG_PATH = "EXHORT_SYFT_CONFIG_PATH";
@@ -52,45 +50,49 @@ public class ImageUtils {
   static final String EXHORT_IMAGE_VARIANT = "EXHORT_IMAGE_VARIANT";
   static final String EXHORT_SKOPEO_CONFIG_PATH = "EXHORT_SKOPEO_CONFIG_PATH";
   static final String EXHORT_IMAGE_SERVICE_ENDPOINT = "EXHORT_IMAGE_SERVICE_ENDPOINT";
-  private static final String MEDIA_TYPE_DOCKER2_MANIFEST = "application/vnd.docker.distribution.manifest.v2+json";
-  private static final String MEDIA_TYPE_DOCKER2_MANIFEST_LIST = "application/vnd.docker.distribution.manifest.list.v2+json";
-  private static final String MEDIA_TYPE_OCI1_MANIFEST = "application/vnd.oci.image.manifest.v1+json";
-  private static final String MEDIA_TYPE_OCI1_MANIFEST_LIST = "application/vnd.oci.image.index.v1+json";
+  private static final String MEDIA_TYPE_DOCKER2_MANIFEST =
+      "application/vnd.docker.distribution.manifest.v2+json";
+  private static final String MEDIA_TYPE_DOCKER2_MANIFEST_LIST =
+      "application/vnd.docker.distribution.manifest.list.v2+json";
+  private static final String MEDIA_TYPE_OCI1_MANIFEST =
+      "application/vnd.oci.image.manifest.v1+json";
+  private static final String MEDIA_TYPE_OCI1_MANIFEST_LIST =
+      "application/vnd.oci.image.index.v1+json";
 
   private static final Logger logger = LoggersFactory.getLogger(ImageUtils.class.getName());
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private static final Map<String, String> archMapping = Map.ofEntries(
-    new AbstractMap.SimpleEntry<>("amd64", "amd64"),
-    new AbstractMap.SimpleEntry<>("x86_64", "amd64"),
-    new AbstractMap.SimpleEntry<>("armv5tl", "arm"),
-    new AbstractMap.SimpleEntry<>("armv5tel", "arm"),
-    new AbstractMap.SimpleEntry<>("armv5tejl", "arm"),
-    new AbstractMap.SimpleEntry<>("armv6l", "arm"),
-    new AbstractMap.SimpleEntry<>("armv7l", "arm"),
-    new AbstractMap.SimpleEntry<>("armv7ml", "arm"),
-    new AbstractMap.SimpleEntry<>("arm64", "arm64"),
-    new AbstractMap.SimpleEntry<>("aarch64", "arm64"),
-    new AbstractMap.SimpleEntry<>("i386", "386"),
-    new AbstractMap.SimpleEntry<>("i486", "386"),
-    new AbstractMap.SimpleEntry<>("i586", "386"),
-    new AbstractMap.SimpleEntry<>("i686", "386"),
-    new AbstractMap.SimpleEntry<>("mips64le", "mips64le"),
-    new AbstractMap.SimpleEntry<>("ppc64le", "ppc64le"),
-    new AbstractMap.SimpleEntry<>("riscv64", "riscv64"),
-    new AbstractMap.SimpleEntry<>("s390x", "s390x")
-  );
-  private static final Map<String, String> variantMapping = Map.ofEntries(
-    new AbstractMap.SimpleEntry<>("armv5tl", "v5"),
-    new AbstractMap.SimpleEntry<>("armv5tel", "v5"),
-    new AbstractMap.SimpleEntry<>("armv5tejl", "v5"),
-    new AbstractMap.SimpleEntry<>("armv6l", "v6"),
-    new AbstractMap.SimpleEntry<>("armv7l", "v7"),
-    new AbstractMap.SimpleEntry<>("armv7ml", "v7"),
-    new AbstractMap.SimpleEntry<>("arm64", "v8"),
-    new AbstractMap.SimpleEntry<>("aarch64", "v8")
-  );
+  private static final Map<String, String> archMapping =
+      Map.ofEntries(
+          new AbstractMap.SimpleEntry<>("amd64", "amd64"),
+          new AbstractMap.SimpleEntry<>("x86_64", "amd64"),
+          new AbstractMap.SimpleEntry<>("armv5tl", "arm"),
+          new AbstractMap.SimpleEntry<>("armv5tel", "arm"),
+          new AbstractMap.SimpleEntry<>("armv5tejl", "arm"),
+          new AbstractMap.SimpleEntry<>("armv6l", "arm"),
+          new AbstractMap.SimpleEntry<>("armv7l", "arm"),
+          new AbstractMap.SimpleEntry<>("armv7ml", "arm"),
+          new AbstractMap.SimpleEntry<>("arm64", "arm64"),
+          new AbstractMap.SimpleEntry<>("aarch64", "arm64"),
+          new AbstractMap.SimpleEntry<>("i386", "386"),
+          new AbstractMap.SimpleEntry<>("i486", "386"),
+          new AbstractMap.SimpleEntry<>("i586", "386"),
+          new AbstractMap.SimpleEntry<>("i686", "386"),
+          new AbstractMap.SimpleEntry<>("mips64le", "mips64le"),
+          new AbstractMap.SimpleEntry<>("ppc64le", "ppc64le"),
+          new AbstractMap.SimpleEntry<>("riscv64", "riscv64"),
+          new AbstractMap.SimpleEntry<>("s390x", "s390x"));
+  private static final Map<String, String> variantMapping =
+      Map.ofEntries(
+          new AbstractMap.SimpleEntry<>("armv5tl", "v5"),
+          new AbstractMap.SimpleEntry<>("armv5tel", "v5"),
+          new AbstractMap.SimpleEntry<>("armv5tejl", "v5"),
+          new AbstractMap.SimpleEntry<>("armv6l", "v6"),
+          new AbstractMap.SimpleEntry<>("armv7l", "v7"),
+          new AbstractMap.SimpleEntry<>("armv7ml", "v7"),
+          new AbstractMap.SimpleEntry<>("arm64", "v8"),
+          new AbstractMap.SimpleEntry<>("aarch64", "v8"));
 
   static String updatePATHEnv(String execPath) {
     String path = System.getenv("PATH");
@@ -101,7 +103,8 @@ public class ImageUtils {
     }
   }
 
-  public static JsonNode generateImageSBOM(ImageRef imageRef) throws IOException, MalformedPackageURLException {
+  public static JsonNode generateImageSBOM(ImageRef imageRef)
+      throws IOException, MalformedPackageURLException {
     var output = execSyft(imageRef);
 
     if (!output.getError().isEmpty() || output.getExitCode() != 0) {
@@ -121,7 +124,8 @@ public class ImageUtils {
       }
     }
 
-    throw new RuntimeException(String.format("The generated SBOM of the image is invalid: %s", output.getOutput()));
+    throw new RuntimeException(
+        String.format("The generated SBOM of the image is invalid: %s", output.getOutput()));
   }
 
   static Operations.ProcessExecOutput execSyft(ImageRef imageRef) {
@@ -133,27 +137,57 @@ public class ImageUtils {
     var imageSource = getStringValueEnvironment(EXHORT_SYFT_IMAGE_SOURCE, "");
     SyftImageSource.getImageSource(imageSource);
 
-    var dockerPath = docker != null && docker.contains(File.separator) ?
-      docker.substring(0, docker.lastIndexOf(File.separator) + 1) : "";
-    var podmanPath = podman != null && podman.contains(File.separator) ?
-      podman.substring(0, podman.lastIndexOf(File.separator) + 1) : "";
+    var dockerPath =
+        docker != null && docker.contains(File.separator)
+            ? docker.substring(0, docker.lastIndexOf(File.separator) + 1)
+            : "";
+    var podmanPath =
+        podman != null && podman.contains(File.separator)
+            ? podman.substring(0, podman.lastIndexOf(File.separator) + 1)
+            : "";
     var envs = getSyftEnvs(dockerPath, podmanPath);
 
     var scheme = imageRef.getImage().toString();
 
     String[] cmd;
     if (!imageSource.isEmpty()) {
-      cmd = syftConfigPath.isEmpty() ?
-        new String[]{syft, scheme, "--from", imageSource, "-s", "all-layers", "-o", "cyclonedx-json", "-q"} :
-        new String[]{syft, scheme, "--from", imageSource, "-c", syftConfigPath, "-s", "all-layers", "-o", "cyclonedx-json", "-q"};
+      cmd =
+          syftConfigPath.isEmpty()
+              ? new String[] {
+                syft,
+                scheme,
+                "--from",
+                imageSource,
+                "-s",
+                "all-layers",
+                "-o",
+                "cyclonedx-json",
+                "-q"
+              }
+              : new String[] {
+                syft,
+                scheme,
+                "--from",
+                imageSource,
+                "-c",
+                syftConfigPath,
+                "-s",
+                "all-layers",
+                "-o",
+                "cyclonedx-json",
+                "-q"
+              };
     } else {
-      cmd = syftConfigPath.isEmpty() ?
-        new String[]{syft, scheme, "-s", "all-layers", "-o", "cyclonedx-json", "-q"} :
-        new String[]{syft, scheme, "-c", syftConfigPath, "-s", "all-layers", "-o", "cyclonedx-json", "-q"};
+      cmd =
+          syftConfigPath.isEmpty()
+              ? new String[] {syft, scheme, "-s", "all-layers", "-o", "cyclonedx-json", "-q"}
+              : new String[] {
+                syft, scheme, "-c", syftConfigPath, "-s", "all-layers", "-o", "cyclonedx-json", "-q"
+              };
     }
 
-    return Operations.runProcessGetFullOutput(null, cmd,
-      envs.isEmpty() ? null : envs.toArray(new String[1]));
+    return Operations.runProcessGetFullOutput(
+        null, cmd, envs.isEmpty() ? null : envs.toArray(new String[1]));
   }
 
   static List<String> getSyftEnvs(String dockerPath, String podmanPath) {
@@ -210,19 +244,21 @@ public class ImageUtils {
 
   static String hostInfo(String engine, String info) {
     var exec = Operations.getCustomPathOrElse(engine);
-    var cmd = new String[]{exec, "info"};
+    var cmd = new String[] {exec, "info"};
 
     var output = Operations.runProcessGetFullOutput(null, cmd, null);
-    if (output.getOutput().isEmpty() && (!output.getError().isEmpty() || output.getExitCode() != 0)) {
+    if (output.getOutput().isEmpty()
+        && (!output.getError().isEmpty() || output.getExitCode() != 0)) {
       throw new RuntimeException(output.getError());
     }
 
-    return output.getOutput()
-      .lines()
-      .filter(line -> line.stripLeading().startsWith(info + ":"))
-      .map(line -> line.strip().substring(info.length() + 1).strip())
-      .findAny()
-      .orElse("");
+    return output
+        .getOutput()
+        .lines()
+        .filter(line -> line.stripLeading().startsWith(info + ":"))
+        .map(line -> line.strip().substring(info.length() + 1).strip())
+        .findAny()
+        .orElse("");
   }
 
   static String dockerGetOs() {
@@ -261,7 +297,8 @@ public class ImageUtils {
     return info;
   }
 
-  public static Map<Platform, String> getImageDigests(ImageRef imageRef) throws JsonProcessingException {
+  public static Map<Platform, String> getImageDigests(ImageRef imageRef)
+      throws JsonProcessingException {
     var output = execSkopeoInspect(imageRef, true);
 
     if (!output.getError().isEmpty() || output.getExitCode() != 0) {
@@ -293,23 +330,23 @@ public class ImageUtils {
       var manifestsNode = node.get("manifests");
       if (manifestsNode.isArray()) {
         return StreamSupport.stream(manifestsNode.spliterator(), false)
-          .filter(ImageUtils::filterMediaType)
-          .filter(ImageUtils::filterDigest)
-          .filter(ImageUtils::filterPlatform)
-          .collect(Collectors.toMap(
-            manifestNode -> {
-              var platformNode = manifestNode.get("platform");
-              var arch = platformNode.get("architecture").asText();
-              var os = platformNode.get("os").asText();
-              if (platformNode.hasNonNull("variant")) {
-                var variant = platformNode.get("variant").asText();
-                return new Platform(String.format("%s/%s/%s", os, arch, variant));
-              } else {
-                return new Platform(String.format("%s/%s", os, arch));
-              }
-            },
-            manifestNode -> manifestNode.get("digest").asText()
-          ));
+            .filter(ImageUtils::filterMediaType)
+            .filter(ImageUtils::filterDigest)
+            .filter(ImageUtils::filterPlatform)
+            .collect(
+                Collectors.toMap(
+                    manifestNode -> {
+                      var platformNode = manifestNode.get("platform");
+                      var arch = platformNode.get("architecture").asText();
+                      var os = platformNode.get("os").asText();
+                      if (platformNode.hasNonNull("variant")) {
+                        var variant = platformNode.get("variant").asText();
+                        return new Platform(String.format("%s/%s/%s", os, arch, variant));
+                      } else {
+                        return new Platform(String.format("%s/%s", os, arch));
+                      }
+                    },
+                    manifestNode -> manifestNode.get("digest").asText()));
       }
     }
     return Collections.emptyMap();
@@ -320,7 +357,8 @@ public class ImageUtils {
       var mediaTypeNode = manifestNode.get("mediaType");
       if (mediaTypeNode.isTextual()) {
         var mediaType = mediaTypeNode.asText();
-        return MEDIA_TYPE_OCI1_MANIFEST.equals(mediaType) || MEDIA_TYPE_DOCKER2_MANIFEST.equals(mediaType);
+        return MEDIA_TYPE_OCI1_MANIFEST.equals(mediaType)
+            || MEDIA_TYPE_DOCKER2_MANIFEST.equals(mediaType);
       }
     }
     return false;
@@ -346,7 +384,10 @@ public class ImageUtils {
               var variantNode = platformNode.get("variant");
               if (variantNode.isTextual()) {
                 try {
-                  new Platform(String.format("%s/%s/%s", osNode.asText(), architectureNode.asText(), variantNode.asText()));
+                  new Platform(
+                      String.format(
+                          "%s/%s/%s",
+                          osNode.asText(), architectureNode.asText(), variantNode.asText()));
                 } catch (IllegalArgumentException e) {
                   return false;
                 }
@@ -366,7 +407,8 @@ public class ImageUtils {
     return false;
   }
 
-  static Map<Platform, String> getSingleImageDigest(ImageRef imageRef) throws JsonProcessingException {
+  static Map<Platform, String> getSingleImageDigest(ImageRef imageRef)
+      throws JsonProcessingException {
     var output = execSkopeoInspect(imageRef, false);
 
     if (!output.getError().isEmpty() || output.getExitCode() != 0) {
@@ -392,49 +434,74 @@ public class ImageUtils {
 
     String[] cmd;
     if (daemonHost.isEmpty()) {
-      cmd = configPath.isEmpty() ?
-        new String[]{skopeo, "inspect", raw ? "--raw" : "",
-          String.format("docker://%s", imageRef.getImage().getFullName())} :
-        new String[]{skopeo, "inspect", "--authfile", configPath, raw ? "--raw" : "",
-          String.format("docker://%s", imageRef.getImage().getFullName())};
+      cmd =
+          configPath.isEmpty()
+              ? new String[] {
+                skopeo,
+                "inspect",
+                raw ? "--raw" : "",
+                String.format("docker://%s", imageRef.getImage().getFullName())
+              }
+              : new String[] {
+                skopeo,
+                "inspect",
+                "--authfile",
+                configPath,
+                raw ? "--raw" : "",
+                String.format("docker://%s", imageRef.getImage().getFullName())
+              };
     } else {
-      cmd = configPath.isEmpty() ?
-        new String[]{skopeo, "inspect", "--daemon-host", daemonHost, raw ? "--raw" : "",
-          String.format("docker-daemon:%s", imageRef.getImage().getFullName())} :
-        new String[]{skopeo, "inspect", "--authfile", configPath, "--daemon-host", daemonHost, raw ? "--raw" : "",
-          String.format("docker-daemon:%s", imageRef.getImage().getFullName())};
+      cmd =
+          configPath.isEmpty()
+              ? new String[] {
+                skopeo,
+                "inspect",
+                "--daemon-host",
+                daemonHost,
+                raw ? "--raw" : "",
+                String.format("docker-daemon:%s", imageRef.getImage().getFullName())
+              }
+              : new String[] {
+                skopeo,
+                "inspect",
+                "--authfile",
+                configPath,
+                "--daemon-host",
+                daemonHost,
+                raw ? "--raw" : "",
+                String.format("docker-daemon:%s", imageRef.getImage().getFullName())
+              };
     }
 
     return Operations.runProcessGetFullOutput(null, cmd, null);
   }
 
   private enum SyftImageSource {
-    DEFAULT("",
-      () -> dockerPodmanInfo(ImageUtils::dockerGetOs, ImageUtils::podmanGetOs),
-      () -> dockerPodmanInfo(ImageUtils::dockerGetArch, ImageUtils::podmanGetArch),
-      () -> dockerPodmanInfo(ImageUtils::dockerGetVariant, ImageUtils::podmanGetVariant)),
-    REGISTRY("registry",
-      () -> dockerPodmanInfo(ImageUtils::dockerGetOs, ImageUtils::podmanGetOs),
-      () -> dockerPodmanInfo(ImageUtils::dockerGetArch, ImageUtils::podmanGetArch),
-      () -> dockerPodmanInfo(ImageUtils::dockerGetVariant, ImageUtils::podmanGetVariant)),
-    DOCKER("docker",
-      ImageUtils::dockerGetOs,
-      ImageUtils::dockerGetArch,
-      ImageUtils::dockerGetVariant),
-    PODMAN("podman",
-      ImageUtils::podmanGetOs,
-      ImageUtils::podmanGetArch,
-      ImageUtils::podmanGetVariant);
+    DEFAULT(
+        "",
+        () -> dockerPodmanInfo(ImageUtils::dockerGetOs, ImageUtils::podmanGetOs),
+        () -> dockerPodmanInfo(ImageUtils::dockerGetArch, ImageUtils::podmanGetArch),
+        () -> dockerPodmanInfo(ImageUtils::dockerGetVariant, ImageUtils::podmanGetVariant)),
+    REGISTRY(
+        "registry",
+        () -> dockerPodmanInfo(ImageUtils::dockerGetOs, ImageUtils::podmanGetOs),
+        () -> dockerPodmanInfo(ImageUtils::dockerGetArch, ImageUtils::podmanGetArch),
+        () -> dockerPodmanInfo(ImageUtils::dockerGetVariant, ImageUtils::podmanGetVariant)),
+    DOCKER(
+        "docker", ImageUtils::dockerGetOs, ImageUtils::dockerGetArch, ImageUtils::dockerGetVariant),
+    PODMAN(
+        "podman", ImageUtils::podmanGetOs, ImageUtils::podmanGetArch, ImageUtils::podmanGetVariant);
 
     private final String name;
     private final Supplier<String> osSupplier;
     private final Supplier<String> archSupplier;
     private final Supplier<String> variantSupplier;
 
-    SyftImageSource(String name,
-                    Supplier<String> osSupplier,
-                    Supplier<String> archSupplier,
-                    Supplier<String> variantSupplier) {
+    SyftImageSource(
+        String name,
+        Supplier<String> osSupplier,
+        Supplier<String> archSupplier,
+        Supplier<String> variantSupplier) {
       this.name = name;
       this.osSupplier = osSupplier;
       this.archSupplier = archSupplier;
@@ -443,9 +510,12 @@ public class ImageUtils {
 
     static SyftImageSource getImageSource(String name) {
       return EnumSet.allOf(SyftImageSource.class).stream()
-        .filter(s -> s.name.equals(name))
-        .findAny()
-        .orElseThrow(() -> new IllegalArgumentException(String.format("The image source for syft is not valid: %s", name)));
+          .filter(s -> s.name.equals(name))
+          .findAny()
+          .orElseThrow(
+              () ->
+                  new IllegalArgumentException(
+                      String.format("The image source for syft is not valid: %s", name)));
     }
 
     String getOs() {
@@ -461,4 +531,3 @@ public class ImageUtils {
     }
   }
 }
-

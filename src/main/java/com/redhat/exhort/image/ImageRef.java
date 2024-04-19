@@ -15,16 +15,15 @@
  */
 package com.redhat.exhort.image;
 
+import static com.redhat.exhort.image.ImageUtils.getImageDigests;
+import static com.redhat.exhort.image.ImageUtils.getImagePlatform;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.packageurl.MalformedPackageURLException;
 import com.github.packageurl.PackageURL;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-
-import static com.redhat.exhort.image.ImageUtils.getImageDigests;
-import static com.redhat.exhort.image.ImageUtils.getImagePlatform;
 
 public class ImageRef {
 
@@ -109,10 +108,7 @@ public class ImageRef {
 
   @Override
   public String toString() {
-    return "ImageRef{" +
-      "image='" + image + '\'' +
-      ", platform='" + platform + '\'' +
-      '}';
+    return "ImageRef{" + "image='" + image + '\'' + ", platform='" + platform + '\'' + '}';
   }
 
   void checkImageDigest() {
@@ -132,7 +128,8 @@ public class ImageRef {
             throw new RuntimeException("Failed to get image platform for image digest");
           }
           if (!digests.containsKey(this.platform)) {
-            throw new RuntimeException(String.format("Failed to get image digest for platform %s", this.platform));
+            throw new RuntimeException(
+                String.format("Failed to get image digest for platform %s", this.platform));
           }
           this.image.setDigest(digests.get(this.platform));
         }
@@ -162,11 +159,12 @@ public class ImageRef {
       qualifiers.put(TAG_QUALIFIER, tag);
     }
 
-    return new PackageURL(OCI_TYPE,
-      null,
-      this.image.getSimpleName().toLowerCase(),
-      image.getDigest().toLowerCase(),
-      qualifiers,
-      null);
+    return new PackageURL(
+        OCI_TYPE,
+        null,
+        this.image.getSimpleName().toLowerCase(),
+        image.getDigest().toLowerCase(),
+        qualifiers,
+        null);
   }
 }

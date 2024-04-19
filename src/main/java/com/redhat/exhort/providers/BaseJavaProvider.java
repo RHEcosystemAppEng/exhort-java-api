@@ -20,7 +20,6 @@ import com.github.packageurl.PackageURL;
 import com.redhat.exhort.Provider;
 import com.redhat.exhort.sbom.Sbom;
 import com.redhat.exhort.tools.Ecosystem;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -32,50 +31,47 @@ public abstract class BaseJavaProvider extends Provider {
     super(ecosystem);
   }
 
-  void parseDependencyTree(String src, int srcDepth, String [] lines, Sbom sbom) {
-    if(lines.length == 0) {
+  void parseDependencyTree(String src, int srcDepth, String[] lines, Sbom sbom) {
+    if (lines.length == 0) {
       return;
     }
-    if(lines.length == 1 && lines[0].trim().equals("")){
+    if (lines.length == 1 && lines[0].trim().equals("")) {
       return;
     }
     int index = 0;
     String target = lines[index];
     int targetDepth = getDepth(target);
-    while(targetDepth > srcDepth && index < lines.length )
-    {
-      if(targetDepth == srcDepth + 1) {
+    while (targetDepth > srcDepth && index < lines.length) {
+      if (targetDepth == srcDepth + 1) {
         PackageURL from = parseDep(src);
         PackageURL to = parseDep(target);
-        if(dependencyIsNotTestScope(from) && dependencyIsNotTestScope(to)) {
+        if (dependencyIsNotTestScope(from) && dependencyIsNotTestScope(to)) {
           sbom.addDependency(from, to);
         }
-      }
-      else {
+      } else {
         String[] modifiedLines = Arrays.copyOfRange(lines, index, lines.length);
-        parseDependencyTree(lines[index-1],getDepth(lines[index-1]),modifiedLines,sbom);
+        parseDependencyTree(lines[index - 1], getDepth(lines[index - 1]), modifiedLines, sbom);
       }
-      if(index< lines.length - 1) {
+      if (index < lines.length - 1) {
         target = lines[++index];
         targetDepth = getDepth(target);
-      }
-      else
-      {
+      } else {
         index++;
       }
     }
   }
 
   static boolean dependencyIsNotTestScope(PackageURL artifact) {
-    return (Objects.nonNull(artifact.getQualifiers()) && !artifact.getQualifiers().get("scope").equals("test")) || Objects.isNull(artifact.getQualifiers());
+    return (Objects.nonNull(artifact.getQualifiers())
+            && !artifact.getQualifiers().get("scope").equals("test"))
+        || Objects.isNull(artifact.getQualifiers());
   }
 
   PackageURL parseDep(String dep) {
-    //root package
+    // root package
     DependencyAggregator dependencyAggregator = new DependencyAggregator();
     // in case line in dependency tree text starts with a letter ( for root artifact).
-    if(dep.matches("^\\w.*"))
-    {
+    if (dep.matches("^\\w.*")) {
       dependencyAggregator = new DependencyAggregator();
       String[] parts = dep.split(":");
       dependencyAggregator.groupId = parts[0];
@@ -83,85 +79,81 @@ public abstract class BaseJavaProvider extends Provider {
       dependencyAggregator.version = parts[3];
 
       return dependencyAggregator.toPurl();
-
     }
     int firstDash = dep.indexOf("-");
     String dependency = dep.substring(++firstDash).trim();
-    if(dependency.startsWith("("))
-    {
+    if (dependency.startsWith("(")) {
       dependency = dependency.substring(1);
     }
     dependency = dependency.replace(":runtime", ":compile").replace(":provided", ":compile");
-    int endIndex = Math.max(dependency.indexOf(":compile"),dependency.indexOf(":test"));
+    int endIndex = Math.max(dependency.indexOf(":compile"), dependency.indexOf(":test"));
     int scopeLength;
-    if(dependency.indexOf(":compile") > -1) {
-      scopeLength =   ":compile".length();
+    if (dependency.indexOf(":compile") > -1) {
+      scopeLength = ":compile".length();
+    } else {
+      scopeLength = ":test".length();
     }
-    else {
-      scopeLength =   ":test".length();
-    }
-    dependency = dependency.substring(0,endIndex + scopeLength);
+    dependency = dependency.substring(0, endIndex + scopeLength);
     String[] parts = dependency.split(":");
     // contains only GAV + packaging + scope
-    if(parts.length == 5)
-    {
+    if (parts.length == 5) {
       dependencyAggregator.groupId = parts[0];
-      dependencyAggregator.artifactId= parts[1];
+      dependencyAggregator.artifactId = parts[1];
       dependencyAggregator.version = parts[3];
 
       String conflictMessage = "omitted for conflict with";
-      if (dep.contains(conflictMessage))
-      {
-        dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
+      if (dep.contains(conflictMessage)) {
+        dependencyAggregator.version =
+            dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length())
+                .replace(")", "")
+                .trim();
       }
     }
     // In case there are 6 parts, there is also a classifier for artifact (version suffix)
     // contains GAV + packaging + classifier + scope
-    else if(parts.length == 6)
-    {
+    else if (parts.length == 6) {
       dependencyAggregator.groupId = parts[0];
-      dependencyAggregator.artifactId= parts[1];
-      dependencyAggregator.version = String.format("%s-%s",parts[4],parts[3]);
+      dependencyAggregator.artifactId = parts[1];
+      dependencyAggregator.version = String.format("%s-%s", parts[4], parts[3]);
       String conflictMessage = "omitted for conflict with";
-      if (dep.contains(conflictMessage))
-      {
-        dependencyAggregator.version = dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length()).replace(")", "").trim();
+      if (dep.contains(conflictMessage)) {
+        dependencyAggregator.version =
+            dep.substring(dep.indexOf(conflictMessage) + conflictMessage.length())
+                .replace(")", "")
+                .trim();
       }
 
+    } else {
+      throw new RuntimeException(
+          String.format("Cannot parse dependency into PackageUrl from line = \"%s\"", dep));
     }
-    else{
-      throw new RuntimeException(String.format("Cannot parse dependency into PackageUrl from line = \"%s\"",dep));
-    }
-    if(parts[parts.length - 1].matches(".*[a-z]$")) {
+    if (parts[parts.length - 1].matches(".*[a-z]$")) {
       dependencyAggregator.scope = parts[parts.length - 1];
-    }
-    else {
-      int endOfLine = Integer.min(parts[parts.length - 1].indexOf(""), parts[parts.length - 1].indexOf("-"));
+    } else {
+      int endOfLine =
+          Integer.min(parts[parts.length - 1].indexOf(""), parts[parts.length - 1].indexOf("-"));
       dependencyAggregator.scope = parts[parts.length - 1].substring(0, endOfLine).trim();
     }
     return dependencyAggregator.toPurl();
   }
 
   int getDepth(String line) {
-    if(line == null || line.trim().equals("")){
+    if (line == null || line.trim().equals("")) {
       return -1;
     }
 
-    if(line.matches("^\\w.*"))
-    {
+    if (line.matches("^\\w.*")) {
       return 0;
     }
 
-    return  ( (line.indexOf('-') -1 ) / 3) + 1;
+    return ((line.indexOf('-') - 1) / 3) + 1;
   }
 
   // NOTE if we want to include "scope" tags in ignore,
   // add property here and a case in the start-element-switch in the getIgnored method
 
-  /**
-   * Aggregator class for aggregating Dependency data over stream iterations,
-   **/
-  final static class DependencyAggregator {
+  /** Aggregator class for aggregating Dependency data over stream iterations, */
+  static final class DependencyAggregator {
     String scope = "*";
     String groupId;
     String artifactId;
@@ -189,7 +181,13 @@ public abstract class BaseJavaProvider extends Provider {
 
     PackageURL toPurl() {
       try {
-        return new PackageURL(Ecosystem.Type.MAVEN.getType(), groupId, artifactId, version, this.scope == "*" ? null : new TreeMap<>(Map.of("scope", this.scope)), null);
+        return new PackageURL(
+            Ecosystem.Type.MAVEN.getType(),
+            groupId,
+            artifactId,
+            version,
+            this.scope == "*" ? null : new TreeMap<>(Map.of("scope", this.scope)),
+            null);
       } catch (MalformedPackageURLException e) {
         throw new IllegalArgumentException("Unable to parse PackageURL", e);
       }
@@ -203,10 +201,9 @@ public abstract class BaseJavaProvider extends Provider {
       // NOTE we do not compare the ignored field
       // This is required for comparing pom.xml with effective_pom.xml as the latter doesn't
       // contain comments indicating ignore
-      return Objects.equals(this.groupId, that.groupId) &&
-        Objects.equals(this.artifactId, that.artifactId) &&
-        Objects.equals(this.version, that.version);
-
+      return Objects.equals(this.groupId, that.groupId)
+          && Objects.equals(this.artifactId, that.artifactId)
+          && Objects.equals(this.version, that.version);
     }
 
     @Override

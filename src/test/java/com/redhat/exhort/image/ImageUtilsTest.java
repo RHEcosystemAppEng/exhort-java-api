@@ -15,35 +15,6 @@
  */
 package com.redhat.exhort.image;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.github.packageurl.MalformedPackageURLException;
-import com.redhat.exhort.ExhortTest;
-import com.redhat.exhort.tools.Operations;
-import org.junit.jupiter.api.Named;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junitpioneer.jupiter.ClearEnvironmentVariable;
-import org.junitpioneer.jupiter.SetEnvironmentVariable;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static com.redhat.exhort.image.ImageUtils.EXHORT_IMAGE_ARCH;
 import static com.redhat.exhort.image.ImageUtils.EXHORT_IMAGE_OS;
 import static com.redhat.exhort.image.ImageUtils.EXHORT_IMAGE_PLATFORM;
@@ -61,9 +32,38 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.github.packageurl.MalformedPackageURLException;
+import com.redhat.exhort.ExhortTest;
+import com.redhat.exhort.tools.Operations;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.ClearEnvironmentVariable;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
 class ImageUtilsTest extends ExhortTest {
 
-  static final String mockImageName = "test.io/test/test-app:test-version@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165";
+  static final String mockImageName =
+      "test.io/test/test-app:test-version@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165";
   static final String mockImagePlatform = "linux/amd64";
   static final ImageRef mockImageRef = new ImageRef(mockImageName, mockImagePlatform);
   static final String mockSyftPath = "test-path/syft";
@@ -81,96 +81,38 @@ class ImageUtilsTest extends ExhortTest {
 
   static Stream<Arguments> dockerArchSources() {
     return Stream.of(
-      Arguments.of(
-        Named.of("amd64", "amd64"), "amd64"
-      ),
-      Arguments.of(
-        Named.of("x86_64", "x86_64"), "amd64"
-      ),
-      Arguments.of(
-        Named.of("armv5tl", "armv5tl"), "arm"
-      ),
-      Arguments.of(
-        Named.of("armv5tel", "armv5tel"), "arm"
-      ),
-      Arguments.of(
-        Named.of("armv5tejl", "armv5tejl"), "arm"
-      ),
-      Arguments.of(
-        Named.of("armv6l", "armv6l"), "arm"
-      ),
-      Arguments.of(
-        Named.of("armv7l", "armv7l"), "arm"
-      ),
-      Arguments.of(
-        Named.of("armv7ml", "armv7ml"), "arm"
-      ),
-      Arguments.of(
-        Named.of("arm64", "arm64"), "arm64"
-      ),
-      Arguments.of(
-        Named.of("aarch64", "aarch64"), "arm64"
-      ),
-      Arguments.of(
-        Named.of("i386", "i386"), "386"
-      ),
-      Arguments.of(
-        Named.of("i486", "i486"), "386"
-      ),
-      Arguments.of(
-        Named.of("i586", "i586"), "386"
-      ),
-      Arguments.of(
-        Named.of("i686", "i686"), "386"
-      ),
-      Arguments.of(
-        Named.of("mips64le", "mips64le"), "mips64le"
-      ),
-      Arguments.of(
-        Named.of("ppc64le", "ppc64le"), "ppc64le"
-      ),
-      Arguments.of(
-        Named.of("riscv64", "riscv64"), "riscv64"
-      ),
-      Arguments.of(
-        Named.of("s390x", "s390x"), "s390x"
-      ),
-      Arguments.of(
-        Named.of("empty", ""), ""
-      )
-    );
+        Arguments.of(Named.of("amd64", "amd64"), "amd64"),
+        Arguments.of(Named.of("x86_64", "x86_64"), "amd64"),
+        Arguments.of(Named.of("armv5tl", "armv5tl"), "arm"),
+        Arguments.of(Named.of("armv5tel", "armv5tel"), "arm"),
+        Arguments.of(Named.of("armv5tejl", "armv5tejl"), "arm"),
+        Arguments.of(Named.of("armv6l", "armv6l"), "arm"),
+        Arguments.of(Named.of("armv7l", "armv7l"), "arm"),
+        Arguments.of(Named.of("armv7ml", "armv7ml"), "arm"),
+        Arguments.of(Named.of("arm64", "arm64"), "arm64"),
+        Arguments.of(Named.of("aarch64", "aarch64"), "arm64"),
+        Arguments.of(Named.of("i386", "i386"), "386"),
+        Arguments.of(Named.of("i486", "i486"), "386"),
+        Arguments.of(Named.of("i586", "i586"), "386"),
+        Arguments.of(Named.of("i686", "i686"), "386"),
+        Arguments.of(Named.of("mips64le", "mips64le"), "mips64le"),
+        Arguments.of(Named.of("ppc64le", "ppc64le"), "ppc64le"),
+        Arguments.of(Named.of("riscv64", "riscv64"), "riscv64"),
+        Arguments.of(Named.of("s390x", "s390x"), "s390x"),
+        Arguments.of(Named.of("empty", ""), ""));
   }
 
   static Stream<Arguments> dockerVariantSources() {
     return Stream.of(
-      Arguments.of(
-        Named.of("armv5tl", "armv5tl"), "v5"
-      ),
-      Arguments.of(
-        Named.of("armv5tel", "armv5tel"), "v5"
-      ),
-      Arguments.of(
-        Named.of("armv5tejl", "armv5tejl"), "v5"
-      ),
-      Arguments.of(
-        Named.of("armv6l", "armv6l"), "v6"
-      ),
-      Arguments.of(
-        Named.of("armv7l", "armv7l"), "v7"
-      ),
-      Arguments.of(
-        Named.of("armv7ml", "armv7ml"), "v7"
-      ),
-      Arguments.of(
-        Named.of("arm64", "arm64"), "v8"
-      ),
-      Arguments.of(
-        Named.of("aarch64", "aarch64"), "v8"
-      ),
-      Arguments.of(
-        Named.of("empty", ""), ""
-      )
-    );
+        Arguments.of(Named.of("armv5tl", "armv5tl"), "v5"),
+        Arguments.of(Named.of("armv5tel", "armv5tel"), "v5"),
+        Arguments.of(Named.of("armv5tejl", "armv5tejl"), "v5"),
+        Arguments.of(Named.of("armv6l", "armv6l"), "v6"),
+        Arguments.of(Named.of("armv7l", "armv7l"), "v7"),
+        Arguments.of(Named.of("armv7ml", "armv7ml"), "v7"),
+        Arguments.of(Named.of("arm64", "arm64"), "v8"),
+        Arguments.of(Named.of("aarch64", "aarch64"), "v8"),
+        Arguments.of(Named.of("empty", ""), ""));
   }
 
   @Test
@@ -182,24 +124,40 @@ class ImageUtilsTest extends ExhortTest {
   @ClearEnvironmentVariable(key = EXHORT_SYFT_IMAGE_SOURCE)
   void test_generate_image_sbom() throws IOException, MalformedPackageURLException {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class);
-         var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "image_sbom.json"})) {
-      var json = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        var is =
+            getResourceAsStreamDecision(
+                this.getClass(), new String[] {"msc", "image", "image_sbom.json"})) {
+      var json =
+          new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
+              .lines()
+              .collect(Collectors.joining("\n"));
       var output = new Operations.ProcessExecOutput(json, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("syft")))
-        .thenReturn("syft");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("syft"))).thenReturn("syft");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"syft", mockImageRef.getImage().getFullName(),
-            "-s", "all-layers", "-o", "cyclonedx-json", "-q"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "syft",
+                            mockImageRef.getImage().getFullName(),
+                            "-s",
+                            "all-layers",
+                            "-o",
+                            "cyclonedx-json",
+                            "-q"
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       var sbom = ImageUtils.generateImageSBOM(mockImageRef);
 
       var mapper = new ObjectMapper();
       var node = mapper.readTree(json);
-      ((ObjectNode) node.get("metadata").get("component")).set("purl", new TextNode(mockImageRef.getPackageURL().canonicalize()));
+      ((ObjectNode) node.get("metadata").get("component"))
+          .set("purl", new TextNode(mockImageRef.getPackageURL().canonicalize()));
 
       assertEquals(node, sbom);
     }
@@ -211,32 +169,60 @@ class ImageUtilsTest extends ExhortTest {
   @ClearEnvironmentVariable(key = EXHORT_IMAGE_SERVICE_ENDPOINT)
   void test_get_image_digests_single() throws IOException {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class);
-         var isRaw = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_single_raw.json"});
-         var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_single.json"})) {
-      var jsonRaw = new BufferedReader(new InputStreamReader(isRaw, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        var isRaw =
+            getResourceAsStreamDecision(
+                this.getClass(), new String[] {"msc", "image", "skopeo_inspect_single_raw.json"});
+        var is =
+            getResourceAsStreamDecision(
+                this.getClass(), new String[] {"msc", "image", "skopeo_inspect_single.json"})) {
+      var jsonRaw =
+          new BufferedReader(new InputStreamReader(isRaw, StandardCharsets.UTF_8))
+              .lines()
+              .collect(Collectors.joining("\n"));
       var outputRaw = new Operations.ProcessExecOutput(jsonRaw, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "--raw", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(outputRaw);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "--raw",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(outputRaw);
 
-      var json = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+      var json =
+          new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
+              .lines()
+              .collect(Collectors.joining("\n"));
       var output = new Operations.ProcessExecOutput(json, "", 0);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       var digests = ImageUtils.getImageDigests(mockImageRef);
 
-      var expectedDigests = Collections.singletonMap(Platform.EMPTY_PLATFORM, "sha256:9aa20fd4e4842854ec1c081d2dae77c686601a8640018d68782f36c60eb1a19e");
+      var expectedDigests =
+          Collections.singletonMap(
+              Platform.EMPTY_PLATFORM,
+              "sha256:9aa20fd4e4842854ec1c081d2dae77c686601a8640018d68782f36c60eb1a19e");
 
       assertEquals(expectedDigests, digests);
     }
@@ -248,26 +234,46 @@ class ImageUtilsTest extends ExhortTest {
   @ClearEnvironmentVariable(key = EXHORT_IMAGE_SERVICE_ENDPOINT)
   void test_get_image_digests_multiple() throws IOException {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class);
-         var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_multi_raw.json"})) {
-      var json = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        var is =
+            getResourceAsStreamDecision(
+                this.getClass(), new String[] {"msc", "image", "skopeo_inspect_multi_raw.json"})) {
+      var json =
+          new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
+              .lines()
+              .collect(Collectors.joining("\n"));
       var output = new Operations.ProcessExecOutput(json, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "--raw", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "--raw",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       var digests = ImageUtils.getImageDigests(mockImageRef);
 
       var expectedDigests = new HashMap<>();
-      expectedDigests.put(new Platform("linux", "amd64", null), "sha256:06d06f15f7b641a78f2512c8817cbecaa1bf549488e273f5ac27ff1654ed33f0");
-      expectedDigests.put(new Platform("linux", "arm64", null), "sha256:199d5daca3dba0a7deaf0086331917dee256089e94272bef5613517d0007f6f5");
-      expectedDigests.put(new Platform("linux", "ppc64le", null), "sha256:1bba662cff053201db85aa55caf3273216a6b0e1766409ee133cf78df9b59314");
-      expectedDigests.put(new Platform("linux", "s390x", null), "sha256:b39f9f6998e1693e29b7bd002bc32255fd4f69610e950523b647e61d2bb1dd66");
+      expectedDigests.put(
+          new Platform("linux", "amd64", null),
+          "sha256:06d06f15f7b641a78f2512c8817cbecaa1bf549488e273f5ac27ff1654ed33f0");
+      expectedDigests.put(
+          new Platform("linux", "arm64", null),
+          "sha256:199d5daca3dba0a7deaf0086331917dee256089e94272bef5613517d0007f6f5");
+      expectedDigests.put(
+          new Platform("linux", "ppc64le", null),
+          "sha256:1bba662cff053201db85aa55caf3273216a6b0e1766409ee133cf78df9b59314");
+      expectedDigests.put(
+          new Platform("linux", "s390x", null),
+          "sha256:b39f9f6998e1693e29b7bd002bc32255fd4f69610e950523b647e61d2bb1dd66");
 
       assertEquals(expectedDigests, digests);
     }
@@ -303,13 +309,13 @@ class ImageUtilsTest extends ExhortTest {
   @ClearEnvironmentVariable(key = EXHORT_IMAGE_VARIANT)
   void test_get_image_platform_no_default_no_variant() {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn("podman");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn("podman");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"podman", "info"}),
-          isNull()))
-        .thenReturn(new Operations.ProcessExecOutput("", "", 0));
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {"podman", "info"}), isNull()))
+          .thenReturn(new Operations.ProcessExecOutput("", "", 0));
 
       var platform = ImageUtils.getImagePlatform();
       assertNull(platform);
@@ -325,13 +331,14 @@ class ImageUtilsTest extends ExhortTest {
   @ClearEnvironmentVariable(key = "PATH")
   void test_get_image_platform_no_defaults() {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn("podman");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn("podman");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"podman", "info"}),
-          isNull()))
-        .thenReturn(new Operations.ProcessExecOutput("os: linux\narch: arm64\nvariant=v8", "", 0));
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {"podman", "info"}), isNull()))
+          .thenReturn(
+              new Operations.ProcessExecOutput("os: linux\narch: arm64\nvariant=v8", "", 0));
 
       var platform = ImageUtils.getImagePlatform();
       assertEquals(new Platform("linux", "arm64", "v8"), platform);
@@ -349,21 +356,35 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("syft")))
-        .thenReturn(mockSyftPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("syft"))).thenReturn(mockSyftPath);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn(mockDockerPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn(mockDockerPath);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn(mockPodmanPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn(mockPodmanPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockSyftPath,  mockImageRef.getImage().getFullName(),
-            "--from", mockSyftSource, "-c", mockSyftConfig, "-s", "all-layers",
-            "-o", "cyclonedx-json", "-q"}),
-          eq(new String[]{"PATH=" + "test-path/" + File.pathSeparator + "test-path/"})))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            mockSyftPath,
+                            mockImageRef.getImage().getFullName(),
+                            "--from",
+                            mockSyftSource,
+                            "-c",
+                            mockSyftConfig,
+                            "-s",
+                            "all-layers",
+                            "-o",
+                            "cyclonedx-json",
+                            "-q"
+                          }),
+                      eq(
+                          new String[] {
+                            "PATH=" + "test-path/" + File.pathSeparator + "test-path/"
+                          })))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSyft(mockImageRef)).isEqualTo(output);
     }
@@ -380,20 +401,28 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn("docker");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn("docker");
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn("podman");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn("podman");
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("syft")))
-        .thenReturn("syft");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("syft"))).thenReturn("syft");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"syft", mockImageRef.getImage().getFullName(),
-            "-s", "all-layers", "-o", "cyclonedx-json", "-q"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "syft",
+                            mockImageRef.getImage().getFullName(),
+                            "-s",
+                            "all-layers",
+                            "-o",
+                            "cyclonedx-json",
+                            "-q"
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSyft(mockImageRef)).isEqualTo(output);
     }
@@ -442,13 +471,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("info0: test\n info: test-output", "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn(mockDockerPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn(mockDockerPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockDockerPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockDockerPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.hostInfo("docker", "info")).isEqualTo("test-output");
     }
@@ -460,17 +489,20 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn("docker");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn("docker");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"docker", "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {"docker", "info"}), isNull()))
+          .thenReturn(output);
 
-      var exception = assertThrows(RuntimeException.class, () -> {
-        ImageUtils.hostInfo("docker", "info");
-      });
+      var exception =
+          assertThrows(
+              RuntimeException.class,
+              () -> {
+                ImageUtils.hostInfo("docker", "info");
+              });
       assertEquals("test-error", exception.getMessage());
     }
   }
@@ -482,13 +514,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("OSType: test-output", "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn(mockDockerPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn(mockDockerPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockDockerPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockDockerPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.dockerGetOs()).isEqualTo("test-output");
     }
@@ -502,13 +534,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("Architecture:" + sysArch, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn(mockDockerPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn(mockDockerPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockDockerPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockDockerPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.dockerGetArch()).isEqualTo(arch);
     }
@@ -522,13 +554,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("Architecture:" + sysArch, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("docker")))
-        .thenReturn(mockDockerPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("docker"))).thenReturn(mockDockerPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockDockerPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockDockerPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.dockerGetVariant()).isEqualTo(variant);
     }
@@ -541,13 +573,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("info: test-output\nabcdesss", "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn(mockPodmanPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn(mockPodmanPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockPodmanPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockPodmanPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.hostInfo("podman", "info")).isEqualTo("test-output");
     }
@@ -560,13 +592,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("os: test-output", "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn(mockPodmanPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn(mockPodmanPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockPodmanPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockPodmanPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.podmanGetOs()).isEqualTo("test-output");
     }
@@ -579,13 +611,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("arch: test-output", "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn(mockPodmanPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn(mockPodmanPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockPodmanPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockPodmanPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.podmanGetArch()).isEqualTo("test-output");
     }
@@ -598,13 +630,13 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("variant: test-output", "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("podman")))
-        .thenReturn(mockPodmanPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("podman"))).thenReturn(mockPodmanPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockPodmanPath, "info"}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(), aryEq(new String[] {mockPodmanPath, "info"}), isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.podmanGetVariant()).isEqualTo("test-output");
     }
@@ -627,15 +659,25 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn(mockSkopeoPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn(mockSkopeoPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockSkopeoPath, "inspect", "--authfile", mockSkopeoConfig,
-            "--daemon-host", mockSkopeoDaemon, "--raw",
-            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            mockSkopeoPath,
+                            "inspect",
+                            "--authfile",
+                            mockSkopeoConfig,
+                            "--daemon-host",
+                            mockSkopeoDaemon,
+                            "--raw",
+                            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, true)).isEqualTo(output);
     }
@@ -649,15 +691,23 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn(mockSkopeoPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn(mockSkopeoPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockSkopeoPath, "inspect",
-            "--daemon-host", mockSkopeoDaemon, "--raw",
-            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            mockSkopeoPath,
+                            "inspect",
+                            "--daemon-host",
+                            mockSkopeoDaemon,
+                            "--raw",
+                            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, true)).isEqualTo(output);
     }
@@ -671,14 +721,23 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect", "--authfile", mockSkopeoConfig,
-            "--raw", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "--authfile",
+                            mockSkopeoConfig,
+                            "--raw",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, true)).isEqualTo(output);
     }
@@ -692,14 +751,21 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "--raw", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "--raw",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, true)).isEqualTo(output);
     }
@@ -713,15 +779,25 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn(mockSkopeoPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn(mockSkopeoPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockSkopeoPath, "inspect", "--authfile", mockSkopeoConfig,
-            "--daemon-host", mockSkopeoDaemon, "",
-            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            mockSkopeoPath,
+                            "inspect",
+                            "--authfile",
+                            mockSkopeoConfig,
+                            "--daemon-host",
+                            mockSkopeoDaemon,
+                            "",
+                            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, false)).isEqualTo(output);
     }
@@ -735,15 +811,23 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn(mockSkopeoPath);
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn(mockSkopeoPath);
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{mockSkopeoPath, "inspect",
-            "--daemon-host", mockSkopeoDaemon, "",
-            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            mockSkopeoPath,
+                            "inspect",
+                            "--daemon-host",
+                            mockSkopeoDaemon,
+                            "",
+                            String.format("docker-daemon:%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, false)).isEqualTo(output);
     }
@@ -757,14 +841,23 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect", "--authfile", mockSkopeoConfig,
-            "", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "--authfile",
+                            mockSkopeoConfig,
+                            "",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, false)).isEqualTo(output);
     }
@@ -778,14 +871,21 @@ class ImageUtilsTest extends ExhortTest {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class)) {
       var output = new Operations.ProcessExecOutput("test-output", "test-error", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       assertThat(ImageUtils.execSkopeoInspect(mockImageRef, false)).isEqualTo(output);
     }
@@ -793,16 +893,26 @@ class ImageUtilsTest extends ExhortTest {
 
   @Test
   void test_get_multi_image_digests() throws IOException {
-    try (var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_multi_raw.json"})) {
+    try (var is =
+        getResourceAsStreamDecision(
+            this.getClass(), new String[] {"msc", "image", "skopeo_inspect_multi_raw.json"})) {
       var mapper = new ObjectMapper();
       var node = mapper.readTree(is);
 
       var digests = ImageUtils.getMultiImageDigests(node);
       Map<Platform, String> expectedDigests = new HashMap<>();
-      expectedDigests.put(new Platform("linux", "amd64", null), "sha256:06d06f15f7b641a78f2512c8817cbecaa1bf549488e273f5ac27ff1654ed33f0");
-      expectedDigests.put(new Platform("linux", "arm64", null), "sha256:199d5daca3dba0a7deaf0086331917dee256089e94272bef5613517d0007f6f5");
-      expectedDigests.put(new Platform("linux", "ppc64le", null), "sha256:1bba662cff053201db85aa55caf3273216a6b0e1766409ee133cf78df9b59314");
-      expectedDigests.put(new Platform("linux", "s390x", null), "sha256:b39f9f6998e1693e29b7bd002bc32255fd4f69610e950523b647e61d2bb1dd66");
+      expectedDigests.put(
+          new Platform("linux", "amd64", null),
+          "sha256:06d06f15f7b641a78f2512c8817cbecaa1bf549488e273f5ac27ff1654ed33f0");
+      expectedDigests.put(
+          new Platform("linux", "arm64", null),
+          "sha256:199d5daca3dba0a7deaf0086331917dee256089e94272bef5613517d0007f6f5");
+      expectedDigests.put(
+          new Platform("linux", "ppc64le", null),
+          "sha256:1bba662cff053201db85aa55caf3273216a6b0e1766409ee133cf78df9b59314");
+      expectedDigests.put(
+          new Platform("linux", "s390x", null),
+          "sha256:b39f9f6998e1693e29b7bd002bc32255fd4f69610e950523b647e61d2bb1dd66");
 
       assertEquals(expectedDigests, digests);
     }
@@ -820,7 +930,9 @@ class ImageUtilsTest extends ExhortTest {
 
   @Test
   void test_filter_mediaType() throws IOException {
-    try (var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_multi_raw.json"})) {
+    try (var is =
+        getResourceAsStreamDecision(
+            this.getClass(), new String[] {"msc", "image", "skopeo_inspect_multi_raw.json"})) {
       var mapper = new ObjectMapper();
       var node = mapper.readTree(is);
 
@@ -830,7 +942,9 @@ class ImageUtilsTest extends ExhortTest {
 
   @Test
   void test_filter_digest() throws IOException {
-    try (var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_multi_raw.json"})) {
+    try (var is =
+        getResourceAsStreamDecision(
+            this.getClass(), new String[] {"msc", "image", "skopeo_inspect_multi_raw.json"})) {
       var mapper = new ObjectMapper();
       var node = mapper.readTree(is);
 
@@ -840,7 +954,9 @@ class ImageUtilsTest extends ExhortTest {
 
   @Test
   void test_filter_platform() throws IOException {
-    try (var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_multi_raw.json"})) {
+    try (var is =
+        getResourceAsStreamDecision(
+            this.getClass(), new String[] {"msc", "image", "skopeo_inspect_multi_raw.json"})) {
       var mapper = new ObjectMapper();
       var node = mapper.readTree(is);
 
@@ -851,21 +967,36 @@ class ImageUtilsTest extends ExhortTest {
   @Test
   void test_get_single_image_digest() throws IOException {
     try (MockedStatic<Operations> mock = Mockito.mockStatic(Operations.class);
-         var is = getResourceAsStreamDecision(this.getClass(), new String[]{"msc", "image", "skopeo_inspect_single.json"})) {
-      var json = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        var is =
+            getResourceAsStreamDecision(
+                this.getClass(), new String[] {"msc", "image", "skopeo_inspect_single.json"})) {
+      var json =
+          new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))
+              .lines()
+              .collect(Collectors.joining("\n"));
       var output = new Operations.ProcessExecOutput(json, "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       var digests = ImageUtils.getSingleImageDigest(mockImageRef);
-      Map<Platform, String> expectedDigests = Collections.singletonMap(Platform.EMPTY_PLATFORM, "sha256:9aa20fd4e4842854ec1c081d2dae77c686601a8640018d68782f36c60eb1a19e");
+      Map<Platform, String> expectedDigests =
+          Collections.singletonMap(
+              Platform.EMPTY_PLATFORM,
+              "sha256:9aa20fd4e4842854ec1c081d2dae77c686601a8640018d68782f36c60eb1a19e");
 
       assertEquals(expectedDigests, digests);
     }
@@ -878,14 +1009,21 @@ class ImageUtilsTest extends ExhortTest {
       var node = new TextNode("root");
       var output = new Operations.ProcessExecOutput(mapper.writeValueAsString(node), "", 0);
 
-      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo")))
-        .thenReturn("skopeo");
+      mock.when(() -> Operations.getCustomPathOrElse(eq("skopeo"))).thenReturn("skopeo");
 
-      mock.when(() -> Operations.runProcessGetFullOutput(isNull(),
-          aryEq(new String[]{"skopeo", "inspect",
-            "", String.format("docker://%s", mockImageRef.getImage().getFullName())}),
-          isNull()))
-        .thenReturn(output);
+      mock.when(
+              () ->
+                  Operations.runProcessGetFullOutput(
+                      isNull(),
+                      aryEq(
+                          new String[] {
+                            "skopeo",
+                            "inspect",
+                            "",
+                            String.format("docker://%s", mockImageRef.getImage().getFullName())
+                          }),
+                      isNull()))
+          .thenReturn(output);
 
       var digests = ImageUtils.getSingleImageDigest(mockImageRef);
       Map<Platform, String> expectedDigests = Collections.emptyMap();

@@ -18,18 +18,17 @@ package com.redhat.exhort.tools;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.nio.file.Paths;
-
-import org.junit.jupiter.api.Test;
-
 import com.redhat.exhort.providers.JavaMavenProvider;
+import java.nio.file.Paths;
+import org.junit.jupiter.api.Test;
 
 class Ecosystem_Test {
 
   @Test
   void get_a_provider_for_an_unknown_package_file_should_throw_an_exception() {
     var manifestPath = Paths.get("/not/a/supported/mani.fest");
-    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> Ecosystem.getProvider(manifestPath));
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> Ecosystem.getProvider(manifestPath));
   }
 
   @Test
@@ -37,5 +36,4 @@ class Ecosystem_Test {
     var manifestPath = Paths.get("/supported/manifest/pom.xml");
     assertThat(Ecosystem.getProvider(manifestPath)).isInstanceOf(JavaMavenProvider.class);
   }
-
 }

@@ -15,33 +15,32 @@
  */
 package com.redhat.exhort.api.serialization;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.redhat.exhort.api.PackageRef;
+import java.io.IOException;
 
 public class PackageRefDeserializer extends StdDeserializer<PackageRef> {
 
-    public PackageRefDeserializer() {
-        this(null);
-    }
+  public PackageRefDeserializer() {
+    this(null);
+  }
 
-    public PackageRefDeserializer(Class<PackageRef> c) {
-        super(c);
-    }
+  public PackageRefDeserializer(Class<PackageRef> c) {
+    super(c);
+  }
 
-    @Override
-    public PackageRef deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        JsonNode n = p.getCodec().readTree(p);
-        String purl = n.asText();
-        if (purl == null) {
-            return null;
-        }
-        return new PackageRef(purl);
+  @Override
+  public PackageRef deserialize(JsonParser p, DeserializationContext ctxt)
+      throws IOException, JacksonException {
+    JsonNode n = p.getCodec().readTree(p);
+    String purl = n.asText();
+    if (purl == null) {
+      return null;
     }
-
+    return new PackageRef(purl);
+  }
 }

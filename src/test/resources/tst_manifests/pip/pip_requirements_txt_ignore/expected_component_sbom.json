@@ -3,9 +3,23 @@
   "specVersion" : "1.4",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2023-09-28T12:40:41Z"
+    "timestamp" : "2024-04-29T09:14:16Z",
+    "component" : {
+      "name" : "default-pip-root",
+      "version" : "0.0.0",
+      "purl" : "pkg:pypi/default-pip-root@0.0.0",
+      "type" : "application",
+      "bom-ref" : "pkg:pypi/default-pip-root@0.0.0"
+    }
   },
   "components" : [
+    {
+      "name" : "default-pip-root",
+      "version" : "0.0.0",
+      "purl" : "pkg:pypi/default-pip-root@0.0.0",
+      "type" : "application",
+      "bom-ref" : "pkg:pypi/default-pip-root@0.0.0"
+    },
     {
       "name" : "anyio",
       "version" : "3.6.2",
@@ -183,6 +197,36 @@
     }
   ],
   "dependencies" : [
+    {
+      "ref" : "pkg:pypi/default-pip-root@0.0.0",
+      "dependsOn" : [
+        "pkg:pypi/anyio@3.6.2",
+        "pkg:pypi/asgiref@3.4.1",
+        "pkg:pypi/beautifulsoup4@4.12.2",
+        "pkg:pypi/certifi@2023.7.22",
+        "pkg:pypi/chardet@4.0.0",
+        "pkg:pypi/contextlib2@21.6.0",
+        "pkg:pypi/fastapi@0.75.1",
+        "pkg:pypi/flask@2.0.3",
+        "pkg:pypi/h11@0.13.0",
+        "pkg:pypi/idna@2.10",
+        "pkg:pypi/immutables@0.19",
+        "pkg:pypi/importlib-metadata@4.8.3",
+        "pkg:pypi/itsdangerous@2.0.1",
+        "pkg:pypi/jinja2@3.0.3",
+        "pkg:pypi/markupsafe@2.0.1",
+        "pkg:pypi/requests@2.25.1",
+        "pkg:pypi/six@1.16.0",
+        "pkg:pypi/sniffio@1.2.0",
+        "pkg:pypi/soupsieve@2.3.2.post1",
+        "pkg:pypi/starlette@0.17.1",
+        "pkg:pypi/typing-extensions@4.1.1",
+        "pkg:pypi/urllib3@1.26.16",
+        "pkg:pypi/uvicorn@0.17.0",
+        "pkg:pypi/werkzeug@2.0.3",
+        "pkg:pypi/zipp@3.6.0"
+      ]
+    },
     {
       "ref" : "pkg:pypi/anyio@3.6.2",
       "dependsOn" : [ ]

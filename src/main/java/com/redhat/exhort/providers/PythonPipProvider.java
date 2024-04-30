@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 public final class PythonPipProvider extends Provider {
 
   private Logger log = LoggersFactory.getLogger(this.getClass().getName());
+  private static final String DEFAULT_PIP_ROOT_COMPONENT_NAME = "default-pip-root";
+  private static final String DEFAULT_PIP_ROOT_COMPONENT_VERSION = "0.0.0";
 
   public void setPythonController(PythonControllerBase pythonController) {
     this.pythonController = pythonController;
@@ -76,11 +78,7 @@ public final class PythonPipProvider extends Provider {
         pythonController.getDependencies(manifestPath.toString(), true);
     printDependenciesTree(dependencies);
     Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL, "sensitive");
-    try {
-      sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(), "root"));
-    } catch (MalformedPackageURLException e) {
-      throw new RuntimeException(e);
-    }
+    sbom.addRoot(toPurl(DEFAULT_PIP_ROOT_COMPONENT_NAME, DEFAULT_PIP_ROOT_COMPONENT_VERSION));
     dependencies.stream()
         .forEach(
             (component) -> {
@@ -88,10 +86,6 @@ public final class PythonPipProvider extends Provider {
             });
     byte[] requirementsFile = Files.readAllBytes(manifestPath);
     handleIgnoredDependencies(new String(requirementsFile), sbom);
-    // In python' pip requirements.txt, there is no real root element, then need to remove dummy
-    // root element that
-    // was created for creating the sbom.
-    sbom.removeRootComponent();
     return new Content(
         sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
   }
@@ -132,11 +126,7 @@ public final class PythonPipProvider extends Provider {
         pythonController.getDependencies(manifestPath.toString(), false);
     printDependenciesTree(dependencies);
     Sbom sbom = SbomFactory.newInstance();
-    try {
-      sbom.addRoot(new PackageURL(Ecosystem.Type.PYTHON.getType(), "root"));
-    } catch (MalformedPackageURLException e) {
-      throw new RuntimeException(e);
-    }
+    sbom.addRoot(toPurl(DEFAULT_PIP_ROOT_COMPONENT_NAME, DEFAULT_PIP_ROOT_COMPONENT_VERSION));
     dependencies.stream()
         .forEach(
             (component) -> {
@@ -147,10 +137,6 @@ public final class PythonPipProvider extends Provider {
     Files.delete(manifestPath);
     Files.delete(tempRepository);
     handleIgnoredDependencies(new String(manifestContent), sbom);
-    // In python' pip requirements.txt, there is no real root element, then need to remove dummy
-    // root element that
-    // was created for creating the sbom.
-    sbom.removeRootComponent();
     return new Content(
         sbom.getAsJsonString().getBytes(StandardCharsets.UTF_8), Api.CYCLONEDX_MEDIA_TYPE);
   }

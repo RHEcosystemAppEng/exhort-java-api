@@ -48,7 +48,9 @@ class Gradle_Provider_Test extends ExhortTest {
         "deps_with_ignore_full_specification",
         "deps_with_ignore_named_params",
         "deps_with_ignore_notations",
-        "deps_with_no_ignore_common_paths");
+        "deps_with_no_ignore_common_paths",
+        "deps_with_duplicate_no_version",
+        "deps_with_duplicate_different_versions");
   }
 
   @ParameterizedTest

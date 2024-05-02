@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +87,7 @@ public final class GradleProvider extends BaseJavaProvider {
     // Process each ignored dependency
     for (String dependency : ignoredLines) {
       String ignoredDepInfo;
-      if (isNotation(dependency)) {
+      if (depHasLibsNotation(dependency)) {
         ignoredDepInfo = getDepFromNotation(dependency, manifestPath);
       } else {
         ignoredDepInfo = getDepInfo(dependency);
@@ -184,17 +185,11 @@ public final class GradleProvider extends BaseJavaProvider {
     }
   }
 
-  public static boolean isNotation(String line) {
-    int colonCount = 0;
-    for (char c : line.toCharArray()) {
-      if (c == ':') {
-        colonCount++;
-        if (colonCount > 1) {
-          return false; // Likely full dependency with group and artifact
-        }
-      }
-    }
-    return true; // Potentially a notation
+  private boolean depHasLibsNotation(String depToBeIgnored) {
+    Pattern pattern = Pattern.compile(":");
+    Matcher matcher = pattern.matcher(depToBeIgnored.trim());
+    return (depToBeIgnored.trim().startsWith("library(") || depToBeIgnored.trim().contains("libs."))
+        && (matcher.results().count() <= 1);
   }
 
   private boolean isIgnoredLine(String line) {
@@ -216,7 +211,7 @@ public final class GradleProvider extends BaseJavaProvider {
     return packageName;
   }
 
-  private static Path getDependencies(Path manifestPath) throws IOException {
+  private Path getDependencies(Path manifestPath) throws IOException {
     // check for custom gradle executable
     var gradle = Operations.getCustomPathOrElse("gradle");
     // create a temp file for storing the dependency tree in
@@ -254,19 +249,85 @@ public final class GradleProvider extends BaseJavaProvider {
     var rootPurl = parseDep(root);
     sbom.addRoot(rootPurl);
     List<String> lines = extractLines(textFormatFile, configName);
-    String[] array = new String[lines.size()];
-    for (int index = 0; index < array.length; index++) {
-      String line = lines.get(index);
+    List<String> arrayForSbom = new ArrayList<>();
+
+    for (String line : lines) {
       line = line.replaceAll("---", "-").replaceAll("    ", "  ");
       line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
       line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
       line = line.replaceAll(" \\(n\\)$", "");
       line = line.replaceAll(" \\(\\*\\)", "");
       line = line.replaceAll("$", ":compile");
-      array[index] = line;
+      if (containsVersion(line)) {
+        arrayForSbom.add(line);
+      }
     }
+    // remove duplicates for component analysis
+    if (List.of("api", "implementation", "compile").contains(configName)) {
+      removeDuplicateIfExists(arrayForSbom, textFormatFile);
+    }
+
+    String[] array = arrayForSbom.toArray(new String[0]);
     parseDependencyTree(root, 0, array, sbom);
     return sbom;
+  }
+
+  private void removeDuplicateIfExists(List<String> arrayForSbom, Path theContent) {
+    Consumer<String> removeDuplicateFunction =
+        dependency -> {
+          try {
+            String content = Files.readString(theContent);
+            PackageURL depUrl = parseDep(dependency);
+            String depVersion = depUrl.getVersion().trim();
+            int indexOfDuplicate = -1;
+            int selfIndex = -1;
+
+            for (int i = 0; i < arrayForSbom.size(); i++) {
+              PackageURL dep = parseDep(arrayForSbom.get(i));
+              if (dep.getNamespace().equals(depUrl.getNamespace())
+                  && dep.getName().equals(depUrl.getName())) {
+                if (dep.getVersion().equals(depVersion)) {
+                  selfIndex = i;
+                } else if (!dep.getVersion().equals(depVersion) && indexOfDuplicate == -1) {
+                  indexOfDuplicate = i;
+                }
+              }
+            }
+
+            if (selfIndex != -1 && selfIndex != indexOfDuplicate && indexOfDuplicate != -1) {
+              PackageURL duplicateDepVersion = parseDep(arrayForSbom.get(indexOfDuplicate));
+              Pattern pattern =
+                  Pattern.compile(
+                      ".*" + depVersion + "\\W?->\\W?" + duplicateDepVersion.getVersion() + ".*");
+              Matcher matcher = pattern.matcher(content);
+              if (matcher.find()) {
+                arrayForSbom.remove(selfIndex);
+              } else {
+                pattern =
+                    Pattern.compile(
+                        ".*" + duplicateDepVersion.getVersion() + "\\W?->\\W?" + depVersion + ".*");
+                matcher = pattern.matcher(content);
+                if (matcher.find()) {
+                  arrayForSbom.remove(indexOfDuplicate);
+                }
+              }
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        };
+    List<String> copyOfArrayForSbom = new ArrayList<>(arrayForSbom);
+    copyOfArrayForSbom.forEach(removeDuplicateFunction);
+  }
+
+  private boolean containsVersion(String line) {
+    String lineStripped = line.replace("(n)", "").trim();
+    Pattern pattern1 =
+        Pattern.compile("\\W*[a-z0-9.-]+:[a-z0-9.-]+:[0-9]+[.][0-9]+(.[0-9]+)?(.*)?.*");
+    Pattern pattern2 = Pattern.compile(".*version:\\s?(')?[0-9]+[.][0-9]+(.[0-9]+)?(')?");
+    Matcher matcher1 = pattern1.matcher(lineStripped);
+    Matcher matcher2 = pattern2.matcher(lineStripped);
+    return (matcher1.find() || matcher2.find()) && !lineStripped.contains("libs.");
   }
 
   private String getRoot(Path textFormatFile, Map<String, String> propertiesMap)

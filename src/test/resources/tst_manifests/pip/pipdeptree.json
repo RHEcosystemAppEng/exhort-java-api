@@ -1,0 +1,432 @@
+[
+  {
+    "package": {
+      "key": "altgraph",
+      "package_name": "altgraph",
+      "installed_version": "0.17.2"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "anyio",
+      "package_name": "anyio",
+      "installed_version": "3.6.2"
+    },
+    "dependencies": [
+      {
+        "key": "idna",
+        "package_name": "idna",
+        "installed_version": "2.10",
+        "required_version": ">=2.8"
+      },
+      {
+        "key": "sniffio",
+        "package_name": "sniffio",
+        "installed_version": "1.2.0",
+        "required_version": ">=1.1"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "asgiref",
+      "package_name": "asgiref",
+      "installed_version": "3.4.1"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "beautifulsoup4",
+      "package_name": "beautifulsoup4",
+      "installed_version": "4.12.2"
+    },
+    "dependencies": [
+      {
+        "key": "soupsieve",
+        "package_name": "soupsieve",
+        "installed_version": "2.3.2.post1",
+        "required_version": ">1.2"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "certifi",
+      "package_name": "certifi",
+      "installed_version": "2023.7.22"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "chardet",
+      "package_name": "chardet",
+      "installed_version": "4.0.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "click",
+      "package_name": "click",
+      "installed_version": "8.0.4"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "contextlib2",
+      "package_name": "contextlib2",
+      "installed_version": "21.6.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "fastapi",
+      "package_name": "fastapi",
+      "installed_version": "0.75.1"
+    },
+    "dependencies": [
+      {
+        "key": "pydantic",
+        "package_name": "pydantic",
+        "installed_version": "1.9.2",
+        "required_version": ">=1.6.2,<2.0.0,!=1.8.1,!=1.8,!=1.7.3,!=1.7.2,!=1.7.1,!=1.7"
+      },
+      {
+        "key": "starlette",
+        "package_name": "starlette",
+        "installed_version": "0.17.1",
+        "required_version": "==0.17.1"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "flask",
+      "package_name": "Flask",
+      "installed_version": "2.0.3"
+    },
+    "dependencies": [
+      {
+        "key": "click",
+        "package_name": "click",
+        "installed_version": "8.0.4",
+        "required_version": ">=7.1.2"
+      },
+      {
+        "key": "itsdangerous",
+        "package_name": "itsdangerous",
+        "installed_version": "2.0.1",
+        "required_version": ">=2.0"
+      },
+      {
+        "key": "jinja2",
+        "package_name": "Jinja2",
+        "installed_version": "3.0.3",
+        "required_version": ">=3.0"
+      },
+      {
+        "key": "werkzeug",
+        "package_name": "Werkzeug",
+        "installed_version": "2.0.3",
+        "required_version": ">=2.0"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "future",
+      "package_name": "future",
+      "installed_version": "0.18.2"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "h11",
+      "package_name": "h11",
+      "installed_version": "0.13.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "idna",
+      "package_name": "idna",
+      "installed_version": "2.10"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "immutables",
+      "package_name": "immutables",
+      "installed_version": "0.19"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "importlib-metadata",
+      "package_name": "importlib-metadata",
+      "installed_version": "4.8.3"
+    },
+    "dependencies": [
+      {
+        "key": "zipp",
+        "package_name": "zipp",
+        "installed_version": "3.6.0",
+        "required_version": ">=0.5"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "itsdangerous",
+      "package_name": "itsdangerous",
+      "installed_version": "2.0.1"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "jinja2",
+      "package_name": "Jinja2",
+      "installed_version": "3.0.3"
+    },
+    "dependencies": [
+      {
+        "key": "markupsafe",
+        "package_name": "MarkupSafe",
+        "installed_version": "2.0.1",
+        "required_version": ">=2.0"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "macholib",
+      "package_name": "macholib",
+      "installed_version": "1.15.2"
+    },
+    "dependencies": [
+      {
+        "key": "altgraph",
+        "package_name": "altgraph",
+        "installed_version": "0.17.2",
+        "required_version": ">=0.15"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "markupsafe",
+      "package_name": "MarkupSafe",
+      "installed_version": "2.0.1"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "packaging",
+      "package_name": "packaging",
+      "installed_version": "24.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "pip",
+      "package_name": "pip",
+      "installed_version": "24.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "pipdeptree",
+      "package_name": "pipdeptree",
+      "installed_version": "2.19.1"
+    },
+    "dependencies": [
+      {
+        "key": "packaging",
+        "package_name": "packaging",
+        "installed_version": "24.0",
+        "required_version": ">=23.1"
+      },
+      {
+        "key": "pip",
+        "package_name": "pip",
+        "installed_version": "24.0",
+        "required_version": ">=23.1.2"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "pydantic",
+      "package_name": "pydantic",
+      "installed_version": "1.9.2"
+    },
+    "dependencies": [
+      {
+        "key": "typing-extensions",
+        "package_name": "typing_extensions",
+        "installed_version": "4.1.1",
+        "required_version": ">=3.7.4.3"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "requests",
+      "package_name": "requests",
+      "installed_version": "2.25.1"
+    },
+    "dependencies": [
+      {
+        "key": "certifi",
+        "package_name": "certifi",
+        "installed_version": "2023.7.22",
+        "required_version": ">=2017.4.17"
+      },
+      {
+        "key": "chardet",
+        "package_name": "chardet",
+        "installed_version": "4.0.0",
+        "required_version": ">=3.0.2,<5"
+      },
+      {
+        "key": "idna",
+        "package_name": "idna",
+        "installed_version": "2.10",
+        "required_version": ">=2.5,<3"
+      },
+      {
+        "key": "urllib3",
+        "package_name": "urllib3",
+        "installed_version": "1.26.16",
+        "required_version": ">=1.21.1,<1.27"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "setuptools",
+      "package_name": "setuptools",
+      "installed_version": "58.0.4"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "six",
+      "package_name": "six",
+      "installed_version": "1.16.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "sniffio",
+      "package_name": "sniffio",
+      "installed_version": "1.2.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "soupsieve",
+      "package_name": "soupsieve",
+      "installed_version": "2.3.2.post1"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "starlette",
+      "package_name": "starlette",
+      "installed_version": "0.17.1"
+    },
+    "dependencies": [
+      {
+        "key": "anyio",
+        "package_name": "anyio",
+        "installed_version": "3.6.2",
+        "required_version": ">=3.0.0,<4"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "typing-extensions",
+      "package_name": "typing_extensions",
+      "installed_version": "4.1.1"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "urllib3",
+      "package_name": "urllib3",
+      "installed_version": "1.26.16"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "uvicorn",
+      "package_name": "uvicorn",
+      "installed_version": "0.17.0"
+    },
+    "dependencies": [
+      {
+        "key": "asgiref",
+        "package_name": "asgiref",
+        "installed_version": "3.4.1",
+        "required_version": ">=3.4.0"
+      },
+      {
+        "key": "click",
+        "package_name": "click",
+        "installed_version": "8.0.4",
+        "required_version": ">=7.0"
+      },
+      {
+        "key": "h11",
+        "package_name": "h11",
+        "installed_version": "0.13.0",
+        "required_version": ">=0.8"
+      }
+    ]
+  },
+  {
+    "package": {
+      "key": "werkzeug",
+      "package_name": "Werkzeug",
+      "installed_version": "2.0.3"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "wheel",
+      "package_name": "wheel",
+      "installed_version": "0.37.0"
+    },
+    "dependencies": []
+  },
+  {
+    "package": {
+      "key": "zipp",
+      "package_name": "zipp",
+      "installed_version": "3.6.0"
+    },
+    "dependencies": []
+  }
+]

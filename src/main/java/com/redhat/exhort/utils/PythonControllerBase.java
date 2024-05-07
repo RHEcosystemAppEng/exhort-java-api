@@ -18,7 +18,9 @@ package com.redhat.exhort.utils;
 import static com.redhat.exhort.impl.ExhortApi.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.exhort.exception.PackageNotInstalledException;
 import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.tools.Operations;
@@ -203,14 +205,12 @@ public abstract class PythonControllerBase {
     if (automaticallyInstallPackageOnEnvironment()) {
       boolean installBestEfforts =
           getBooleanValueEnvironment("EXHORT_PYTHON_INSTALL_BEST_EFFORTS", "false");
-      // make best efforts to install the requirements.txt on the virtual environment created from
-      // the python3
-      // passed in.
-      // that means that it will install the packages without referring to the versions, but will
-      // let pip choose
-      // the version
-      // tailored for version of the python environment( and of pip package manager) for each
-      // package.
+      /*
+       make best efforts to install the requirements.txt on the virtual environment created from
+       the python3 passed in. that means that it will install the packages without referring to
+       the versions, but will let pip choose the version tailored for version of the python
+       environment( and of pip package manager) for each package.
+      */
       if (installBestEfforts) {
         boolean matchManifestVersions =
             getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
@@ -221,9 +221,7 @@ public abstract class PythonControllerBase {
         } else {
           installingRequirementsOneByOne(pathToRequirements);
         }
-      }
-      //
-      else {
+      } else {
         installPackages(pathToRequirements);
       }
     }
@@ -268,34 +266,10 @@ public abstract class PythonControllerBase {
   private List<Map<String, Object>> getDependenciesImpl(
       String pathToRequirements, boolean includeTransitive) {
     List<Map<String, Object>> dependencies = new ArrayList<>();
-    String freeze = getPipFreezeFromEnvironment();
-    String freezeMessage = "";
-    if (debugLoggingIsNeeded()) {
-      freezeMessage =
-          String.format(
-              "Package Manager PIP freeze --all command result output -> %s %s",
-              System.lineSeparator(), freeze);
-      log.info(freezeMessage);
-    }
-    String[] deps = freeze.split(System.lineSeparator());
-    String depNames =
-        Arrays.stream(deps)
-            .map(PythonControllerBase::getDependencyName)
-            .collect(Collectors.joining(" "));
-    String pipShowOutput = getPipShowFromEnvironment(depNames);
-    if (debugLoggingIsNeeded()) {
-      String pipShowMessage =
-          String.format(
-              "Package Manager PIP show command result output -> %s %s",
-              System.lineSeparator(), pipShowOutput);
-      log.info(pipShowMessage);
-    }
-    List<String> allPipShowLines = splitPipShowLines(pipShowOutput);
-    boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
-    Map<StringInsensitive, String> CachedTree = new HashMap<>();
+    Map<StringInsensitive, PythonDependency> cachedEnvironmentDeps = new HashMap<>();
+    fillCacheWithEnvironmentDeps(cachedEnvironmentDeps);
     List<String> linesOfRequirements;
     try {
-
       linesOfRequirements =
           Files.readAllLines(Path.of(pathToRequirements)).stream()
               .filter((line) -> !line.startsWith("#"))
@@ -304,96 +278,154 @@ public abstract class PythonControllerBase {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    allPipShowLines.stream()
-        .forEach(
-            record -> {
-              String dependencyNameShow = getDependencyNameShow(record);
-              StringInsensitive stringInsensitive = new StringInsensitive(dependencyNameShow);
-              CachedTree.put(stringInsensitive, record);
-              CachedTree.putIfAbsent(
-                  new StringInsensitive(dependencyNameShow.replace("-", "_")), record);
-              CachedTree.putIfAbsent(
-                  new StringInsensitive(dependencyNameShow.replace("_", "-")), record);
-            });
-    ObjectMapper om = new ObjectMapper();
-    String tree;
     try {
-      tree = om.writerWithDefaultPrettyPrinter().writeValueAsString(CachedTree);
+      ObjectMapper om = new ObjectMapper();
+      om.writerWithDefaultPrettyPrinter().writeValueAsString(cachedEnvironmentDeps);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
-    linesOfRequirements.stream()
-        .forEach(
-            dep -> {
-              if (matchManifestVersions) {
-                String dependencyName;
-                String manifestVersion;
-                String installedVersion = "";
-                int doubleEqualSignPosition;
-                if (dep.contains("==")) {
-                  doubleEqualSignPosition = dep.indexOf("==");
-                  manifestVersion = dep.substring(doubleEqualSignPosition + 2).trim();
-                  if (manifestVersion.contains("#")) {
-                    var hashCharIndex = manifestVersion.indexOf("#");
-                    manifestVersion = manifestVersion.substring(0, hashCharIndex);
-                  }
-                  dependencyName = getDependencyName(dep);
-                  String pipShowRecord = CachedTree.get(new StringInsensitive(dependencyName));
-                  if (pipShowRecord != null) {
-                    installedVersion = getDependencyVersion(pipShowRecord);
-                  }
-                  if (!installedVersion.trim().equals("")) {
-                    if (!manifestVersion.trim().equals(installedVersion.trim())) {
-                      throw new RuntimeException(
-                          String.format(
-                              "Can't continue with analysis - versions mismatch for dependency"
-                                  + " name=%s, manifest version=%s, installed Version=%s, if you"
-                                  + " want to allow version mismatch for analysis between installed"
-                                  + " and requested packages, set environment variable/setting -"
-                                  + " MATCH_MANIFEST_VERSIONS=false",
-                              dependencyName, manifestVersion, installedVersion));
-                    }
-                  }
-                }
-              }
-              List<String> path = new ArrayList<>();
-              String depName = getDependencyName(dep.toLowerCase());
-              path.add(depName);
-              bringAllDependencies(dependencies, depName, CachedTree, includeTransitive, path);
-            });
+    boolean matchManifestVersions = getBooleanValueEnvironment("MATCH_MANIFEST_VERSIONS", "true");
+
+    for (String dep : linesOfRequirements) {
+      if (matchManifestVersions) {
+        String dependencyName;
+        String manifestVersion;
+        String installedVersion = "";
+        int doubleEqualSignPosition;
+        if (dep.contains("==")) {
+          doubleEqualSignPosition = dep.indexOf("==");
+          manifestVersion = dep.substring(doubleEqualSignPosition + 2).trim();
+          if (manifestVersion.contains("#")) {
+            var hashCharIndex = manifestVersion.indexOf("#");
+            manifestVersion = manifestVersion.substring(0, hashCharIndex);
+          }
+          dependencyName = getDependencyName(dep);
+          PythonDependency pythonDependency =
+              cachedEnvironmentDeps.get(new StringInsensitive(dependencyName));
+          if (pythonDependency != null) {
+            installedVersion = pythonDependency.getVersion();
+          }
+          if (!installedVersion.trim().equals("")) {
+            if (!manifestVersion.trim().equals(installedVersion.trim())) {
+              throw new RuntimeException(
+                  String.format(
+                      "Can't continue with analysis - versions mismatch for dependency"
+                          + " name=%s, manifest version=%s, installed Version=%s, if you"
+                          + " want to allow version mismatch for analysis between installed"
+                          + " and requested packages, set environment variable/setting -"
+                          + " MATCH_MANIFEST_VERSIONS=false",
+                      dependencyName, manifestVersion, installedVersion));
+            }
+          }
+        }
+      }
+      List<String> path = new ArrayList<>();
+      String selectedDepName = getDependencyName(dep.toLowerCase());
+      path.add(selectedDepName);
+      bringAllDependencies(
+          dependencies, selectedDepName, cachedEnvironmentDeps, includeTransitive, path);
+    }
 
     return dependencies;
   }
 
   private String getPipShowFromEnvironment(String depNames) {
-    return getPipCommandInvokedOrDecodedFromEnvironment(
-        "EXHORT_PIP_SHOW", pipBinaryLocation, "show", depNames);
-    //    return Operations.runProcessGetOutput(pythonEnvironmentDir, pipBinaryLocation, "show",
-    // depNames);
+    return executeCommandOrExtractFromEnv("EXHORT_PIP_SHOW", pipBinaryLocation, "show", depNames);
   }
 
   String getPipFreezeFromEnvironment() {
-    return getPipCommandInvokedOrDecodedFromEnvironment(
+    return executeCommandOrExtractFromEnv(
         "EXHORT_PIP_FREEZE", pipBinaryLocation, "freeze", "--all");
   }
 
-  private String getPipCommandInvokedOrDecodedFromEnvironment(String EnvVar, String... cmdList) {
-    return getStringValueEnvironment(EnvVar, "").trim().equals("")
-        ? Operations.runProcessGetOutput(pythonEnvironmentDir, cmdList)
-        : new String(Base64.getDecoder().decode(getStringValueEnvironment(EnvVar, "")));
+  List<PythonDependency> getDependencyTreeJsonFromPipDepTree() {
+    executeCommandOrExtractFromEnv(
+        "EXHORT_PIP_PIPDEPTREE", pipBinaryLocation, "install", "pipdeptree");
+
+    String pipdeptreeJsonString;
+    if (isVirtualEnv()) {
+      pipdeptreeJsonString =
+          executeCommandOrExtractFromEnv("EXHORT_PIP_PIPDEPTREE", "./bin/pipdeptree", "--json");
+    } else if (isRealEnv()) {
+      pipdeptreeJsonString =
+          executeCommandOrExtractFromEnv(
+              "EXHORT_PIP_PIPDEPTREE", pathToPythonBin, "-m", "pipdeptree", "--json");
+    } else {
+      pipdeptreeJsonString =
+          executeCommandOrExtractFromEnv(
+              "EXHORT_PIP_PIPDEPTREE", "./bin/pipdeptree", "--json", "--python", pathToPythonBin);
+    }
+    if (debugLoggingIsNeeded()) {
+      String pipdeptreeMessage =
+          String.format(
+              "Package Manager pipdeptree --json command result output -> %s %s",
+              System.lineSeparator(), pipdeptreeJsonString);
+      log.info(pipdeptreeMessage);
+    }
+    return mapToPythonDependencies(pipdeptreeJsonString);
+  }
+
+  public static List<PythonDependency> mapToPythonDependencies(String jsonString) {
+    // Parse JSON string using ObjectMapper
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode rootNode = null;
+    try {
+      rootNode = mapper.readTree(jsonString);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+    List<PythonDependency> dependencies = new ArrayList<>();
+
+    // Check if it's an array
+    if (rootNode.isArray()) {
+      for (JsonNode dependencyNode : rootNode) {
+        if (dependencyNode.isObject()) {
+          ObjectNode dependencyObject = (ObjectNode) dependencyNode;
+
+          // Extract information from the nested "package" object
+          JsonNode packageNode = dependencyObject.get("package");
+          String name = packageNode.get("package_name").asText();
+          String version = packageNode.get("installed_version").asText();
+
+          // Extract dependencies (might be an array or an empty object)
+          JsonNode dependenciesElement = dependencyObject.get("dependencies");
+          List<String> depList = new ArrayList<>();
+          if (dependenciesElement.isArray()) {
+            // Loop through the dependencies array and add names
+            for (JsonNode depNode : dependenciesElement) {
+              String depName = depNode.get("package_name").asText();
+              depList.add(depName);
+            }
+          }
+
+          // Create a PythonDependency object and add it to the list
+          PythonDependency dependency = new PythonDependency(name, version, depList);
+          dependencies.add(dependency);
+        }
+      }
+    }
+
+    return dependencies;
+  }
+
+  private String executeCommandOrExtractFromEnv(String EnvVar, String... cmdList) {
+    String envValue = getStringValueEnvironment(EnvVar, "");
+    if (envValue.trim().equals(""))
+      return Operations.runProcessGetOutput(pythonEnvironmentDir, cmdList);
+    return new String(Base64.getDecoder().decode(envValue));
   }
 
   private void bringAllDependencies(
-      List<Map<String, Object>> dependencies,
+      List<Map<String, Object>> dependencyList,
       String depName,
-      Map<StringInsensitive, String> cachedTree,
+      Map<StringInsensitive, PythonDependency> cachedTree,
       boolean includeTransitive,
       List<String> path) {
 
-    if (dependencies == null || depName.trim().equals("")) return;
+    if (dependencyList == null || depName.trim().equals("")) return;
 
-    String record = cachedTree.get(new StringInsensitive(depName));
-    if (record == null) {
+    PythonDependency pythonDependency = cachedTree.get(new StringInsensitive(depName));
+    if (pythonDependency == null) {
       throw new PackageNotInstalledException(
           String.format(
               "Package name=>%s is not installed on your python environment, either install it ("
@@ -402,42 +434,39 @@ public abstract class PythonControllerBase {
                   + " virtual environment ( will slow down the analysis)",
               depName));
     }
-    String depVersion = getDependencyVersion(record);
-    List<String> directDeps = getDepsList(record);
-    getDependencyNameShow(record);
-    Map<String, Object> entry = new HashMap<String, Object>();
-    dependencies.add(entry);
-    entry.put("name", getDependencyNameShow(record));
-    entry.put("version", depVersion);
-    List<Map<String, Object>> targetDeps = new ArrayList<>();
-    directDeps.stream()
-        .forEach(
-            dep -> {
-              if (!path.contains(dep.toLowerCase())) {
-                List<String> depList = new ArrayList();
-                depList.add(dep.toLowerCase());
 
-                if (includeTransitive) {
-                  bringAllDependencies(
-                      targetDeps,
-                      dep,
-                      cachedTree,
-                      includeTransitive,
-                      Stream.concat(path.stream(), depList.stream()).collect(Collectors.toList()));
-                }
-              }
-              Collections.sort(
-                  targetDeps,
-                  (o1, o2) -> {
-                    String string1 = (String) (o1.get("name"));
-                    String string2 = (String) (o2.get("name"));
-                    return Arrays.compare(string1.toCharArray(), string2.toCharArray());
-                  });
-              entry.put("dependencies", targetDeps);
-            });
+    Map<String, Object> dataMap = new HashMap<>();
+    dataMap.put("name", pythonDependency.getName());
+    dataMap.put("version", pythonDependency.getVersion());
+    dependencyList.add(dataMap);
+
+    List<Map<String, Object>> transitiveDepList = new ArrayList<>();
+    List<String> directDeps = pythonDependency.getDependencies();
+    for (String directDep : directDeps) {
+      if (!path.contains(directDep.toLowerCase())) {
+        List<String> depList = new ArrayList<>();
+        depList.add(directDep.toLowerCase());
+
+        if (includeTransitive) {
+          bringAllDependencies(
+              transitiveDepList,
+              directDep,
+              cachedTree,
+              true,
+              Stream.concat(path.stream(), depList.stream()).collect(Collectors.toList()));
+        }
+      }
+      transitiveDepList.sort(
+          (map1, map2) -> {
+            String string1 = (String) (map1.get("name"));
+            String string2 = (String) (map2.get("name"));
+            return Arrays.compare(string1.toCharArray(), string2.toCharArray());
+          });
+      dataMap.put("dependencies", transitiveDepList);
+    }
   }
 
-  protected List getDepsList(String pipShowOutput) {
+  protected List<String> getDepsList(String pipShowOutput) {
     int requiresKeyIndex = pipShowOutput.indexOf("Requires:");
     String requiresToken = pipShowOutput.substring(requiresKeyIndex + 9);
     int endOfLine = requiresToken.indexOf(System.lineSeparator());
@@ -476,7 +505,6 @@ public abstract class PythonControllerBase {
     if (rightTriangleBracket == -1 && leftTriangleBracket == -1 && equalsSign == -1) {
       depName = dep;
     } else {
-
       depName = dep.substring(0, minimumIndex);
     }
     return depName.trim();
@@ -498,5 +526,54 @@ public abstract class PythonControllerBase {
     return Arrays.stream(
             pipShowOutput.split(System.lineSeparator() + "---" + System.lineSeparator()))
         .collect(Collectors.toList());
+  }
+
+  private PythonDependency getPythonDependencyByShowStringBlock(String pipShowStringBlock) {
+    return new PythonDependency(
+        getDependencyNameShow(pipShowStringBlock),
+        getDependencyVersion(pipShowStringBlock),
+        getDepsList(pipShowStringBlock));
+  }
+
+  private void fillCacheWithEnvironmentDeps(Map<StringInsensitive, PythonDependency> cache) {
+    boolean usePipDepTree = getBooleanValueEnvironment("EXHORT_PIP_USE_DEP_TREE", "false");
+    if (usePipDepTree) {
+      getDependencyTreeJsonFromPipDepTree().forEach(d -> saveToCacheWithKeyVariations(cache, d));
+    } else {
+      String freezeOutput = getPipFreezeFromEnvironment();
+      if (debugLoggingIsNeeded()) {
+        String freezeMessage =
+            String.format(
+                "Package Manager PIP freeze --all command result output -> %s %s",
+                System.lineSeparator(), freezeOutput);
+        log.info(freezeMessage);
+      }
+      String[] deps = freezeOutput.split(System.lineSeparator());
+      String depNames =
+          Arrays.stream(deps)
+              .map(PythonControllerBase::getDependencyName)
+              .collect(Collectors.joining(" "));
+      String pipShowOutput = getPipShowFromEnvironment(depNames);
+      if (debugLoggingIsNeeded()) {
+        String pipShowMessage =
+            String.format(
+                "Package Manager PIP show command result output -> %s %s",
+                System.lineSeparator(), pipShowOutput);
+        log.info(pipShowMessage);
+      }
+      splitPipShowLines(pipShowOutput).stream()
+          .map(this::getPythonDependencyByShowStringBlock)
+          .forEach(d -> saveToCacheWithKeyVariations(cache, d));
+    }
+  }
+
+  private void saveToCacheWithKeyVariations(
+      Map<StringInsensitive, PythonDependency> cache, PythonDependency pythonDependency) {
+    StringInsensitive stringInsensitive = new StringInsensitive(pythonDependency.getName());
+    cache.put(stringInsensitive, pythonDependency);
+    cache.putIfAbsent(
+        new StringInsensitive(pythonDependency.getName().replace("-", "_")), pythonDependency);
+    cache.putIfAbsent(
+        new StringInsensitive(pythonDependency.getName().replace("_", "-")), pythonDependency);
   }
 }

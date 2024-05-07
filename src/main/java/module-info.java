@@ -22,6 +22,8 @@ module com.redhat.exhort {
   exports com.redhat.exhort.sbom;
   exports com.redhat.exhort.tools;
 
+  opens com.redhat.exhort.utils to
+      com.fasterxml.jackson.databind;
   opens com.redhat.exhort.sbom to
       com.fasterxml.jackson.databind,
       packageurl.java;

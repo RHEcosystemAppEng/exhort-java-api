@@ -341,7 +341,7 @@ public abstract class PythonControllerBase {
     executeCommandOrExtractFromEnv(
         "EXHORT_PIP_PIPDEPTREE", pipBinaryLocation, "install", "pipdeptree");
 
-    String pipdeptreeJsonString;
+    String pipdeptreeJsonString = "";
     if (isVirtualEnv()) {
       pipdeptreeJsonString =
           executeCommandOrExtractFromEnv("EXHORT_PIP_PIPDEPTREE", "./bin/pipdeptree", "--json");
@@ -349,10 +349,6 @@ public abstract class PythonControllerBase {
       pipdeptreeJsonString =
           executeCommandOrExtractFromEnv(
               "EXHORT_PIP_PIPDEPTREE", pathToPythonBin, "-m", "pipdeptree", "--json");
-    } else {
-      pipdeptreeJsonString =
-          executeCommandOrExtractFromEnv(
-              "EXHORT_PIP_PIPDEPTREE", "./bin/pipdeptree", "--json", "--python", pathToPythonBin);
     }
     if (debugLoggingIsNeeded()) {
       String pipdeptreeMessage =

@@ -424,7 +424,7 @@ public abstract class PythonControllerBase {
     dataMap.put("version", pythonDependency.getVersion());
     dependencyList.add(dataMap);
 
-    List<Map<String, Object>> transitiveDepList = new ArrayList<>();
+    List<Map<String, Object>> targetDeps = new ArrayList<>();
     List<String> directDeps = pythonDependency.getDependencies();
     for (String directDep : directDeps) {
       if (!path.contains(directDep.toLowerCase())) {
@@ -433,20 +433,20 @@ public abstract class PythonControllerBase {
 
         if (includeTransitive) {
           bringAllDependencies(
-              transitiveDepList,
+              targetDeps,
               directDep,
               cachedTree,
               true,
               Stream.concat(path.stream(), depList.stream()).collect(Collectors.toList()));
         }
       }
-      transitiveDepList.sort(
+      targetDeps.sort(
           (map1, map2) -> {
             String string1 = (String) (map1.get("name"));
             String string2 = (String) (map2.get("name"));
             return Arrays.compare(string1.toCharArray(), string2.toCharArray());
           });
-      dataMap.put("dependencies", transitiveDepList);
+      dataMap.put("dependencies", targetDeps);
     }
   }
 

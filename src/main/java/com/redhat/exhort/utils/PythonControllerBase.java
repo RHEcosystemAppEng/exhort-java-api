@@ -20,7 +20,6 @@ import static com.redhat.exhort.impl.ExhortApi.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.exhort.exception.PackageNotInstalledException;
 import com.redhat.exhort.logging.LoggersFactory;
 import com.redhat.exhort.tools.Operations;
@@ -366,46 +365,31 @@ public abstract class PythonControllerBase {
   }
 
   public static List<PythonDependency> mapToPythonDependencies(String jsonString) {
-    // Parse JSON string using ObjectMapper
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode rootNode = null;
     try {
-      rootNode = mapper.readTree(jsonString);
+      // Parse JSON and store in a list of JsonNodes
+      List<JsonNode> jsonNodeList = new ArrayList<>();
+      new ObjectMapper().readTree(jsonString).elements().forEachRemaining(jsonNodeList::add);
+
+      return jsonNodeList.stream()
+          .filter(JsonNode::isObject)
+          .map(
+              dependencyNode -> {
+                String name = dependencyNode.get("package").get("package_name").asText();
+                String version = dependencyNode.get("package").get("installed_version").asText();
+
+                // Extract dependencies
+                List<String> depList = new ArrayList<>();
+                dependencyNode
+                    .get("dependencies")
+                    .elements()
+                    .forEachRemaining(e -> depList.add(e.get("package_name").asText()));
+
+                return new PythonDependency(name, version, depList);
+              })
+          .collect(Collectors.toList());
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
-    List<PythonDependency> dependencies = new ArrayList<>();
-
-    // Check if it's an array
-    if (rootNode.isArray()) {
-      for (JsonNode dependencyNode : rootNode) {
-        if (dependencyNode.isObject()) {
-          ObjectNode dependencyObject = (ObjectNode) dependencyNode;
-
-          // Extract information from the nested "package" object
-          JsonNode packageNode = dependencyObject.get("package");
-          String name = packageNode.get("package_name").asText();
-          String version = packageNode.get("installed_version").asText();
-
-          // Extract dependencies (might be an array or an empty object)
-          JsonNode dependenciesElement = dependencyObject.get("dependencies");
-          List<String> depList = new ArrayList<>();
-          if (dependenciesElement.isArray()) {
-            // Loop through the dependencies array and add names
-            for (JsonNode depNode : dependenciesElement) {
-              String depName = depNode.get("package_name").asText();
-              depList.add(depName);
-            }
-          }
-
-          // Create a PythonDependency object and add it to the list
-          PythonDependency dependency = new PythonDependency(name, version, depList);
-          dependencies.add(dependency);
-        }
-      }
-    }
-
-    return dependencies;
   }
 
   private String executeCommandOrExtractFromEnv(String EnvVar, String... cmdList) {

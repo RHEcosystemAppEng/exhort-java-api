@@ -22,8 +22,6 @@ public class PythonDependency {
   String version = "";
   List<String> dependencies;
 
-  public PythonDependency() {}
-
   public PythonDependency(String name, String version, List<String> dependencies) {
     this.name = name;
     this.version = version;

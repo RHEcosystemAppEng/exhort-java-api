@@ -360,7 +360,7 @@ public abstract class PythonControllerBase {
     return mapToPythonDependencies(pipdeptreeJsonString);
   }
 
-  public static List<PythonDependency> mapToPythonDependencies(String jsonString) {
+  List<PythonDependency> mapToPythonDependencies(String jsonString) {
     try {
       // Parse JSON and store in a list of JsonNodes
       List<JsonNode> jsonNodeList = new ArrayList<>();
@@ -384,7 +384,8 @@ public abstract class PythonControllerBase {
               })
           .collect(Collectors.toList());
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(
+          "Could not parse the JSON output from 'pipdeptree --json' command. ", e);
     }
   }
 

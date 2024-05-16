@@ -79,11 +79,9 @@ public final class PythonPipProvider extends Provider {
     printDependenciesTree(dependencies);
     Sbom sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL, "sensitive");
     sbom.addRoot(toPurl(DEFAULT_PIP_ROOT_COMPONENT_NAME, DEFAULT_PIP_ROOT_COMPONENT_VERSION));
-    dependencies.stream()
-        .forEach(
-            (component) -> {
-              addAllDependencies(sbom.getRoot(), component, sbom);
-            });
+    for (Map<String, Object> component : dependencies) {
+      addAllDependencies(sbom.getRoot(), component, sbom);
+    }
     byte[] requirementsFile = Files.readAllBytes(manifestPath);
     handleIgnoredDependencies(new String(requirementsFile), sbom);
     return new Content(
@@ -92,25 +90,17 @@ public final class PythonPipProvider extends Provider {
 
   private void addAllDependencies(PackageURL source, Map<String, Object> component, Sbom sbom) {
 
-    sbom.addDependency(
-        source, toPurl((String) component.get("name"), (String) component.get("version")));
-    List<Map> directDeps = (List<Map>) component.get("dependencies");
-    if (directDeps != null)
-      //    {
-      directDeps.stream()
-          .forEach(
-              dep -> {
-                String name = (String) dep.get("name");
-                String version = (String) dep.get("version");
+    PackageURL packageURL =
+        toPurl((String) component.get("name"), (String) component.get("version"));
+    sbom.addDependency(source, packageURL);
 
-                addAllDependencies(
-                    toPurl((String) component.get("name"), (String) component.get("version")),
-                    dep,
-                    sbom);
-              });
-    //
-    //    }
-
+    List<Map<String, Object>> directDeps =
+        (List<Map<String, Object>>) component.get("dependencies");
+    if (directDeps != null) {
+      for (Map<String, Object> dep : directDeps) {
+        addAllDependencies(packageURL, dep, sbom);
+      }
+    }
   }
 
   @Override

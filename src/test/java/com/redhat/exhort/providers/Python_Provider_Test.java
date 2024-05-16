@@ -151,6 +151,42 @@ class Python_Provider_Test extends ExhortTest {
 
   @ParameterizedTest
   @MethodSource("testFolders")
+  void test_the_provideStack_with_pipdeptree(String testFolder)
+      throws IOException, InterruptedException {
+    // create temp file hosting our sut package.json
+    System.setProperty("EXHORT_PIP_USE_DEP_TREE", "true");
+    var tmpPythonModuleDir = Files.createTempDirectory("exhort_test_");
+    var tmpPythonFile = Files.createFile(tmpPythonModuleDir.resolve("requirements.txt"));
+    try (var is =
+        getResourceAsStreamDecision(
+            this.getClass(),
+            new String[] {"tst_manifests", "pip", testFolder, "requirements.txt"})) {
+      Files.write(tmpPythonFile, is.readAllBytes());
+    }
+    // load expected SBOM
+    String expectedSbom;
+    try (var is =
+        getResourceAsStreamDecision(
+            this.getClass(),
+            new String[] {"tst_manifests", "pip", testFolder, "expected_stack_sbom.json"})) {
+      expectedSbom = new String(is.readAllBytes());
+    }
+    // when providing stack content for our pom
+    var content = this.pythonPipProvider.provideStack(tmpPythonFile);
+    String pipdeptreeContent = this.getStringFromFile("tst_manifests", "pip", "pipdeptree.json");
+    String base64Pipdeptree = new String(Base64.getEncoder().encode(pipdeptreeContent.getBytes()));
+    System.setProperty("EXHORT_PIP_PIPDEPTREE", base64Pipdeptree);
+    // cleanup
+    Files.deleteIfExists(tmpPythonFile);
+    Files.deleteIfExists(tmpPythonModuleDir);
+    System.clearProperty("EXHORT_PIP_USE_DEP_TREE");
+    // verify expected SBOM is returned
+    assertThat(content.type).isEqualTo(Api.CYCLONEDX_MEDIA_TYPE);
+    assertThat(dropIgnored(new String(content.buffer))).isEqualTo(dropIgnored(expectedSbom));
+  }
+
+  @ParameterizedTest
+  @MethodSource("testFolders")
   void test_the_provideComponent_with_properties(String testFolder)
       throws IOException, InterruptedException {
     // load the pom target pom file

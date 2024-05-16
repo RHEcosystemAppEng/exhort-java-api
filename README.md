@@ -467,6 +467,11 @@ A New setting is introduced - `EXHORT_PYTHON_INSTALL_BEST_EFFORTS` (as both env 
 1. `EXHORT_PYTHON_INSTALL_BEST_EFFORTS`="false" - install requirements.txt while respecting declared versions for all packages.
 2. `EXHORT_PYTHON_INSTALL_BEST_EFFORTS`="true" - install all packages from requirements.txt, not respecting the declared version, but trying to install a version tailored for the used python version, when using this setting,you must set setting `MATCH_MANIFEST_VERSIONS`="false"
 
+##### Using `pipdeptree`
+By Default, The API algorithm will use native commands of PIP installer as data source to build the dependency tree.
+It's also possible, to use lightweight Python PIP utility [pipdeptree](https://pypi.org/project/pipdeptree/) as data source instead, in order to activate this,
+Need to set environment variable/option - `EXHORT_PIP_USE_DEP_TREE` to true.
+
 ### Image Support 
 
 Generate vulnerability analysis report for container images.

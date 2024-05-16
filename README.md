@@ -470,7 +470,7 @@ A New setting is introduced - `EXHORT_PYTHON_INSTALL_BEST_EFFORTS` (as both env 
 ##### Using `pipdeptree`
 By Default, The API algorithm will use native commands of PIP installer as data source to build the dependency tree.
 It's also possible, to use lightweight Python PIP utility [pipdeptree](https://pypi.org/project/pipdeptree/) as data source instead, in order to activate this,
-Need to set environment variable/option - `EXHORT_PIP_USE_DEP_TREE` to true.
+Need to set environment variable/system property - `EXHORT_PIP_USE_DEP_TREE` to true.
 
 ### Image Support 
 
@@ -540,7 +540,8 @@ Customize image analysis optionally by using *Environment Variables* or *Java Pr
 ### Known Issues
 
 - For pip requirements.txt - It's been observed that for python versions 3.11.x, there might be slowness for invoking the analysis.
-  Task to mitigate this issue /to make it less problematic is a WIP.
+  If you encounter a performance issue with python version >= 3.11.x, kindly try to set environment variable/system property `EXHORT_PIP_USE_DEP_TREE`=true, before calling the analysis - this should fix the performance issue.
+
 
 
 - For maven pom.xml, it has been noticed that using java 17 might cause stack analysis to hang forever.

@@ -251,25 +251,76 @@ public final class GradleProvider extends BaseJavaProvider {
     List<String> lines = extractLines(textFormatFile, configName);
     List<String> arrayForSbom = new ArrayList<>();
 
-    for (String line : lines) {
-      line = line.replaceAll("---", "-").replaceAll("    ", "  ");
-      line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
-      line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
-      line = line.replaceAll(" \\(n\\)$", "");
-      line = line.replaceAll(" \\(\\*\\)", "");
-      line = line.replaceAll("$", ":compile");
-      if (containsVersion(line)) {
-        arrayForSbom.add(line);
+      for (String line : lines) {
+          line = line.replaceAll("---", "-").replaceAll("    ", "  ");
+          line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
+          line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
+          line = line.replaceAll(" \\(n\\)$", "");
+          line = line.replaceAll(" \\(\\*\\)", "");
+          line = line.replaceAll("$", ":compile");
+          if (containsVersion(line)) {
+              arrayForSbom.add(line);
+          }
       }
-    }
-    // remove duplicates for component analysis
-    if (List.of("api", "implementation", "compile").contains(configName)) {
-      removeDuplicateIfExists(arrayForSbom, textFormatFile);
-    }
+      // remove duplicates for component analysis
+      if (List.of("api", "implementation", "compileOnly").contains(configName)) {
+          removeDuplicateIfExists(arrayForSbom, textFormatFile);
+          arrayForSbom = performManifestVersionsCheck(arrayForSbom, textFormatFile);
+      }
 
     String[] array = arrayForSbom.toArray(new String[0]);
     parseDependencyTree(root, 0, array, sbom);
     return sbom;
+  }
+
+  private List<String> performManifestVersionsCheck(List<String> arrayForSbom, Path textFormatFile) throws IOException {
+
+    List<String> runtimeClasspathLines = extractLines(textFormatFile, "runtimeClasspath");
+    Map<String, String> runtimeClasspathVersions = parseDependencyVersions(runtimeClasspathLines);
+    List<String> updatedLines = updateDependencies(arrayForSbom, runtimeClasspathVersions);
+
+    return updatedLines;
+  }
+
+  private Map<String, String> parseDependencyVersions(List<String> lines) {
+    Map<String, String> dependencyVersions = new HashMap<>();
+
+    for (String line : lines) {
+      if (line.contains("->")) {
+        String[] splitLine = line.split("---");
+        if (splitLine.length > 1) {
+          String dependencyPart = splitLine[1].trim();
+          String[] parts = dependencyPart.split("-> ");
+          // Extract the dependency name (without the version) and the resolved version
+          String dependency = parts[0].substring(0, parts[0].lastIndexOf(':')).trim();
+          String version = parts[1].split(" ")[0].trim();
+          dependencyVersions.put(dependency, version);
+        }
+      }
+    }
+
+    return dependencyVersions;
+  }
+
+  private List<String> updateDependencies(List<String> lines, Map<String, String> runtimeClasspathVersions) {
+    List<String> updatedLines = new ArrayList<>();
+    for (String line : lines) {
+      PackageURL packageURL = parseDep(line);
+      String[] parts = line.split(":");
+      if (parts.length >= 4) {
+        String dependencyKey = packageURL.getNamespace() + ":" + packageURL.getName(); // Extract dependency key
+        if (runtimeClasspathVersions.containsKey(dependencyKey)) {
+          String newVersion = runtimeClasspathVersions.get(dependencyKey);
+          parts[3] = newVersion; // Replace version with the resolved version
+          updatedLines.add(String.join(":", parts));
+        } else {
+          updatedLines.add(line); // Keep the original line if no update is needed
+        }
+      } else {
+        updatedLines.add(line); // Keep the original line if it doesn't match the expected pattern
+      }
+    }
+    return updatedLines;
   }
 
   private void removeDuplicateIfExists(List<String> arrayForSbom, Path theContent) {
@@ -413,7 +464,7 @@ public final class GradleProvider extends BaseJavaProvider {
     Path tempFile = getDependencies(manifestPath);
     Map<String, String> propertiesMap = extractProperties(manifestPath);
 
-    String[] configurationNames = {"api", "implementation", "compile"};
+    String[] configurationNames = {"api", "implementation", "compileOnly", "runtimeOnly"};
 
     String configName = null;
     for (String configurationName : configurationNames) {

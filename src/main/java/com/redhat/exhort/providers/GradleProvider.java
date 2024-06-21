@@ -251,29 +251,30 @@ public final class GradleProvider extends BaseJavaProvider {
     List<String> lines = extractLines(textFormatFile, configName);
     List<String> arrayForSbom = new ArrayList<>();
 
-      for (String line : lines) {
-          line = line.replaceAll("---", "-").replaceAll("    ", "  ");
-          line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
-          line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
-          line = line.replaceAll(" \\(n\\)$", "");
-          line = line.replaceAll(" \\(\\*\\)", "");
-          line = line.replaceAll("$", ":compile");
-          if (containsVersion(line)) {
-              arrayForSbom.add(line);
-          }
+    for (String line : lines) {
+      line = line.replaceAll("---", "-").replaceAll("    ", "  ");
+      line = line.replaceAll(":(.*):(.*) -> (.*)$", ":$1:$3");
+      line = line.replaceAll("(.*):(.*):(.*)$", "$1:$2:jar:$3");
+      line = line.replaceAll(" \\(n\\)$", "");
+      line = line.replaceAll(" \\(\\*\\)", "");
+      line = line.replaceAll("$", ":compile");
+      if (containsVersion(line)) {
+        arrayForSbom.add(line);
       }
-      // remove duplicates for component analysis
-      if (List.of("api", "implementation", "compileOnly").contains(configName)) {
-          removeDuplicateIfExists(arrayForSbom, textFormatFile);
-          arrayForSbom = performManifestVersionsCheck(arrayForSbom, textFormatFile);
-      }
+    }
+    // remove duplicates for component analysis
+    if (List.of("api", "implementation", "compileOnly").contains(configName)) {
+      removeDuplicateIfExists(arrayForSbom, textFormatFile);
+      arrayForSbom = performManifestVersionsCheck(arrayForSbom, textFormatFile);
+    }
 
     String[] array = arrayForSbom.toArray(new String[0]);
     parseDependencyTree(root, 0, array, sbom);
     return sbom;
   }
 
-  private List<String> performManifestVersionsCheck(List<String> arrayForSbom, Path textFormatFile) throws IOException {
+  private List<String> performManifestVersionsCheck(List<String> arrayForSbom, Path textFormatFile)
+      throws IOException {
 
     List<String> runtimeClasspathLines = extractLines(textFormatFile, "runtimeClasspath");
     Map<String, String> runtimeClasspathVersions = parseDependencyVersions(runtimeClasspathLines);
@@ -302,13 +303,15 @@ public final class GradleProvider extends BaseJavaProvider {
     return dependencyVersions;
   }
 
-  private List<String> updateDependencies(List<String> lines, Map<String, String> runtimeClasspathVersions) {
+  private List<String> updateDependencies(
+      List<String> lines, Map<String, String> runtimeClasspathVersions) {
     List<String> updatedLines = new ArrayList<>();
     for (String line : lines) {
       PackageURL packageURL = parseDep(line);
       String[] parts = line.split(":");
       if (parts.length >= 4) {
-        String dependencyKey = packageURL.getNamespace() + ":" + packageURL.getName(); // Extract dependency key
+        String dependencyKey =
+            packageURL.getNamespace() + ":" + packageURL.getName(); // Extract dependency key
         if (runtimeClasspathVersions.containsKey(dependencyKey)) {
           String newVersion = runtimeClasspathVersions.get(dependencyKey);
           parts[3] = newVersion; // Replace version with the resolved version

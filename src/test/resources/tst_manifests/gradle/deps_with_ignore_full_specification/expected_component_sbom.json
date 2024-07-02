@@ -3,7 +3,7 @@
   "specVersion" : "1.4",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2024-04-02T22:31:28Z",
+    "timestamp" : "2024-06-21T20:31:39Z",
     "component" : {
       "group" : "org.acme.dbaas",
       "name" : "postgresql-orm-quarkus",
@@ -41,10 +41,10 @@
     {
       "group" : "io.quarkus",
       "name" : "quarkus-resteasy",
-      "version" : "2.13.5.Final",
-      "purl" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final",
+      "version" : "2.13.7.Final",
+      "purl" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.7.Final",
       "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final"
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.7.Final"
     },
     {
       "group" : "io.quarkus",
@@ -65,10 +65,10 @@
     {
       "group" : "io.quarkus",
       "name" : "quarkus-vertx-http",
-      "version" : "2.13.5.Final",
-      "purl" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final",
+      "version" : "2.13.7.Final",
+      "purl" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.7.Final",
       "type" : "library",
-      "bom-ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final"
+      "bom-ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.7.Final"
     },
     {
       "group" : "io.quarkus",
@@ -117,10 +117,10 @@
       "dependsOn" : [
         "pkg:maven/io.quarkus/quarkus-hibernate-orm@2.13.5.Final",
         "pkg:maven/io.quarkus/quarkus-agroal@2.13.5.Final",
-        "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final",
+        "pkg:maven/io.quarkus/quarkus-resteasy@2.13.7.Final",
         "pkg:maven/io.quarkus/quarkus-resteasy-jackson@2.13.5.Final",
         "pkg:maven/io.quarkus/quarkus-jdbc-postgresql@2.13.5.Final",
-        "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final",
+        "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.7.Final",
         "pkg:maven/io.quarkus/quarkus-kubernetes-service-binding@2.13.5.Final",
         "pkg:maven/io.quarkus/quarkus-container-image-docker@2.13.5.Final",
         "pkg:maven/jakarta.validation/jakarta.validation-api@2.0.2",
@@ -137,7 +137,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.5.Final",
+      "ref" : "pkg:maven/io.quarkus/quarkus-resteasy@2.13.7.Final",
       "dependsOn" : [ ]
     },
     {
@@ -149,7 +149,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.5.Final",
+      "ref" : "pkg:maven/io.quarkus/quarkus-vertx-http@2.13.7.Final",
       "dependsOn" : [ ]
     },
     {

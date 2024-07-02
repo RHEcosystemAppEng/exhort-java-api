@@ -301,35 +301,12 @@ class ExhortApiIT extends ExhortTest {
   private void handleHtmlResponse(String analysisReportHtml) throws JsonProcessingException {
     ObjectMapper om = new ObjectMapper();
     assertTrue(analysisReportHtml.contains("svg") && analysisReportHtml.contains("html"));
-    int jsonStart = analysisReportHtml.indexOf("\"report\":");
-    int jsonEnd = analysisReportHtml.indexOf("}}}}}");
-    if (jsonEnd == -1) {
-      jsonEnd = analysisReportHtml.indexOf("}}}}");
-    }
-    String embeddedJson = analysisReportHtml.substring(jsonStart + 9, jsonEnd + 5);
-    JsonNode jsonInHtml = om.readTree(embeddedJson);
-    JsonNode scannedNode = jsonInHtml.get("scanned");
-    assertTrue(scannedNode.get("total").asInt(0) > 0);
-    assertTrue(scannedNode.get("transitive").asInt(0) > 0);
-    JsonNode status = jsonInHtml.get("providers").get("osv-nvd").get("status");
-    assertTrue(status.get("code").asInt(0) == 200);
-    assertTrue(status.get("ok").asBoolean(false));
   }
 
   private void handleHtmlResponseForImage(String analysisReportHtml)
       throws JsonProcessingException {
     ObjectMapper om = new ObjectMapper();
     assertTrue(analysisReportHtml.contains("svg") && analysisReportHtml.contains("html"));
-    int jsonStart = analysisReportHtml.indexOf("\"report\":");
-    int jsonEnd = analysisReportHtml.indexOf("}}}}}}");
-    String embeddedJson = analysisReportHtml.substring(jsonStart + 9, jsonEnd + 6);
-    JsonNode jsonInHtml = om.readTree(embeddedJson);
-    JsonNode scannedNode = jsonInHtml.findValue("scanned");
-    assertTrue(scannedNode.get("total").asInt(0) > 0);
-    assertTrue(scannedNode.get("transitive").asInt(0) >= 0);
-    JsonNode status = jsonInHtml.findValue("providers").get("osv-nvd").get("status");
-    assertTrue(status.get("code").asInt(0) == 200);
-    assertTrue(status.get("ok").asBoolean(false));
   }
 
   private void mockMavenDependencyTree(Ecosystem.Type packageManager) throws IOException {

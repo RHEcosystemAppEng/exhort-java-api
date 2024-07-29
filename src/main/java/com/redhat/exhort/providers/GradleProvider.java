@@ -29,10 +29,7 @@ import com.redhat.exhort.tools.Operations;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -49,6 +46,9 @@ import org.tomlj.TomlTable;
  */
 public final class GradleProvider extends BaseJavaProvider {
 
+  public static final String[] COMPONENT_ANALYSIS_CONFIGURATIONS = {
+    "api", "implementation", "compileOnlyApi", "compileOnly", "runtimeOnly"
+  };
   private Logger log = LoggersFactory.getLogger(this.getClass().getName());
 
   public GradleProvider() {
@@ -67,7 +67,7 @@ public final class GradleProvider extends BaseJavaProvider {
     }
     Map<String, String> propertiesMap = extractProperties(manifestPath);
 
-    var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, "runtimeClasspath");
+    var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, new String[] {"runtimeClasspath"});
     var ignored = getIgnoredDeps(manifestPath);
 
     return new Content(
@@ -241,14 +241,20 @@ public final class GradleProvider extends BaseJavaProvider {
   }
 
   private Sbom buildSbomFromTextFormat(
-      Path textFormatFile, Map<String, String> propertiesMap, String configName)
+      Path textFormatFile, Map<String, String> propertiesMap, String[] configNames)
       throws IOException {
     var sbom = SbomFactory.newInstance(Sbom.BelongingCondition.PURL, "sensitive");
     String root = getRoot(textFormatFile, propertiesMap);
 
     var rootPurl = parseDep(root);
     sbom.addRoot(rootPurl);
-    List<String> lines = extractLines(textFormatFile, configName);
+    List<String> lines = new ArrayList<>();
+
+    for (String configName : configNames) {
+      List<String> deps = extractLines(textFormatFile, configName);
+      lines.addAll(deps);
+    }
+
     List<String> arrayForSbom = new ArrayList<>();
 
     for (String line : lines) {
@@ -263,7 +269,7 @@ public final class GradleProvider extends BaseJavaProvider {
       }
     }
     // remove duplicates for component analysis
-    if (List.of("api", "implementation", "compileOnly").contains(configName)) {
+    if (Arrays.equals(configNames, COMPONENT_ANALYSIS_CONFIGURATIONS)) {
       removeDuplicateIfExists(arrayForSbom, textFormatFile);
       arrayForSbom = performManifestVersionsCheck(arrayForSbom, textFormatFile);
     }
@@ -467,20 +473,11 @@ public final class GradleProvider extends BaseJavaProvider {
     Path tempFile = getDependencies(manifestPath);
     Map<String, String> propertiesMap = extractProperties(manifestPath);
 
-    String[] configurationNames = {"api", "implementation", "compileOnly", "runtimeOnly"};
+    String[] configurationNames = COMPONENT_ANALYSIS_CONFIGURATIONS;
 
     String configName = null;
-    for (String configurationName : configurationNames) {
-      List<String> directDependencies = extractLines(tempFile, configurationName);
 
-      // Check if dependencies are found for the current configuration
-      if (!directDependencies.isEmpty()) {
-        configName = configurationName;
-        break;
-      }
-    }
-
-    var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, configName);
+    var sbom = buildSbomFromTextFormat(tempFile, propertiesMap, configurationNames);
     var ignored = getIgnoredDeps(manifestPath);
 
     return new Content(

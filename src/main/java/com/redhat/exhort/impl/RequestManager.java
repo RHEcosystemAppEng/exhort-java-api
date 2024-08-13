@@ -18,6 +18,7 @@ package com.redhat.exhort.impl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class RequestManager {
 
@@ -40,7 +41,18 @@ public class RequestManager {
   }
 
   public synchronized void removeClientTraceIdFromRequest() {
-    requests.remove(concatenatedThreadId());
+    String removedClientTraceId = requests.remove(concatenatedThreadId());
+    // remove the traceId If it was propagated from parent Thread.
+    if (removedClientTraceId != null) {
+      Optional<String> keyOfParent =
+          requests.entrySet().stream()
+              .filter(pair -> pair.getValue().equals(removedClientTraceId))
+              .map(pair -> pair.getKey())
+              .findFirst();
+      if (keyOfParent.isPresent()) {
+        requests.remove(keyOfParent.get());
+      }
+    }
   }
 
   public String getTraceIdOfRequest() {

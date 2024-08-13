@@ -194,9 +194,10 @@ public final class ExhortApi implements Api {
 
   private String commonHookBeginning(boolean startOfApi) {
     if (startOfApi) {
-      generateClientRequestId();
+      //      generateClientRequestId();
       if (debugLoggingIsNeeded()) {
         LOG.info("Start of exhort-java-api client");
+        LOG.info(String.format("Starting time of API: %s", LocalDateTime.now()));
       }
     } else {
       if (Objects.isNull(getClientRequestId())) {

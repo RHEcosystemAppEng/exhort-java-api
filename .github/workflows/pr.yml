@@ -65,7 +65,7 @@ jobs:
 
     - name: Upload coverage reports
       if: ${{ matrix.java == env.MAIN_JAVA_VER }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: coverage
+        name: coverage-${{ matrix.java }}
         path: ./target/site/jacoco/jacoco.xml

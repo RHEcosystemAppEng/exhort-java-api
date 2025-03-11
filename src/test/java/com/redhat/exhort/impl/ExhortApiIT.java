@@ -42,6 +42,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -54,7 +55,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -85,8 +88,10 @@ class ExhortApiIT extends ExhortTest {
             "package.json",
             "pypi",
             "requirements.txt",
-            "gradle",
-            "build.gradle");
+            "gradle-groovy",
+            "build.gradle",
+            "gradle-kotlin",
+            "build.gradle.kts");
   }
 
   @Tag("IntegrationTest")
@@ -97,17 +102,21 @@ class ExhortApiIT extends ExhortTest {
     api = null;
   }
 
+  private static List<Arguments> scenarios() {
+    return ecoSystemsManifestNames.entrySet().stream()
+        .map(e -> Arguments.of(e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
+  }
+
   @Tag("IntegrationTest")
-  @ParameterizedTest
-  @EnumSource(
-      value = Ecosystem.Type.class,
-      names = {"GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE"})
-  void Integration_Test_End_To_End_Stack_Analysis(Ecosystem.Type packageManager)
+  @ParameterizedTest(name = "StackAnalysis for: {0} with manifest: {1}")
+  @MethodSource("scenarios")
+  void Integration_Test_End_To_End_Stack_Analysis(String useCase, String manifestFileName)
       throws IOException, ExecutionException, InterruptedException {
-    String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
+    var provider = Ecosystem.getProvider(manifestFileName);
+    var packageManager = provider.ecosystem;
     String pathToManifest =
-        getFileFromResource(
-            manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
+        getFileFromResource(manifestFileName, "tst_manifests", "it", useCase, manifestFileName);
     preparePythonEnvironment(packageManager);
     // Github action runner with all maven and java versions seems to enter infinite loop in
     // integration tests of
@@ -126,16 +135,14 @@ class ExhortApiIT extends ExhortTest {
   }
 
   @Tag("IntegrationTest")
-  @ParameterizedTest
-  @EnumSource(
-      value = Ecosystem.Type.class,
-      names = {"GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE"})
-  void Integration_Test_End_To_End_Stack_Analysis_Mixed(Ecosystem.Type packageManager)
+  @ParameterizedTest(name = "StackAnalysis Mixed for: {0} with manifest: {1}")
+  @MethodSource("scenarios")
+  void Integration_Test_End_To_End_Stack_Analysis_Mixed(String useCase, String manifestFileName)
       throws IOException, ExecutionException, InterruptedException {
-    String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
+    var provider = Ecosystem.getProvider(manifestFileName);
+    var packageManager = provider.ecosystem;
     String pathToManifest =
-        getFileFromResource(
-            manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
+        getFileFromResource(manifestFileName, "tst_manifests", "it", useCase, manifestFileName);
     preparePythonEnvironment(packageManager);
     // Github action runner with all maven and java versions seems to enter infinite loop in
     // integration tests of
@@ -150,16 +157,14 @@ class ExhortApiIT extends ExhortTest {
   }
 
   @Tag("IntegrationTest")
-  @ParameterizedTest
-  @EnumSource(
-      value = Ecosystem.Type.class,
-      names = {"GOLANG", "MAVEN", "NPM", "PYTHON", "GRADLE"})
-  void Integration_Test_End_To_End_Stack_Analysis_Html(Ecosystem.Type packageManager)
+  @ParameterizedTest(name = "StackAnalysis HTML for: {0} with manifest: {1}")
+  @MethodSource("scenarios")
+  void Integration_Test_End_To_End_Stack_Analysis_Html(String useCase, String manifestFileName)
       throws IOException, ExecutionException, InterruptedException {
-    String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
+    var provider = Ecosystem.getProvider(manifestFileName);
+    var packageManager = provider.ecosystem;
     String pathToManifest =
-        getFileFromResource(
-            manifestFileName, "tst_manifests", "it", packageManager.getType(), manifestFileName);
+        getFileFromResource(manifestFileName, "tst_manifests", "it", useCase, manifestFileName);
     preparePythonEnvironment(packageManager);
     // Github action runner with all maven and java versions seems to enter infinite loop in
     // integration tests of

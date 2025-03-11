@@ -75,6 +75,7 @@ public final class Ecosystem {
       case "requirements.txt":
         return new PythonPipProvider();
       case "build.gradle":
+      case "build.gradle.kts":
         return new GradleProvider();
 
       default:

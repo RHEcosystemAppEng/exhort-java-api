@@ -23,6 +23,9 @@
 target
 .flattened-pom.xml
 
+# Gradle
+.gradle
+
 # Cache Files
 *.cache
 

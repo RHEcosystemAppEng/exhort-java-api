@@ -77,7 +77,7 @@ encrypted-token-will-appear-here
 </li>
 
 <li>
-<em>Gradle</em> users, add a <em>maven-type repository</em> definition in <em>build.gradle</em>
+<em>Gradle</em> users, add a <em>maven-type repository</em> definition in <em>build.gradle</em> (Groovy DSL) or <em>build.gradle.kts</em> (Kotlin DSL)
 
 ```groovy
 repositories {

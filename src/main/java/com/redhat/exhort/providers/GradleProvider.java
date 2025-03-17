@@ -41,8 +41,8 @@ import org.tomlj.TomlTable;
 
 /**
  * Concrete implementation of the {@link Provider} used for converting dependency trees for Gradle
- * projects (gradle.build) into a content Dot Graphs for Stack analysis or Json for Component
- * analysis.
+ * projects (gradle.build / gradle.build.kts) into a content Dot Graphs for Stack analysis or Json
+ * for Component analysis.
  */
 public final class GradleProvider extends BaseJavaProvider {
 
@@ -155,8 +155,9 @@ public final class GradleProvider extends BaseJavaProvider {
 
   private String getDepFromNotation(String dependency, Path manifestPath) throws IOException {
     // Extract everything after "libs."
-    String alias = dependency.substring(dependency.indexOf("libs.") + "libs.".length());
-    alias = alias.replace(".", "-");
+    String alias = dependency.substring(dependency.indexOf("libs.") + "libs.".length()).trim();
+    alias = alias.replace(".", "-").replace(")", "");
+
     // Read and parse the TOML file
     TomlParseResult toml = Toml.parse(getLibsVersionsTomlPath(manifestPath));
     TomlTable librariesTable = toml.getTable("libraries");

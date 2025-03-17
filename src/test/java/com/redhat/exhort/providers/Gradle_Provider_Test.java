@@ -28,16 +28,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatcher;
 import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(HelperExtension.class)
-@ExtendWith(MockitoExtension.class)
-class Gradle_Provider_Test extends ExhortTest {
+abstract class Gradle_Provider_Test extends ExhortTest {
+
+  abstract String getProviderFolder();
+
+  abstract String getManifestName();
+
+  abstract String getSettingsName();
+
   //  private static System.Logger log = System.getLogger("Gradle_Provider_Test");
   // test folder are located at src/test/resources/tst_manifests
   // each folder should contain:
@@ -58,13 +61,14 @@ class Gradle_Provider_Test extends ExhortTest {
   void test_the_provideStack(String testFolder) throws IOException, InterruptedException {
     // create temp file hosting our sut build.gradle
     var tmpGradleDir = Files.createTempDirectory("exhort_test_");
-    var tmpGradleFile = Files.createFile(tmpGradleDir.resolve("build.gradle"));
+    var tmpGradleFile = Files.createFile(tmpGradleDir.resolve(getManifestName()));
     //    log.log(System.Logger.Level.INFO,"the test folder is : " + testFolder);
     try (var is =
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "build.gradle"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, getManifestName()))) {
       Files.write(tmpGradleFile, is.readAllBytes());
     }
     var settingsFile = Files.createFile(tmpGradleDir.resolve("settings.gradle"));
@@ -72,7 +76,8 @@ class Gradle_Provider_Test extends ExhortTest {
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "settings.gradle"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, getSettingsName()))) {
       Files.write(settingsFile, is.readAllBytes());
     }
     var subGradleDir = Files.createDirectories(tmpGradleDir.resolve("gradle"));
@@ -82,7 +87,12 @@ class Gradle_Provider_Test extends ExhortTest {
             .getClassLoader()
             .getResourceAsStream(
                 String.join(
-                    "/", "tst_manifests", "gradle", testFolder, "gradle", "libs.versions.toml"))) {
+                    "/",
+                    "tst_manifests",
+                    getProviderFolder(),
+                    testFolder,
+                    "gradle",
+                    "libs.versions.toml"))) {
       Files.write(libsVersionFile, is.readAllBytes());
     }
     // load expected SBOM
@@ -92,7 +102,11 @@ class Gradle_Provider_Test extends ExhortTest {
             .getClassLoader()
             .getResourceAsStream(
                 String.join(
-                    "/", "tst_manifests", "gradle", testFolder, "expected_stack_sbom.json"))) {
+                    "/",
+                    "tst_manifests",
+                    getProviderFolder(),
+                    testFolder,
+                    "expected_stack_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     String depTree;
@@ -100,7 +114,8 @@ class Gradle_Provider_Test extends ExhortTest {
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "depTree.txt"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, "depTree.txt"))) {
       depTree = new String(is.readAllBytes());
     }
     String gradleProperties;
@@ -108,7 +123,8 @@ class Gradle_Provider_Test extends ExhortTest {
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "gradle.properties"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, "gradle.properties"))) {
       gradleProperties = new String(is.readAllBytes());
     }
 
@@ -149,7 +165,8 @@ class Gradle_Provider_Test extends ExhortTest {
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "build.gradle"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, getManifestName()))) {
       targetGradleBuild = is.readAllBytes();
     }
 
@@ -171,21 +188,23 @@ class Gradle_Provider_Test extends ExhortTest {
       throws IOException, InterruptedException {
     // create temp file hosting our sut build.gradle
     var tmpGradleDir = Files.createTempDirectory("exhort_test_");
-    var tmpGradleFile = Files.createFile(tmpGradleDir.resolve("build.gradle"));
+    var tmpGradleFile = Files.createFile(tmpGradleDir.resolve(getManifestName()));
     //    log.log(System.Logger.Level.INFO,"the test folder is : " + testFolder);
     try (var is =
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "build.gradle"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, getManifestName()))) {
       Files.write(tmpGradleFile, is.readAllBytes());
     }
-    var settingsFile = Files.createFile(tmpGradleDir.resolve("settings.gradle"));
+    var settingsFile = Files.createFile(tmpGradleDir.resolve(getSettingsName()));
     try (var is =
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "settings.gradle"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, getSettingsName()))) {
       Files.write(settingsFile, is.readAllBytes());
     }
     var subGradleDir = Files.createDirectories(tmpGradleDir.resolve("gradle"));
@@ -195,7 +214,12 @@ class Gradle_Provider_Test extends ExhortTest {
             .getClassLoader()
             .getResourceAsStream(
                 String.join(
-                    "/", "tst_manifests", "gradle", testFolder, "gradle", "libs.versions.toml"))) {
+                    "/",
+                    "tst_manifests",
+                    getProviderFolder(),
+                    testFolder,
+                    "gradle",
+                    "libs.versions.toml"))) {
       Files.write(libsVersionFile, is.readAllBytes());
     }
     // load expected SBOM
@@ -205,7 +229,11 @@ class Gradle_Provider_Test extends ExhortTest {
             .getClassLoader()
             .getResourceAsStream(
                 String.join(
-                    "/", "tst_manifests", "gradle", testFolder, "expected_component_sbom.json"))) {
+                    "/",
+                    "tst_manifests",
+                    getProviderFolder(),
+                    testFolder,
+                    "expected_component_sbom.json"))) {
       expectedSbom = new String(is.readAllBytes());
     }
     String depTree;
@@ -213,7 +241,8 @@ class Gradle_Provider_Test extends ExhortTest {
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "depTree.txt"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, "depTree.txt"))) {
       depTree = new String(is.readAllBytes());
     }
     String gradleProperties;
@@ -221,7 +250,8 @@ class Gradle_Provider_Test extends ExhortTest {
         getClass()
             .getClassLoader()
             .getResourceAsStream(
-                String.join("/", "tst_manifests", "gradle", testFolder, "gradle.properties"))) {
+                String.join(
+                    "/", "tst_manifests", getProviderFolder(), testFolder, "gradle.properties"))) {
       gradleProperties = new String(is.readAllBytes());
     }
 

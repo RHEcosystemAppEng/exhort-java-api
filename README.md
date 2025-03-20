@@ -158,7 +158,7 @@ public class ExhortExample {
         
         // get a AnalysisReport future holding a deserialized Component Analysis report
         var manifestContent = Files.readAllBytes(Paths.get("/path/to/pom.xml"));
-        CompletableFuture<AnalysisReport> componentReport = exhortApi.componentAnalysis("pom.xml", manifestContent);
+        CompletableFuture<AnalysisReport> componentReport = exhortApi.componentAnalysis("pom.xml", manifestContent, Paths.get("/path/to/pom.xml"));
     }
 }
 ```

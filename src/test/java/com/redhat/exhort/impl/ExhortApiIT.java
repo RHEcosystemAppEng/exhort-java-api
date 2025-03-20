@@ -39,6 +39,8 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,7 +71,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ExhortApiIT extends ExhortTest {
 
   private static Api api;
-  private static Map<String, String> ecoSystemsManifestNames;
+  private static Map<String, AbstractMap.SimpleEntry<String, Optional<String>>>
+      ecoSystemsManifestNames;
 
   private MockedStatic<Operations> mockedOperations;
 
@@ -81,17 +84,17 @@ class ExhortApiIT extends ExhortTest {
     ecoSystemsManifestNames =
         Map.of(
             "golang",
-            "go.mod",
+            new SimpleEntry<>("go.mod", Optional.empty()),
             "maven",
-            "pom.xml",
+            new SimpleEntry<>("pom.xml", Optional.empty()),
             "npm",
-            "package.json",
+            new SimpleEntry<>("package.json", Optional.of("package-lock.json")),
             "pypi",
-            "requirements.txt",
+            new SimpleEntry<>("requirements.txt", Optional.empty()),
             "gradle-groovy",
-            "build.gradle",
+            new SimpleEntry<>("build.gradle", Optional.empty()),
             "gradle-kotlin",
-            "build.gradle.kts");
+            new SimpleEntry<>("build.gradle.kts", Optional.empty()));
   }
 
   @Tag("IntegrationTest")
@@ -104,19 +107,28 @@ class ExhortApiIT extends ExhortTest {
 
   private static List<Arguments> scenarios() {
     return ecoSystemsManifestNames.entrySet().stream()
-        .map(e -> Arguments.of(e.getKey(), e.getValue()))
+        .map(e -> Arguments.of(e.getKey(), e.getValue().getKey(), e.getValue().getValue()))
         .collect(Collectors.toList());
   }
 
   @Tag("IntegrationTest")
   @ParameterizedTest(name = "StackAnalysis for: {0} with manifest: {1}")
   @MethodSource("scenarios")
-  void Integration_Test_End_To_End_Stack_Analysis(String useCase, String manifestFileName)
+  void Integration_Test_End_To_End_Stack_Analysis(
+      String useCase, String manifestFileName, Optional<String> lockFilename)
       throws IOException, ExecutionException, InterruptedException {
-    var provider = Ecosystem.getProvider(manifestFileName);
+    Path manifestDirPath =
+        new TempDirFromResources()
+            .addFile(manifestFileName)
+            .fromResources("tst_manifests", "it", useCase, manifestFileName)
+            .addFile(
+                lockFilename,
+                () -> Arrays.asList("tst_manifests", "it", useCase, lockFilename.get()))
+            .getTempDir();
+    Path manifestFileNamePath = manifestDirPath.resolve(manifestFileName);
+    var provider = Ecosystem.getProvider(manifestFileName, manifestFileNamePath);
     var packageManager = provider.ecosystem;
-    String pathToManifest =
-        getFileFromResource(manifestFileName, "tst_manifests", "it", useCase, manifestFileName);
+    String pathToManifest = manifestFileNamePath.toString();
     preparePythonEnvironment(packageManager);
     // Github action runner with all maven and java versions seems to enter infinite loop in
     // integration tests of
@@ -137,12 +149,21 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @ParameterizedTest(name = "StackAnalysis Mixed for: {0} with manifest: {1}")
   @MethodSource("scenarios")
-  void Integration_Test_End_To_End_Stack_Analysis_Mixed(String useCase, String manifestFileName)
+  void Integration_Test_End_To_End_Stack_Analysis_Mixed(
+      String useCase, String manifestFileName, Optional<String> lockFilename)
       throws IOException, ExecutionException, InterruptedException {
-    var provider = Ecosystem.getProvider(manifestFileName);
+    Path manifestDirPath =
+        new TempDirFromResources()
+            .addFile(manifestFileName)
+            .fromResources("tst_manifests", "it", useCase, manifestFileName)
+            .addFile(
+                lockFilename,
+                () -> Arrays.asList("tst_manifests", "it", useCase, lockFilename.get()))
+            .getTempDir();
+    Path manifestFileNamePath = manifestDirPath.resolve(manifestFileName);
+    String pathToManifest = manifestFileNamePath.toString();
+    var provider = Ecosystem.getProvider(manifestFileName, Path.of(pathToManifest));
     var packageManager = provider.ecosystem;
-    String pathToManifest =
-        getFileFromResource(manifestFileName, "tst_manifests", "it", useCase, manifestFileName);
     preparePythonEnvironment(packageManager);
     // Github action runner with all maven and java versions seems to enter infinite loop in
     // integration tests of
@@ -159,12 +180,21 @@ class ExhortApiIT extends ExhortTest {
   @Tag("IntegrationTest")
   @ParameterizedTest(name = "StackAnalysis HTML for: {0} with manifest: {1}")
   @MethodSource("scenarios")
-  void Integration_Test_End_To_End_Stack_Analysis_Html(String useCase, String manifestFileName)
+  void Integration_Test_End_To_End_Stack_Analysis_Html(
+      String useCase, String manifestFileName, Optional<String> lockFilename)
       throws IOException, ExecutionException, InterruptedException {
-    var provider = Ecosystem.getProvider(manifestFileName);
+    Path manifestDirPath =
+        new TempDirFromResources()
+            .addFile(manifestFileName)
+            .fromResources("tst_manifests", "it", useCase, manifestFileName)
+            .addFile(
+                lockFilename,
+                () -> Arrays.asList("tst_manifests", "it", useCase, lockFilename.get()))
+            .getTempDir();
+    Path manifestFileNamePath = manifestDirPath.resolve(manifestFileName);
+    String pathToManifest = manifestFileNamePath.toString();
+    var provider = Ecosystem.getProvider(manifestFileName, Path.of(pathToManifest));
     var packageManager = provider.ecosystem;
-    String pathToManifest =
-        getFileFromResource(manifestFileName, "tst_manifests", "it", useCase, manifestFileName);
     preparePythonEnvironment(packageManager);
     // Github action runner with all maven and java versions seems to enter infinite loop in
     // integration tests of
@@ -183,13 +213,18 @@ class ExhortApiIT extends ExhortTest {
       names = {"GOLANG", "MAVEN", "NPM", "PYTHON"})
   void Integration_Test_End_To_End_Component_Analysis(Ecosystem.Type packageManager)
       throws IOException, ExecutionException, InterruptedException {
-    String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType());
-    byte[] manifestContent =
-        getStringFromFile("tst_manifests", "it", packageManager.getType(), manifestFileName)
-            .getBytes();
+    String manifestFileName = ecoSystemsManifestNames.get(packageManager.getType()).getKey();
+
+    Path tempDir =
+        new TempDirFromResources()
+            .addDirectory(packageManager.getType(), "tst_manifests", "it", packageManager.getType())
+            .getTempDir();
+    Path manifestPath = tempDir.resolve(packageManager.getType()).resolve(manifestFileName);
+    byte[] manifestContent = Files.readAllBytes(manifestPath);
+
     preparePythonEnvironment(packageManager);
     AnalysisReport analysisReportResult =
-        api.componentAnalysis(manifestFileName, manifestContent).get();
+        api.componentAnalysis(manifestFileName, manifestContent, manifestPath).get();
     handleJsonResponse(analysisReportResult, false);
   }
 

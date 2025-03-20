@@ -39,6 +39,7 @@ import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -420,9 +421,10 @@ public final class ExhortApi implements Api {
 
   @Override
   public CompletableFuture<AnalysisReport> componentAnalysis(
-      final String manifestType, final byte[] manifestContent) throws IOException {
+      final String manifestType, final byte[] manifestContent, final Path manifestPath)
+      throws IOException {
     String exClientTraceId = commonHookBeginning(false);
-    var provider = Ecosystem.getProvider(manifestType);
+    var provider = Ecosystem.getProvider(manifestType, manifestPath);
     var uri = URI.create(String.format("%s/api/v4/analysis", this.endpoint));
     var content = provider.provideComponent(manifestContent);
     commonHookAfterProviderCreatedSbomAndBeforeExhort();

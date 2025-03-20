@@ -53,6 +53,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -227,12 +228,12 @@ class Exhort_Api_Test extends ExhortTest {
   void componentAnalysis_with_pom_xml_should_return_json_object_from_the_backend()
       throws IOException, ExecutionException, InterruptedException {
     // load pom.xml
-    byte[] targetPom;
-    try (var is =
-        getResourceAsStreamDecision(
-            this.getClass(), new String[] {"tst_manifests", "maven", "empty", "pom.xml"})) {
-      targetPom = is.readAllBytes();
-    }
+    Path tempDir =
+        new TempDirFromResources()
+            .addFile("pom.xml")
+            .fromResources(new String[] {"tst_manifests", "maven", "empty", "pom.xml"})
+            .getTempDir();
+    byte[] targetPom = Files.readAllBytes(tempDir.resolve("pom.xml"));
 
     // stub the mocked provider with a fake content object
     given(mockProvider.provideComponent(targetPom))
@@ -274,14 +275,14 @@ class Exhort_Api_Test extends ExhortTest {
     // mock static getProvider utility function
     try (var ecosystemTool = mockStatic(Ecosystem.class)) {
       // stub static getProvider utility function to return our mock provider
-      ecosystemTool.when(() -> Ecosystem.getProvider("pom.xml")).thenReturn(mockProvider);
+      ecosystemTool.when(() -> Ecosystem.getProvider("pom.xml", tempDir)).thenReturn(mockProvider);
 
       // stub the http client to return our mocked response when request matches our arg matcher
       given(mockHttpClient.sendAsync(argThat(matchesRequest), any()))
           .willReturn(CompletableFuture.completedFuture(mockHttpResponse));
 
       // when invoking the api for a json stack analysis report
-      var responseAnalysis = exhortApiSut.componentAnalysis("pom.xml", targetPom);
+      var responseAnalysis = exhortApiSut.componentAnalysis("pom.xml", targetPom, tempDir);
       // verify we got the correct analysis report
       then(responseAnalysis.get()).isEqualTo(expectedReport);
     }
